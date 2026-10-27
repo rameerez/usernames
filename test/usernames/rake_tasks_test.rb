@@ -60,7 +60,7 @@ class RakeTasksTest < UsernamesTestCase
     assert_match(/· 1 fail today's rules.*\n.*"admin": username_reserved/, output)
     assert_match(/Stored values \(6 with a username\)/, output)
     assert_match(/✓ index_users_on_username matches the lowercase mode/, output)
-    assert_match(/\d+ things? to fix/, output)
+    assert_match(/\A\d+ things? to fix\. /, output.lines.last, "the last line says how many, for a script to grep")
   end
 
   def test_audit_of_a_clean_column
@@ -71,7 +71,7 @@ class RakeTasksTest < UsernamesTestCase
     assert_match(/✓ every stored username is already in its normalised form/, output)
     assert_match(/✓ no two stored names collide/, output)
     assert_match(/✓ every stored username passes today's rules/, output)
-    assert_match(/Nothing to fix/, output)
+    assert_match(/\ANothing to fix: /, output.lines.last)
   end
 
   def test_audit_reports_a_missing_index_in_preserve_mode
