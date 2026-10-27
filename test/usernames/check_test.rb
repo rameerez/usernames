@@ -2,7 +2,7 @@
 
 require "test_helper"
 
-# The pure functions on the Usernames module (PRD §6.3).
+# The pure functions on the Usernames module.
 class CheckTest < UsernamesTestCase
   def test_check_normalises_then_applies_the_rules
     result = Usernames.check("  @Javi_R ")

@@ -4,7 +4,7 @@ require "test_helper"
 require "etc"
 require "json"
 
-# The generator's vocabulary (PRD §12.1) and its CI guarantee: no adjective +
+# The generator's vocabulary and its CI guarantee: no adjective +
 # animal pair, at any digit shape the generator draws, is a name the gem
 # itself would refuse.
 class WordsTest < UsernamesTestCase

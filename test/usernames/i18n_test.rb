@@ -5,7 +5,7 @@ require "test_helper"
 class I18nTest < UsernamesTestCase
   LOCALES = %i[en es pt].freeze
 
-  # Every error type a username can get (PRD §15).
+  # Every error type a username can get.
   TYPES = %i[
     too_short too_long blank taken
     username_spaces username_characters username_characters_without_separators username_unicode
@@ -61,7 +61,7 @@ class I18nTest < UsernamesTestCase
     end
   end
 
-  # D-13: a message never repeats what was typed.
+  # A message never repeats what was typed.
   def test_no_message_interpolates_the_value
     LOCALE_FILES.each do |path|
       refute_match(/%\{value\}/, File.read(path).lines.grep_v(/\A\s*#/).join, File.basename(path))

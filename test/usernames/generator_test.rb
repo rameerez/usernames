@@ -2,7 +2,7 @@
 
 require "test_helper"
 
-# Default and seeded names (PRD §12).
+# Default and seeded names.
 class GeneratorTest < UsernamesTestCase
   ADJECTIVE = Usernames::Words::ADJECTIVES.first
   ANIMAL = Usernames::Words::ANIMALS.first
@@ -207,7 +207,7 @@ class GeneratorTest < UsernamesTestCase
     assert_nil Usernames::Generator.fit("", 5, rules)
   end
 
-  # --- custom (§12.3) ------------------------------------------------------------------------------
+  # --- custom ------------------------------------------------------------------------------------
 
   def test_a_custom_generator_is_called_with_the_attempt_and_still_checked
     attempts = []

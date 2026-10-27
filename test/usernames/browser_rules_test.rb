@@ -4,7 +4,7 @@ require "test_helper"
 require "json"
 require "open3"
 
-# PRD §8.2: JavaScript-compatible hints for rules 1–7, advisory only.
+# JavaScript-compatible hints for rules 1–7, advisory only.
 class BrowserRulesTest < UsernamesTestCase
   # Configurations whose browser rules must all lint and agree.
   CONFIGURATIONS = [

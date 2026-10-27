@@ -9,7 +9,7 @@ rescue LoadError
   nil
 end
 
-# Which unique index a RecordNotUnique came from (D-19), from the shapes each
+# Which unique index a RecordNotUnique came from, from the shapes each
 # adapter reports it in.
 class UniqueViolationTest < UsernamesTestCase
   # The parts of a PG::Result the diagnostics are read from.

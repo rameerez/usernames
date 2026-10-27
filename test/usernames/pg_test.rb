@@ -3,7 +3,7 @@
 require "test_helper"
 require "usernames/audit"
 
-# PRD §11.3–11.4, live on PostgreSQL: real concurrent races, the savepoint,
+# Live on PostgreSQL: real concurrent races, the savepoint,
 # unique-violation diagnostics, the "C" comparison against ICU and
 # nondeterministic collations, and the audit's verdict on citext.
 #
@@ -232,7 +232,7 @@ class PostgresTest < UsernamesTestCase
 
   # --- collations ---------------------------------------------------------------------------------
 
-  # PRD §11.1: under a Turkish ICU collation lower('I') is 'ı', so a
+  # Under a Turkish ICU collation lower('I') is 'ı', so a
   # lower() index there would let `HIJ` and `hij` be two people.
   def test_the_c_collation_avoids_the_turkish_i
     skip "this PostgreSQL has no ICU" unless collation?("tr-x-icu")
@@ -248,8 +248,8 @@ class PostgresTest < UsernamesTestCase
     end
   end
 
-  # A nondeterministic collation can make john.doe equal johndoe (D-6 says
-  # they are two people); "C" never does, and the audit flags the collation.
+  # A nondeterministic collation can make john.doe equal johndoe (the gem
+  # says they are two people); "C" never does, and the audit flags the collation.
   def test_a_nondeterministic_collation_is_avoided_and_reported
     skip "this PostgreSQL has no ICU" unless collation?("und-x-icu")
 

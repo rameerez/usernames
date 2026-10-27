@@ -243,7 +243,7 @@ class GeneratorInstallTest < Rails::Generators::TestCase
     refute_match(/collation/, output)
   end
 
-  # citext still becomes a plain string (D-17), with no collation of its own.
+  # citext still becomes a plain string, with no collation of its own.
   def test_a_citext_column_adopted_in_preserve_mode_becomes_a_plain_string
     citext = Struct.new(:name, :sql_type, :collation).new("username", "citext", nil)
     schema = Usernames::Generators::ExistingSchema.new(reachable: true, column: citext)

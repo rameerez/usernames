@@ -4,7 +4,7 @@ require "test_helper"
 require "json"
 require "yaml"
 
-# Hygiene of the bundled data (PRD §9.4, §10.1, §12.1, §17, §20). Reads the files directly, not
+# Hygiene of the bundled data. Reads the files directly, not
 # through the library, so a loader bug cannot hide a data bug.
 module Usernames
   module DataFiles
@@ -175,7 +175,7 @@ module Usernames
     end
 
     def test_negro_is_blocked_in_no_locale
-      %w[en es].each { |locale| assert_empty spellings(offensive(locale)).grep(/negro/), "D-20: #{locale}" }
+      %w[en es].each { |locale| assert_empty spellings(offensive(locale)).grep(/negro/), "no negro anywhere: #{locale}" }
       assert_includes corpus("legitimate.txt"), "negro"
     end
 

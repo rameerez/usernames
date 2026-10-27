@@ -45,7 +45,7 @@ class EngineTest < UsernamesTestCase
     assert_empty Member._usernames, "a model without has_username declares nothing"
   end
 
-  # PRD §9.3: routes are collected lazily and forgotten whenever they reload,
+  # Routes are collected lazily and forgotten whenever they reload,
   # so a page added to config/routes.rb is reserved from the next check on.
   def test_reloading_the_routes_resets_the_reserved_routes
     Usernames::Reserved.routes

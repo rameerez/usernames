@@ -2,7 +2,7 @@
 
 require "test_helper"
 
-# PRD §11.1: one comparison expression per adapter and case mode.
+# One comparison expression per adapter and case mode.
 class ComparisonTest < UsernamesTestCase
   Comparison = Usernames::Comparison
 

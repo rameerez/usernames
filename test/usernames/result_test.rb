@@ -49,7 +49,7 @@ class ResultTest < UsernamesTestCase
     end
   end
 
-  # D-13: never which word, never what was typed.
+  # Never which word, never what was typed.
   def test_the_message_never_contains_the_input
     ["ja%{value}vi", "_%{count}_", "x\nadmin", "<script>"].each do |input|
       result = Usernames.check(input)

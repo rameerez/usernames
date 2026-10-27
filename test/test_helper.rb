@@ -64,7 +64,7 @@ class ApplicationRecord < ActiveRecord::Base
   self.abstract_class = true
 end
 
-# The schema the install generator writes, per adapter (PRD §11.2): a
+# The schema the install generator writes, per adapter: a
 # byte-compared column ("C" on PostgreSQL; SQLite's default BINARY), a plain
 # unique index in lowercase mode and a unique lower() expression in preserve
 # mode, on a column that keeps the database's collation (the expression

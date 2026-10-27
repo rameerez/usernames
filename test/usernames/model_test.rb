@@ -88,7 +88,7 @@ class ModelTest < UsernamesTestCase
     count
   end
 
-  # --- what has_username installs (PRD §6.1) ------------------------------------------------------
+  # --- what has_username installs ------------------------------------------------------------------
 
   def test_normalizes_on_assignment
     user = User.new(username: "  @Javi_R ")
@@ -254,7 +254,7 @@ class ModelTest < UsernamesTestCase
     end
   end
 
-  # --- validate only on change (D-11) --------------------------------------------------------------
+  # --- validate only on change ---------------------------------------------------------------------
 
   def test_a_now_reserved_legacy_name_saves_other_attributes
     take("admin", email: "old@example.com")
@@ -281,7 +281,7 @@ class ModelTest < UsernamesTestCase
     refute_predicate user, :username_generated?
   end
 
-  # --- races (PRD §11.3) -----------------------------------------------------------------------------
+  # --- races ----------------------------------------------------------------------------------------
 
   def test_a_generated_name_taken_in_the_race_window_is_redrawn
     RacingUser.rival = ->(record) { take(record.username) }

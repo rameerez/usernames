@@ -2,7 +2,7 @@
 
 require "test_helper"
 
-# Suggestions for a sign-up form (PRD §13).
+# Suggestions for a sign-up form.
 class CandidatesTest < UsernamesTestCase
   def candidates_for(seed, count: 5, **)
     Usernames.candidates_for(seed, count: count, **)

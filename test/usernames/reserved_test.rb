@@ -16,7 +16,7 @@ module RecipeBox
   end
 end
 
-# Reserved names (PRD §9): exact and impersonation matching, the prefixes,
+# Reserved names: exact and impersonation matching, the prefixes,
 # config.allowed, the app's own name and its routes.
 class ReservedTest < UsernamesTestCase
   DOTS = { separators: %w[_ .] }.freeze
@@ -35,7 +35,7 @@ class ReservedTest < UsernamesTestCase
     Usernames::Reserved.verdict(key, Usernames.configuration.rules_for(**))
   end
 
-  # PRD §9.2, required behaviour.
+  # Required behaviour.
   def test_impersonation_is_matched_in_every_form_it_is_typed
     %w[admin2 ad.min adm1n admin_bob adm1n_bob admin1bob admin2bob bob.support official_javi admins].each do |name|
       assert_equal :impersonation, rule(name), name

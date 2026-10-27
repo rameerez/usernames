@@ -55,7 +55,7 @@ class ValidatorTest < UsernamesTestCase
     assert errors_for(Member.new(username: "")).of_kind?(:username, :too_short)
   end
 
-  # PRD §6.2: validate what you store.
+  # Validate what you store.
   def test_validates_the_value_as_supplied
     assert errors_for(Member.new(username: "Javi")).of_kind?(:username, :username_characters)
     assert errors_for(Member.new(username: " javi")).of_kind?(:username, :username_spaces)

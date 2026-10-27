@@ -2,7 +2,7 @@
 
 require "test_helper"
 
-# PRD §8.1: the format rules, in order, first failure wins.
+# The format rules, in order, first failure wins.
 class FormatRulesTest < UsernamesTestCase
   # Every code point of Unicode's White_Space property — what \p{Space} matches.
   WHITE_SPACE = [*0x09..0x0D, 0x20, 0x85, 0xA0, 0x1680, *0x2000..0x200A, 0x2028, 0x2029, 0x202F, 0x205F, 0x3000]
@@ -218,7 +218,7 @@ class FormatRulesTest < UsernamesTestCase
     assert_nil supplied("a_b.c-d", separators: every)
   end
 
-  # D-10: a real production handle that must be refused.
+  # A real production handle that must be refused.
   def test_oliver
     assert_equal :username_consecutive, reason("oliver.__-hjj", separators: %w[_ . -])
     assert_equal :username_consecutive, reason("oliver.__-hjj", separators: %w[_ . -], edge_separators: true)

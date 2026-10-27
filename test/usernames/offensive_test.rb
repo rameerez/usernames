@@ -2,7 +2,7 @@
 
 require "test_helper"
 
-# Offensive words (PRD §10): the corpora gates, the §10.2 fixture table,
+# Offensive words: the corpora gates, the fixture table,
 # hate rules, severity modes and adapters.
 class OffensiveTest < UsernamesTestCase
   CORPORA = File.expand_path("../corpora", __dir__)
@@ -17,7 +17,7 @@ class OffensiveTest < UsernamesTestCase
     Usernames.configuration.rules_for(**)
   end
 
-  # The offensive matcher alone, on the comparison key, as PRD §10.6 runs the corpora.
+  # The offensive matcher alone, on the comparison key, as the corpora gates run it.
   def offensive(name, **)
     options = { separators: %w[_ . -], ** }
     rules = rules(**options)
@@ -28,7 +28,7 @@ class OffensiveTest < UsernamesTestCase
     !Usernames.check(name, **DOTS, **).ok?
   end
 
-  # --- §10.6 gates --------------------------------------------------------------------------------
+  # --- corpora gates ------------------------------------------------------------------------------
 
   def test_gate_legitimate_names_are_never_refused_at_strong
     names = corpus("legitimate.txt") + corpus("first_names.txt") + corpus("surnames.txt")
@@ -68,7 +68,7 @@ class OffensiveTest < UsernamesTestCase
     assert_empty passed_check
   end
 
-  # Diagnostic only (PRD §10.6): never a gate, the count is printed.
+  # Diagnostic only: never a gate, the count is printed.
   def test_dictionary_collisions_are_counted
     words = corpus("words_en_50k.txt")
     hits = words.select { |word| offensive(word) }
@@ -78,7 +78,7 @@ class OffensiveTest < UsernamesTestCase
     assert_operator hits.size, :<, words.size / 100
   end
 
-  # --- §10.2 consequences -------------------------------------------------------------------------
+  # --- the fixture table ---------------------------------------------------------------------------
 
   FIXTURES = {
     "scunthorpe" => true, "scunthorpe_united" => true, "scunthorpeunited" => false, "scunt_horpe" => false,
@@ -136,7 +136,7 @@ class OffensiveTest < UsernamesTestCase
     refute Usernames.allowed?("heil_hitler", offensive: { allowed: %w[heil hitler heil_hitler] })
   end
 
-  # --- hate rules (§10.3) -------------------------------------------------------------------------
+  # --- hate rules ---------------------------------------------------------------------------------
 
   def test_hate_numbers
     %w[1488 14_88 x1488 8814x 1_488 148.8 hh88 hh_88 heil88 88hitler combat18 14words heil_hitler siegheil
@@ -160,7 +160,7 @@ class OffensiveTest < UsernamesTestCase
     assert_equal :hate_number, offensive("zog_x", offensive: { languages: %i[en] })
   end
 
-  # --- modes (§10.5) ------------------------------------------------------------------------------
+  # --- modes --------------------------------------------------------------------------------------
 
   def test_severity_modes
     assert_equal :severe, offensive("cunt", offensive: { severity: :severe })
@@ -193,7 +193,7 @@ class OffensiveTest < UsernamesTestCase
     assert_match(/no word list for :pt \(available: :en, :es\)/, error.message)
   end
 
-  # --- adapters (§10.4) ---------------------------------------------------------------------------
+  # --- adapters -----------------------------------------------------------------------------------
 
   def test_callable_adapters
     seen = []

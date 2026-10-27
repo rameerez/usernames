@@ -4,7 +4,7 @@ require "test_helper"
 require "open3"
 require "rubygems/package"
 
-# PRD §17: the bundled data and its licences ship in the gem; the research
+# The bundled data and its licences ship in the gem; the research
 # record, the tests and the maintainer scripts do not. Built for real with
 # `gem build`, so what is checked is what `gem push` would upload.
 class PackagingTest < UsernamesTestCase
