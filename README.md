@@ -5,7 +5,7 @@
 > [!TIP]
 > **🚀 Ship your next Rails app 10x faster!** I've built **[RailsFast](https://railsfast.com/?ref=usernames)**, a production-ready Rails boilerplate template that comes with everything you need to launch a software business in days, not weeks. Go [check it out](https://railsfast.com/?ref=usernames)!
 
-`usernames` gives any Rails model a username that is **valid, unique, not reserved, not offensive, and never empty** — with one line:
+`usernames` gives any Rails model a username that is **valid, unique, not reserved, not offensive, and there from day one** — with one line:
 
 ```ruby
 class User < ApplicationRecord
@@ -30,9 +30,11 @@ Every new account gets a free, pronounceable name from the moment it exists (`qu
 
 ```ruby
 User.create!(email: "ana@example.com").username   # => "quiet_otter_42"
-User.suggest_usernames("Javi R")                  # => ["javi_r", "javir", "javi_r_42", "javi_r_817", "amber_lynx_8"]
+User.suggest_usernames("Javi R")                  # => ["javi_r", "javir", "javi_r_42", "javi_r_817", "javi_r_23"]
 User.username_available?("javi")                  # => false  (taken — or reserved, or not allowed)
 ```
+
+(The names and digits in these examples are illustrative: the digits are random, and a taken name is skipped.)
 
 No table, no migration beyond one unique index, no network calls, no API key. Everything runs in-process in microseconds.
 
@@ -128,7 +130,7 @@ end
 | 3 | your routes | reserved |
 | 4 | the bundled lists | reserved |
 
-Your own official account bypasses the check the Rails way: `validates …, unless: :official?` — the gem adds no API for it. `rails usernames:reserved` prints the effective list with the source of every word, for when you wonder why `x` is reserved.
+Your own official account, under a name the gem reserves? Lift exactly that name — `config.allowed += %w[yourapp]` — and register it yourself before launch (a seed, or the console). It frees that exact name only: `yourapp2` and `your.app` stay reserved. `has_username` deliberately has no per-record skip: whether a name may be held is a fact about the name, and a skip that hangs off the record is one `update` away from letting someone else keep `admin`. `rails usernames:reserved` prints the effective list with the source of every word, for when you wonder why `x` is reserved.
 
 ## Offensive words
 
@@ -137,7 +139,7 @@ A username has no spaces, so `xxfuckxx`, `f_u_c_k` and `sh1thead` have to be cau
 - **Severe** terms (slurs, the worst sexual and violent terms) are matched anywhere inside a name, after folding leetspeak digits and separators — but only terms of four letters or more (`gc` and `mj` are on some lists; matching them anywhere would refuse `gcastro` and `mjordan`).
 - **Strong** terms are matched only as a whole name or a whole segment between separators and digits: `shithead_bob` is refused, `scunthorpe` is not, and a real surname like `Chujew` stays legal.
 - **Mild** words (`hell`, `damn`) are off by default.
-- **Hate numbers** are rules, not list entries: `1488` is refused as a whole number or `14_88`; bare `88` never is (birth years, NASCAR, a lucky number in Chinese); `kkk` is refused in English and not in Brazilian Portuguese, where `kkkk` is laughter.
+- **Hate numbers** are rules, not list entries: `1488` is refused as a whole number or `14_88`; bare `88` never is (birth years, NASCAR, a lucky number in Chinese); `kkk` is refused in English — and, when a Portuguese word list ships, it will not be there, where `kkkk` is laughter (Portuguese messages ship today; Portuguese screening does not).
 - An **allowlist** of ~800 real words and names that happen to contain a bad substring (`scunthorpe`, `sussex`, `cockburn`, `fukuda`, `dikshit`…) exempts a whole name or a whole segment: `scunthorpe_united` is fine. Joining segments never manufactures an exemption, so `scunt_horpe` and `f.u.c.k` are still refused.
 
 ```ruby
@@ -188,7 +190,7 @@ Alternatively, `case: :preserve` leaves stored case alone; the audit will tell y
 
 ## Generated names and suggestions
 
-Every account has a name from the moment it exists. A profile with no name is a row that renders as plain text everywhere and has no page — so `has_username` assigns one on create when the field is blank:
+Every new account has a name from day one. A profile with no name is a row that renders as plain text everywhere and has no page — so `has_username` assigns one on create when the field is blank. (Only on create: an existing account may still clear its username, unless you pass `required: true`.)
 
 ```ruby
 User.create!(email: "ana@example.com").username   # => "quiet_otter_42"
@@ -209,7 +211,7 @@ Names are cut at word boundaries, never mid-word. The gem never derives a userna
 When a chosen name is taken:
 
 ```ruby
-User.suggest_usernames("javi", count: 5)   # => ["javi_42", "javi_17", "javi_903", "javi_5218", "amber_lynx_8"]
+User.suggest_usernames("javi", count: 5)   # => ["javi_42", "javi_817", "javi_23", "javi_561", "javi_90"]  (illustrative: random digits)
 ```
 
 Candidates are built in memory, filtered through every rule, checked for availability in **one** query, and returned in order. You may get fewer than you asked for; you never get a loop or an exception for running out.

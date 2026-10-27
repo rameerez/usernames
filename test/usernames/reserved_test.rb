@@ -219,6 +219,17 @@ class ReservedTest < UsernamesTestCase
     refute Usernames::Reserved.impersonation?("adm1n_bob2", Set["adm1n_bob", "bob2", "admi"])
   end
 
+  # The README's recipe for the app's own official account: lift exactly
+  # its name; every other spelling of it stays reserved.
+  def test_the_official_account_recipe
+    with_config(app_name: "YourApp", allowed: %w[yourapp], separators: %w[_ .]) do
+      assert Usernames.allowed?("yourapp")
+      refute Usernames.allowed?("yourapp2")
+      refute Usernames.allowed?("your.app")
+      refute Usernames.allowed?("your_app")
+    end
+  end
+
   def test_sets_are_compiled_once_per_rules
     rules = Usernames.configuration.rules_for
 
