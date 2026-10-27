@@ -8,7 +8,8 @@ Gem::Specification.new do |spec|
   spec.authors = ["rameerez"]
   spec.email = ["rubygems@rameerez.com"]
 
-  spec.summary = "Usernames for your Rails app: validate, reserve, screen, suggest and generate them in one line"
+  spec.summary = "Add usernames with validations to your Rails app: block reserved names, screen profanity, " \
+                 "enforce case-insensitive uniqueness, suggest alternatives and generate default names"
 
   spec.description = "Add correct, secure usernames to any Rails model with one line (`has_username`). " \
                      "Format rules that read like English (no symbols at the edges, no two in a row, not all digits), " \

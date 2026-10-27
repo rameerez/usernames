@@ -1,5 +1,11 @@
 ## [Unreleased]
 
+## [0.1.3] - 2026-10-27
+
+### Changed
+
+- The gem's summary now says what it does in one line: add usernames with validations to a Rails app — block reserved names, screen profanity, enforce case-insensitive uniqueness, suggest alternatives and generate default names. No code changes; this is the first version published to RubyGems.
+
 ## [0.1.2] - 2026-10-27
 
 ### Fixed
