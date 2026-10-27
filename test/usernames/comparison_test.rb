@@ -74,6 +74,11 @@ class ComparisonTest < UsernamesTestCase
     assert_equal "C", Comparison.column_collation("postgresql")
     assert_equal "utf8mb4_bin", Comparison.column_collation("trilogy")
     assert_nil Comparison.column_collation("sqlite3")
+
+    # Preserve mode on PostgreSQL: the expression carries COLLATE "C" itself.
+    assert_nil Comparison.column_collation("postgresql", :preserve)
+    assert_equal "C", Comparison.column_collation("postgresql", :lowercase)
+    assert_equal "utf8mb4_bin", Comparison.column_collation("mysql2", :preserve), "MySQL's lower() follows the column"
   end
 
   def test_adapter_names

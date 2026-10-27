@@ -64,8 +64,9 @@ end
 # The schema the install generator writes, per adapter (PRD §11.2): a
 # byte-compared column ("C" on PostgreSQL; SQLite's default BINARY), a plain
 # unique index in lowercase mode and a unique lower() expression in preserve
-# mode. The unique email index is the "unrelated constraint" the race wrapper
-# must let through.
+# mode, on a column that keeps the database's collation (the expression
+# carries COLLATE "C"). The unique email index is the "unrelated constraint"
+# the race wrapper must let through.
 POSTGRESQL = ActiveRecord::Base.lease_connection.adapter_name.match?(/postg/i)
 COLLATION = POSTGRESQL ? { collation: "C" } : {}
 
@@ -85,7 +86,7 @@ ActiveRecord::Schema.define(version: 1) do
   add_index :users, :email, unique: true
 
   create_table :players, force: true do |t|
-    t.string :handle, **COLLATION
+    t.string :handle
   end
   add_index :players, POSTGRESQL ? 'lower(handle COLLATE "C")' : "lower(handle)",
             unique: true, name: "index_players_on_lower_handle"

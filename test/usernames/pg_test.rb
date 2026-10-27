@@ -209,6 +209,21 @@ class PostgresTest < UsernamesTestCase
     refute_includes Player.suggest_handles("javi"), "javi"
   end
 
+  # The install generator leaves a preserve-mode column in the database's
+  # collation: equality goes through COLLATE "C" anyway, and ORDER BY keeps
+  # sorting the way people read instead of every capital first.
+  def test_preserve_mode_keeps_the_columns_own_order_and_still_compares_bytewise
+    collation = connection.select_value("SELECT datcollate FROM pg_database WHERE datname = current_database()")
+    skip "this database sorts bytewise already (#{collation})" if %w[C POSIX].include?(collation)
+
+    %w[bob Alice carol].each { |handle| Player.create!(handle: handle) }
+
+    assert_equal %w[Alice bob carol], Player.order(:handle).pluck(:handle)
+    assert_equal "Alice", Player.find_by_handle("ALICE").handle
+    refute_predicate Player.new(handle: "BOB"), :valid?
+    assert_match(/✓ character varying, collation .* \(compared through COLLATE "C"\)/, audit_of(Player, :handle))
+  end
+
   # --- collations ---------------------------------------------------------------------------------
 
   # PRD §11.1: under a Turkish ICU collation lower('I') is 'ı', so a
@@ -305,8 +320,12 @@ class PostgresTest < UsernamesTestCase
       self.table_name = "usernames_scratch"
       def self.name = "Scratch"
     end
+    audit_of(model, :username)
+  end
+
+  def audit_of(model, column)
     output = StringIO.new
-    Usernames::Audit.new(model, :username).report(output)
+    Usernames::Audit.new(model, column).report(output)
     output.string
   end
 end

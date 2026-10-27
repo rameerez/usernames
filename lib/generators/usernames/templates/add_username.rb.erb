@@ -1,16 +1,28 @@
 class <%= migration_class_name %> < ActiveRecord::Migration<%= migration_version %>
   def change
 <% if add_column? -%>
+<% if collation.nil? && adapter == :postgresql -%>
+    # No collation of its own: the unique index below compares through
+    # lower(<%= column %> COLLATE "C"), byte by byte, whatever the column's
+    # collation is — so ORDER BY <%= column %> keeps the database's own order.
+<% else -%>
     # Compared byte by byte (<%= collation ? "collation #{collation.inspect}" : "SQLite's default" %>), so the database agrees
     # with Ruby about what "the same name" means: no locale lowercasing I to
     # ı, no collation that thinks jose and josé are one name.
+<% end -%>
     add_column :<%= table %>, :<%= column %>, :string<%= column_options %>
 <% elsif change_collation? -%>
+<% if collation -%>
     # Compared byte by byte ("C"), so the database agrees with Ruby about what
     # "the same name" means: no locale lowercasing I to ı, no collation that
     # ignores case or punctuation. Run `rails usernames:audit` first.
+<% else -%>
+    # citext compares under the database locale; the gem compares through
+    # lower(<%= column %> COLLATE "C") on a plain string column. Run
+    # `rails usernames:audit` first.
+<% end -%>
     reversible do |direction|
-      direction.up { change_column :<%= table %>, :<%= column %>, :string, collation: <%= collation.inspect %> }
+      direction.up { change_column :<%= table %>, :<%= column %>, :string<%= column_options %> }
     end
 <% elsif mysql_collation_note? -%>
     # The comparison contract wants a byte-wise collation. MySQL's change_column

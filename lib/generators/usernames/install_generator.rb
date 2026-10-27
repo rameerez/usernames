@@ -10,8 +10,9 @@ module Usernames
     #
     # Writes config/initializers/usernames.rb and one migration: the column
     # (if the table has none), byte-compared ("C" on PostgreSQL, utf8mb4_bin
-    # on MySQL), and the ONE unique index the gem needs, built from the same
-    # expression every query uses (Usernames::Comparison).
+    # on MySQL — except PostgreSQL in preserve mode, whose index expression
+    # carries the "C" itself), and the ONE unique index the gem needs, built
+    # from the same expression every query uses (Usernames::Comparison).
     #
     # It looks at the database first, when it can reach it, so a re-run
     # writes nothing twice and an existing column is adopted rather than
@@ -96,7 +97,8 @@ module Usernames
 
         steps = []
         steps << "to add #{table}.#{column}" if add_column?
-        steps << "to set its collation to #{collation.inspect}" if change_collation?
+        steps << (collation ? "to set its collation to #{collation.inspect}" : "to make it a string column") if
+          change_collation?
         steps << "#{steps.empty? ? 'to add' : 'and add'} its unique index, #{index[:name]}" if add_index?
         " (#{steps.join(' ')})"
       end
@@ -115,12 +117,16 @@ module Usernames
 
       def add_column? = database.column.nil?
 
-      # Adopting a PostgreSQL column: set "C" when it is anything else
-      # (citext included — D-17). MySQL's change_column restates the whole
-      # column definition, so there the migration only shows the line.
+      # Adopting a PostgreSQL column: set "C" when it is anything else, and
+      # make citext a plain string (D-17). In preserve mode the comparison
+      # carries its own COLLATE "C", so only citext changes: the column keeps
+      # the collation its ORDER BY sorts by. MySQL's change_column restates
+      # the whole column definition, so there the migration only shows the line.
       def change_collation?
         existing = database.column
-        !existing.nil? && adapter == :postgresql && (existing.collation != collation || existing.sql_type == "citext")
+        return false if existing.nil? || adapter != :postgresql
+
+        existing.sql_type == "citext" || (!collation.nil? && existing.collation != collation)
       end
 
       def mysql_collation_note?
@@ -144,7 +150,7 @@ module Usernames
         @index ||= Usernames::Comparison.index_definition(adapter: adapter, table: table, column: column, mode: mode)
       end
 
-      def collation = Usernames::Comparison.column_collation(adapter)
+      def collation = Usernames::Comparison.column_collation(adapter, mode)
 
       # As the PRD writes it: 'lower(username COLLATE "C")', not an escaped string.
       def index_column

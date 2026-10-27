@@ -92,6 +92,10 @@ module Usernames
       end
 
       problem("#{type} is not text or character varying") unless POSTGRESQL_TYPES.match?(type)
+      # Preserve mode compares lower(column COLLATE "C"): the explicit
+      # collation wins, so the column's own one only decides ORDER BY.
+      return ok(%(#{type}, collation #{collation.inspect} (compared through COLLATE "C"))) if mode == :preserve
+
       if collation == "C"
         ok %(#{type}, collation "C")
       else

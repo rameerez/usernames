@@ -135,6 +135,23 @@ class RakeTasksTest < UsernamesTestCase
     assert_match(/integer is not text or character varying/, output.string)
   end
 
+  # In preserve mode the expression carries COLLATE "C", so a locale (or even
+  # nondeterministic) column collation is not a problem — only citext is.
+  def test_audit_in_preserve_mode_accepts_any_postgresql_collation
+    audit = Usernames::Audit.new(Player, :handle)
+    output = StringIO.new
+    audit.instance_variable_set(:@io, output)
+
+    audit.stub(:deterministic?, false) do
+      audit.send(:postgresql_column, "character varying", "en_US.UTF-8")
+      audit.send(:postgresql_column, "citext", nil)
+    end
+
+    assert_match(/✓ character varying, collation "en_US.UTF-8" \(compared through COLLATE "C"\)/, output.string)
+    assert_match(/citext is incompatible/, output.string)
+    refute_match(/nondeterministic|set collation/, output.string)
+  end
+
   def test_audit_of_an_unknown_model_aborts
     assert_raises(SystemExit) { capture_io { run_task("usernames:audit", "Nope") } }
   end

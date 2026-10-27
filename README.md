@@ -158,7 +158,7 @@ The gem can't read context and never will; it clears the bar of "obvious slurs d
 
 By default usernames are stored **lowercase**. That is the one configuration where Ruby, the validator and the database agree on what "equal" means: the stored value is already canonical, so uniqueness is a plain `username = ?` on an ordinary unique index — no `LOWER()`, no full-table scan.
 
-The generator sets the column's collation to `"C"` on PostgreSQL and `utf8mb4_bin` on MySQL. Why: PostgreSQL's `lower()` and `=` follow the column's collation, and under a Turkish collation `I` lowercases to `ı`, not `i`; MySQL's default `_ai_ci` collations make `jose` equal `josé`; PostgreSQL's nondeterministic collations can ignore punctuation entirely. Pinning the collation makes the database compare bytes, exactly as Ruby does. `citext` is never used — its own docs say it isn't truly case-insensitive.
+In lowercase mode the generator sets the column's collation to `"C"` on PostgreSQL and `utf8mb4_bin` on MySQL. Why: PostgreSQL's `lower()` and `=` follow the column's collation, and under a Turkish collation `I` lowercases to `ı`, not `i`; MySQL's default `_ai_ci` collations make `jose` equal `josé`; PostgreSQL's nondeterministic collations can ignore punctuation entirely. Pinning the collation makes the database compare bytes, exactly as Ruby does. `citext` is never used — its own docs say it isn't truly case-insensitive.
 
 Want to keep the case people type (`CoolCat` shows as `CoolCat`, but nobody else can be `coolcat`)?
 
@@ -166,7 +166,7 @@ Want to keep the case people type (`CoolCat` shows as `CoolCat`, but nobody else
 has_username case: :preserve
 ```
 
-Declare it on the model first (or pass `--case=preserve` to the install generator) and the generator writes a functional unique index on `lower(username COLLATE "C")` instead; every query the gem makes — uniqueness, lookup, availability, suggestions — uses that same expression.
+Declare it on the model first (or pass `--case=preserve` to the install generator) and the generator writes a functional unique index on `lower(username COLLATE "C")` instead; every query the gem makes — uniqueness, lookup, availability, suggestions — uses that same expression. Because the expression carries its own `COLLATE "C"`, on PostgreSQL the generator leaves the column's collation alone, so `ORDER BY username` keeps sorting `Alice, bob, Carol` rather than every capitalised name first (MySQL, whose `lower()` follows the column, still gets `utf8mb4_bin`).
 
 Two names that differ only in punctuation are **different** names: `john.doe` and `johndoe` are two people. (npm and PyPI decided otherwise for package names; for people, literal is less surprising.)
 

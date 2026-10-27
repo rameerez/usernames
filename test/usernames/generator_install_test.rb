@@ -89,13 +89,27 @@ class GeneratorInstallTest < Rails::Generators::TestCase
     end
   end
 
-  def test_postgresql_gets_the_c_collation_and_the_collated_expression
-    on("postgresql") { run_generator %w[--model=Account --case=preserve] }
+  def test_postgresql_gets_the_c_collation_in_lowercase_mode
+    on("postgresql") { run_generator %w[--model=Account] }
 
     assert_migration "db/migrate/add_username_to_accounts.rb" do |content|
       assert_includes content, %(add_column :accounts, :username, :string, collation: "C")
+      assert_includes content, %(add_index :accounts, :username, unique: true)
+    end
+  end
+
+  # The expression carries COLLATE "C", so the column keeps the database's
+  # collation: a "C" column would sort every capitalised name first in an
+  # ORDER BY — exactly what keeping typed case makes visible.
+  def test_postgresql_preserve_mode_leaves_the_column_collation_alone
+    output = on("postgresql") { output_of("--model=Account", "--case=preserve") }
+
+    assert_migration "db/migrate/add_username_to_accounts.rb" do |content|
+      assert_includes content, "add_column :accounts, :username, :string\n"
+      refute_includes content, "collation:"
       assert_includes content, %(add_index :accounts, 'lower(username COLLATE "C")', unique: true)
     end
+    refute_match(/set its collation/, output)
   end
 
   def test_mysql_gets_utf8mb4_bin
@@ -155,12 +169,38 @@ class GeneratorInstallTest < Rails::Generators::TestCase
   end
 
   def test_a_postgresql_column_is_adopted_with_the_c_collation
-    on("postgresql") { run_generator %w[--model=Member --case=preserve] }
+    output = on("postgresql") { output_of("--model=Member") }
 
     assert_migration "db/migrate/add_unique_username_index_to_members.rb" do |content|
       assert_includes content, %(direction.up { change_column :members, :username, :string, collation: "C" })
-      assert_includes content, "lower(username COLLATE"
+      assert_includes content, %(add_index :members, :username, unique: true)
     end
+    assert_match(/to set its collation to "C"/, output)
+  end
+
+  def test_a_postgresql_column_adopted_in_preserve_mode_keeps_its_collation
+    output = on("postgresql") { output_of("--model=Member", "--case=preserve") }
+
+    assert_migration "db/migrate/add_unique_username_index_to_members.rb" do |content|
+      refute_includes content, "change_column"
+      assert_includes content, %(add_index :members, 'lower(username COLLATE "C")', unique: true)
+    end
+    refute_match(/collation/, output)
+  end
+
+  # citext still becomes a plain string (D-17), with no collation of its own.
+  def test_a_citext_column_adopted_in_preserve_mode_becomes_a_plain_string
+    citext = Struct.new(:name, :sql_type, :collation).new("username", "citext", nil)
+    schema = Usernames::Generators::ExistingSchema.new(reachable: true, column: citext)
+    output = Usernames::Generators::ExistingSchema.stub(:read, schema) do
+      on("postgresql") { output_of("--model=Member", "--case=preserve") }
+    end
+
+    assert_migration "db/migrate/add_unique_username_index_to_members.rb" do |content|
+      assert_includes content, "direction.up { change_column :members, :username, :string }"
+      assert_includes content, "citext compares under the database locale"
+    end
+    assert_match(/to make it a string column and add its unique index/, output)
   end
 
   def test_a_mysql_column_is_shown_the_collation_line

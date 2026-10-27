@@ -76,10 +76,17 @@ module Usernames
         index.columns.is_a?(String) && squeeze(index.columns) == squeeze(wanted)
       end
 
-      # "C" on PostgreSQL, "utf8mb4_bin" on MySQL, nil on SQLite (whose
-      # default BINARY is the contract).
-      def column_collation(adapter)
-        COLLATIONS[self.adapter(adapter)]
+      # The collation the column itself needs for `mode`: "C" on PostgreSQL,
+      # "utf8mb4_bin" on MySQL, nil on SQLite (whose default BINARY is the
+      # contract). nil for PostgreSQL in preserve mode: the comparison
+      # expression carries its own COLLATE "C", so the column keeps the
+      # database's collation — and `ORDER BY username` keeps sorting the way
+      # people read (a "C" column sorts every uppercase letter first).
+      def column_collation(adapter, mode = :lowercase)
+        adapter = self.adapter(adapter)
+        return nil if mode == :preserve && adapter == :postgresql
+
+        COLLATIONS[adapter]
       end
 
       # :postgresql, :mysql or :sqlite, from a connection or an adapter name
