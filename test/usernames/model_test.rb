@@ -51,6 +51,14 @@ end
 
 class StaffPersona < Persona; end
 
+# A sign-up flow that asks some people for a name and gives the rest one.
+class FlowUser < ApplicationRecord
+  self.table_name = "users"
+  attr_accessor :handle_required
+
+  has_username required: :handle_required
+end
+
 class ModelTest < UsernamesTestCase
   def setup
     super
@@ -124,10 +132,13 @@ class ModelTest < UsernamesTestCase
     assert_raises(Usernames::ConfigurationError) { Class.new(ApplicationRecord) { has_username length: 3 } }
     error = assert_raises(Usernames::ConfigurationError) { Class.new(ApplicationRecord) { has_username required: "yes" } }
 
-    assert_match(/required: must be true or false/, error.message)
+    assert_match(/required: must be true, false, a method name or a proc \(got "yes"\)/, error.message)
+    error = assert_raises(Usernames::ConfigurationError) { Class.new(ApplicationRecord) { has_username generate: 1 } }
+
+    assert_match(/generate: must be true, false, a method name or a proc/, error.message)
   end
 
-  # --- the required × generate matrix (PRD §6.1), on create and update ---------------------------
+  # --- the required × generate matrix, on create and update -----------------------------------------
 
   def test_default_generates_on_create
     user = User.create!(email: "ana@example.com")
@@ -182,6 +193,65 @@ class ModelTest < UsernamesTestCase
 
     refute named.update(username: "")
     assert_equal [{ error: :blank }], named.errors.details[:username]
+  end
+
+  # Per record: a typed name where the flow asks for one, a generated one
+  # everywhere else. `generate:` defaults to "unless required".
+  def test_required_by_a_method_generates_where_it_is_not_required
+    asked = FlowUser.create!(email: "asked@example.com", handle_required: false)
+
+    assert_predicate asked, :username_generated?
+
+    typed = FlowUser.new(email: "typed@example.com", handle_required: true)
+
+    refute_predicate typed, :valid?
+    assert_equal [{ error: :blank }], typed.errors.details[:username]
+    assert_nil typed.username, "required: nothing is generated"
+
+    typed.username = "javi"
+
+    assert typed.save
+    refute_predicate typed, :username_generated?
+  end
+
+  def test_required_and_generate_as_procs
+    model = flow_model(required: -> { handle_required }, generate: ->(record) { record.email.end_with?(".org") })
+
+    assert_predicate model.create!(email: "a@example.org", handle_required: false), :username_generated?
+    assert_nil model.create!(email: "b@example.com", handle_required: false).username, "neither required nor generated"
+    refute_predicate model.new(email: "c@example.com", handle_required: true), :valid?
+  end
+
+  # An explicit `generate:` is honoured as given, required or not: with both,
+  # a blank is filled on create and can never be cleared later.
+  def test_an_explicit_generate_is_not_tied_to_required
+    model = flow_model(required: true, generate: true)
+    user = model.create!(email: "both@example.com")
+
+    assert_predicate user, :username_generated?
+    refute user.update(username: "")
+    assert_equal [{ error: :blank }], user.errors.details[:username]
+
+    lenient = flow_model(required: :handle_required, generate: false)
+
+    assert_nil lenient.create!(email: "none@example.com", handle_required: false).username
+  end
+
+  def test_required_false_and_true_are_still_plain_switches
+    assert_predicate flow_model(required: false).create!(email: "f@example.com"), :username_generated?
+    refute_predicate flow_model(required: true).new(email: "t@example.com"), :valid?
+  end
+
+  # A model with has_username(**options) on the users table, and a
+  # `handle_required` flag a sign-up flow would set.
+  def flow_model(**options)
+    Class.new(ApplicationRecord) do
+      self.table_name = "users"
+      def self.name = "FlowUser"
+      attr_accessor :handle_required
+
+      has_username(**options)
+    end
   end
 
   # --- validate only on change (D-11) --------------------------------------------------------------

@@ -198,6 +198,15 @@ User.create!(email: "ana@example.com").username   # => "quiet_otter_42"
 
 Adjective + animal + two random digits, from a vocabulary curated for this purpose (no brands, no body parts, nothing a slur list could trip on — and the test suite proves it, pair by pair). Digits come from `SecureRandom`, never a counter, so names don't reveal sign-up order. On collision the digits grow (`quiet_otter_417`), then fall back to hex. If every name a batch draws is taken or not allowed (a tiny custom vocabulary, a very short length), the save fails with `username_unavailable` ("couldn't be assigned automatically, please choose one") rather than raising; `generate_username` itself raises `Usernames::NoFreeNameError`. Pass `required: true` instead if you'd rather make people choose, or `generate: false` to leave it blank.
 
+Both also take a method name or a proc, evaluated on the record like Rails' `if:` — for an app where some sign-up flows ask for a name and others don't:
+
+```ruby
+has_username required: :handle_required            # typed where the flow asks for one, generated everywhere else
+has_username required: -> { invited? }, generate: false
+```
+
+By default a name is generated exactly where none is required, record by record. An explicit `generate:` is honoured as given: `required: true, generate: true` fills a blank on create and refuses clearing it later.
+
 From a real name:
 
 ```ruby
@@ -327,7 +336,7 @@ Usernames.configure do |config|
 end
 ```
 
-Less common, documented here rather than in the initializer: `first_character` (`:alphanumeric`, or `:letter` for the Snapchat/Telegram rule), `reserve_routes` (`true`), `app_name` (auto-detected; `false` to opt out), `offensive.adapters` (`[:moderate]`), `on_adapter_failure` (`:allow` logs and skips a raising adapter; `:reject` fails the save), `generator.adjectives` / `generator.nouns` / `generator` (a callable), `unique_index` (only if the generator didn't create yours). Every option is also accepted per model — `has_username :handle, length: 2..24` — and per validator call. An invalid value raises `Usernames::ConfigurationError` at boot, naming it.
+Less common, documented here rather than in the initializer: `first_character` (`:alphanumeric`, or `:letter` for the Snapchat/Telegram rule), `reserve_routes` (`true`), `app_name` (auto-detected; `false` to opt out), `offensive.adapters` (`[:moderate]`), `on_adapter_failure` (`:allow` logs and skips a raising adapter; `:reject` fails the save), `generator.adjectives` / `generator.nouns` / `generator` (a callable), `unique_index` (only if the generator didn't create yours). Every option is also accepted per model — `has_username :handle, length: 2..24` — and per validator call. `has_username` itself takes `required:` (`false`; `true`, a method name such as `required: :handle_required`, or a proc) and `generate:` (by default: wherever a name isn't required). An invalid value raises `Usernames::ConfigurationError` at boot, naming it.
 
 ## Data and licences
 

@@ -60,12 +60,16 @@ module Usernames
     def validate!: () -> self
   end
 
-  # has_username(column = :username, required: false, generate: true, **rules)
+  # has_username(column = :username, required: false, generate: nil, **rules)
+  #
+  # required: and generate: take true, false, a method name or a proc,
+  # evaluated on the record like Rails' if:. generate: nil (the default)
+  # means: wherever a name is not required.
   #
   # Also defines, named after the column: <column>_available?, suggest_<column>s,
   # generate_<column>, find_by_<column>, <column>_options, check_<column>,
   # <column>_rules_for_browser, and <column>_generated? on instances.
   module Model
-    def has_username: (?(Symbol | String) column, ?required: bool, ?generate: bool, **untyped rules) -> void
+    def has_username: (?(Symbol | String) column, ?required: (bool | Symbol | Proc), ?generate: (bool | Symbol | Proc)?, **untyped rules) -> void
   end
 end

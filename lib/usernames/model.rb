@@ -25,7 +25,7 @@ module Usernames
       base.class_attribute :_usernames, instance_accessor: false, default: {}.freeze
     end
 
-    # has_username(column = :username, required: false, generate: true, **rules)
+    # has_username(column = :username, required: false, generate: nil, **rules)
     #
     # Installs, for that column:
     #
@@ -33,14 +33,19 @@ module Usernames
     # 2. the username rules, checked only when the value changes — a rule
     #    added later never stops an old account from saving its other
     #    attributes;
-    # 3. with `required: true`, presence — on create, and on an update that
+    # 3. with `required:`, presence — on create, and on an update that
     #    changes it (a legacy blank still saves unrelated changes);
     # 4. uniqueness, compared the way the unique index compares (Comparison);
-    # 5. a generated name on create when none was given (unless `required:`
-    #    or `generate: false`);
+    # 5. a generated name on create when none was given — by default, unless
+    #    a name is required for that record;
     # 6. a race wrapper, so two sign-ups racing for one name end in a redraw
     #    (a generated name) or in "has already been taken" (a typed one) —
     #    never a RecordNotUnique 500.
+    #
+    # `required:` and `generate:` take true, false, a method name or a proc,
+    # evaluated on the record the way Rails' `if:` is: a sign-up flow that
+    # asks for a name (`required: :handle_required`) gets presence, and every
+    # other record a generated name.
     #
     # And the class helpers, named after the column: `username_available?`,
     # `suggest_usernames`, `generate_username`, `find_by_username`,
@@ -51,7 +56,7 @@ module Usernames
     # mode, so the model keeps comparing in it even if the configuration
     # changes later. Every other rule is read from the configuration on each
     # check.
-    def has_username(column = :username, required: false, generate: true, **rules)
+    def has_username(column = :username, required: false, generate: nil, **rules)
       column = Column.new(self, column, required: required, generate: generate, rules: rules)
       if _usernames.key?(column.name)
         raise ConfigurationError, "has_username :#{column.name} is already declared on #{name || self}"
@@ -59,6 +64,19 @@ module Usernames
 
       self._usernames = _usernames.merge(column.name => column).freeze
       column.install
+    end
+
+    # true, false, or a condition evaluated on `record` as Rails evaluates
+    # `if:` — a Symbol is a method sent to it, a proc without arguments is
+    # run on it, a proc with one is given it. :nodoc:
+    def self.applies?(condition, record)
+      result =
+        case condition
+        when true, false then condition
+        when Symbol then record.send(condition)
+        else condition.arity.zero? ? record.instance_exec(&condition) : condition.call(record)
+        end
+      result ? true : false
     end
 
     # One has_username declaration, and everything that column needs: the
@@ -70,12 +88,23 @@ module Usernames
       def initialize(model, name, required:, generate:, rules:)
         @model = model
         @name = name.to_sym
-        @required = boolean(:required, required)
-        # `required: true` turns generation off: the person chooses.
-        @generate = boolean(:generate, generate) && !@required
+        @required = condition(:required, required)
+        # By default a name is generated exactly where none is required: where
+        # one is, the person chooses.
+        @generate = generate.nil? ? nil : condition(:generate, generate)
         # Resolving them now raises ConfigurationError for a bad option when
         # the model is defined, and pins the case mode (see has_username).
         @options = rules.merge(case: Usernames.configuration.rules_for(**rules).case).freeze
+      end
+
+      # Whether `record` must have a name.
+      def required?(record)
+        Model.applies?(required, record)
+      end
+
+      # Whether `record` gets a generated name on create when it has none.
+      def generate?(record)
+        generate.nil? ? !required?(record) : Model.applies?(generate, record)
       end
 
       def mode
@@ -91,7 +120,7 @@ module Usernames
       def install
         install_normalization_and_rules
         install_uniqueness
-        model.before_validation(:"assign_#{name}", on: :create) if generate
+        install_generation
         model.include(InstanceMethods.for(name))
         model.extend(ClassMethods.for(self))
       end
@@ -131,14 +160,25 @@ module Usernames
 
       def install_normalization_and_rules
         column = name
+        definition = self
         changed = :"will_save_change_to_#{column}?"
         model.normalizes column, with: Usernames.normalizer(**options)
         model.validates column, username: options, if: changed
-        return unless required
+        return if required == false
 
         # On create, and when an update touches it: a pre-existing blank
         # saves unrelated changes; clearing a name is :blank.
-        model.validates column, presence: true, if: -> { new_record? || will_save_change_to_attribute?(column) }
+        model.validates column, presence: true, if: lambda {
+          (new_record? || will_save_change_to_attribute?(column)) && definition.required?(self)
+        }
+      end
+
+      # Left out altogether when no record can ever get a generated name.
+      def install_generation
+        return if generate == false || (generate.nil? && required == true)
+
+        definition = self
+        model.before_validation(:"assign_#{name}", on: :create, if: -> { definition.generate?(self) })
       end
 
       # Lowercase mode stores the canonical value, so Rails' own exact
@@ -159,10 +199,11 @@ module Usernames
         end
       end
 
-      def boolean(option, value)
-        return value if [true, false].include?(value)
+      def condition(option, value)
+        return value if [true, false].include?(value) || value.is_a?(Symbol) || value.is_a?(Proc)
 
-        raise ConfigurationError, "has_username #{option}: must be true or false (got #{value.inspect})"
+        raise ConfigurationError, "has_username #{option}: must be true, false, a method name or a proc " \
+                                  "(got #{value.inspect})"
       end
     end
 
