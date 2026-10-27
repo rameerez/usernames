@@ -23,7 +23,10 @@ module Usernames
   # `unique_index`, or any index that passes the comparison contract for the
   # column (Comparison::IndexContract). SQLite's column form names no index,
   # so there the column must be the only one named, and the table must have
-  # an identity index on exactly it.
+  # an identity index on exactly it. When the table has more than one unique
+  # index on that column alone (an app's own NOCASE one, say), the message
+  # could be either's: then it is ours only when `conflict` — one query
+  # under the gem's comparison — finds another row with the name.
   module UniqueViolation
     POSTGRESQL_CONSTRAINT = /unique constraint "(?<name>[^"]+)"/
     MYSQL_KEY = /for key '(?:(?<table>[^'.]+)\.)?(?<name>[^']+)'/
@@ -32,8 +35,9 @@ module Usernames
 
     # What a violation is matched against: the table as the model names it
     # (possibly schema-qualified), its bare name, the column, the configured
-    # index, the case mode and the connection to read indexes back with. :nodoc:
-    Target = ::Data.define(:table, :bare_table, :column, :index, :mode, :connection)
+    # index, the case mode, the connection to read indexes back with and the
+    # conflict query. :nodoc:
+    Target = ::Data.define(:table, :bare_table, :column, :index, :mode, :connection, :conflict)
 
     class << self
       # UniqueViolation.of?(error, table: "users", column: :username, rules: rules)
@@ -42,10 +46,14 @@ module Usernames
       # config.unique_index (an index the generator did not create).
       # `connection` is the model's own, which reads its indexes back (an app
       # may have several databases); without one, Active Record's default
-      # connection is used.
-      def of?(error, table:, column:, rules: Usernames.configuration.rules_for, connection: nil)
+      # connection is used. `conflict` answers whether another row has the
+      # record's name under the gem's comparison; without one, an ambiguous
+      # SQLite message is not ours.
+      # rubocop:disable-next Metrics/ParameterLists -- each is one fact about the save, all by keyword
+      def of?(error, table:, column:, rules: Usernames.configuration.rules_for, connection: nil, conflict: nil)
         target = Target.new(table: table.to_s, bare_table: table.to_s.split(".").last, column: column.to_s,
-                            index: rules.unique_index&.to_s, mode: rules.case, connection: connection)
+                            index: rules.unique_index&.to_s, mode: rules.case, connection: connection,
+                            conflict: conflict)
         name = postgresql_constraint(error)
         return postgresql_target?(error, target) && identity?(name, target) if name
 
@@ -108,14 +116,31 @@ module Usernames
       end
 
       # SQLite's "UNIQUE constraint failed: users.username": some unique
-      # index on exactly that column was violated; it is ours when one such
-      # index is the identity index.
+      # index on exactly that column was violated. It is ours when one such
+      # index is the identity index and either it is the only one or another
+      # row really has the name.
       def on_the_column_alone?(target)
         reading(target) do |connection, contract|
-          connection.indexes(target.table).any? do |index|
-            index.unique && Array(index.columns) == [target.column] &&
-              (known_name?(index.name, target) || contract.satisfied_by?(index))
-          end
+          alone = connection.indexes(target.table).select { |index| alone_on_the_column?(index, target) }
+          next false unless alone.any? { |index| known_name?(index.name, target) || contract.satisfied_by?(index) }
+
+          [alone.size, sqlite_unique_indexes_on(connection, contract, target)].max <= 1 || target.conflict&.call == true
+        end
+      end
+
+      def alone_on_the_column?(index, target)
+        index.unique && Array(index.columns) == [target.column]
+      end
+
+      # Every unique index on the column alone, as SQLite itself lists them:
+      # Active Record leaves out those a UNIQUE column constraint creates.
+      def sqlite_unique_indexes_on(connection, contract, target)
+        return 0 unless contract.adapter == :sqlite
+
+        names = connection.select_values("SELECT name FROM pragma_index_list(#{connection.quote(target.bare_table)}) " \
+                                         "WHERE \"unique\" = 1")
+        names.count do |name|
+          connection.select_values("SELECT name FROM pragma_index_info(#{connection.quote(name)})") == [target.column]
         end
       end
 

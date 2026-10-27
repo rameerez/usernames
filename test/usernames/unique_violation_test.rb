@@ -17,6 +17,11 @@ class UniqueViolationTest < UsernamesTestCase
     def error_field(field) = fields[field]
   end
   FakeCause = Struct.new(:result)
+  # A collation that compares names with their underscores taken out.
+  class IgnoringUnderscores
+    def compare(left, right) = left.delete("_") <=> right.delete("_")
+  end
+
   # A connection that cannot read indexes (no database, a permissions quirk).
   class BrokenConnection
     def indexes(_table) = raise(ActiveRecord::ConnectionNotEstablished, "no database")
@@ -46,6 +51,16 @@ class UniqueViolationTest < UsernamesTestCase
     connection.add_index(:violation_users, columns, unique: true, name: name, **)
   end
 
+  # A second unique index on users.username for the block, then none.
+  def with_users_index(expression)
+    User.delete_all
+    connection.add_index(:users, expression, unique: true, name: "index_users_on_second")
+    yield
+  ensure
+    connection.remove_index(:users, name: "index_users_on_second", if_exists: true)
+    User.delete_all
+  end
+
   def diagnostics(fields)
     FakeCause.new(FakeResult.new(fields))
   end
@@ -59,7 +74,8 @@ class UniqueViolationTest < UsernamesTestCase
   # `index` and `mode` are what the column's rules would say: config.unique_index and its case.
   def of?(error, table: "users", column: :username, connection: nil, **said)
     rules = Usernames.configuration.rules_for(unique_index: said[:index], case: said.fetch(:mode, :lowercase))
-    Usernames::UniqueViolation.of?(error, table: table, column: column, rules: rules, connection: connection)
+    Usernames::UniqueViolation.of?(error, table: table, column: column, rules: rules, connection: connection,
+                                          conflict: said[:conflict])
   end
 
   # --- SQLite ------------------------------------------------------------------------------------
@@ -83,6 +99,7 @@ class UniqueViolationTest < UsernamesTestCase
     index(:username, where: "active = 1")
 
     refute of?(violation(message), table: "violation_users"), "only a partial index"
+    connection.remove_index(:violation_users, name: "uniq_login")
     index(:username, name: "uniq_whole")
 
     assert of?(violation(message), table: "violation_users")
@@ -218,5 +235,46 @@ class UniqueViolationTest < UsernamesTestCase
   ensure
     connection.remove_index(:users, name: "index_users_on_prefix", if_exists: true)
     User.delete_all
+  end
+
+  # SQLite's column message names no index. With a second unique index on
+  # the column (one that ignores underscores), the violation is the app's
+  # own constraint unless another row really has the name.
+  def test_a_second_unique_index_on_the_column_needs_a_real_conflict
+    skip "SQLite only" if POSTGRESQL
+    connection.raw_connection.collation("NOPUNCT", IgnoringUnderscores.new)
+    with_users_index("username COLLATE NOPUNCT") do
+      User.create!(username: "javi_r", email: "a@example.com")
+      javir = User.new(username: "javir", email: "b@example.com")
+
+      assert_predicate javir, :valid?
+      assert_raises(ActiveRecord::RecordNotUnique) { javir.save }
+      assert_empty javir.errors
+      twin = User.new(username: "javi_r", email: "c@example.com")
+
+      refute twin.save(validate: false), "the same name, past validation, is still taken"
+      assert_equal [{ error: :taken }], twin.errors.details[:username]
+    end
+  end
+
+  # A legacy JAVI under a second, NOCASE index: the new javi collides with
+  # nobody the gem compares equal, so the error is the app's index's.
+  def test_a_second_nocase_index_with_a_legacy_row_propagates
+    skip "SQLite only" if POSTGRESQL
+    with_users_index("username COLLATE NOCASE") do
+      connection.execute("INSERT INTO users (username, email) VALUES ('JAVI', 'a@example.com')") # as stored before the gem
+
+      assert_raises(ActiveRecord::RecordNotUnique) { User.create(username: "javi", email: "b@example.com") }
+    end
+  end
+
+  def test_an_ambiguous_column_message_without_a_conflict_query_is_not_ours
+    message = "UNIQUE constraint failed: violation_users.username"
+    index(:username, name: "uniq_whole")
+    index(:username, name: "uniq_active", where: "active = 1")
+
+    refute of?(violation(message), table: "violation_users")
+    refute of?(violation(message), table: "violation_users", conflict: -> { false })
+    assert of?(violation(message), table: "violation_users", conflict: -> { true })
   end
 end

@@ -150,16 +150,23 @@ module Usernames
         scope.exists?
       end
 
-      # Whether a RecordNotUnique raised while saving a record of `on` came
-      # from this column's unique index, read on the connection the save is
-      # using. with_connection, not lease_connection: inside a scoped
-      # checkout (a thread or job wrapped in `with_connection`),
-      # lease_connection would turn it into a permanent lease, and the
-      # connection would stay checked out after the block, held by a thread
-      # that may already be gone.
-      def violated_by?(error, on)
+      # Whether a RecordNotUnique raised while saving `record` came from this
+      # column's unique index, read on the connection the save is using.
+      # When the database's message cannot say which index it was, it is
+      # ours only if another row really has the name under the gem's
+      # comparison.
+      #
+      # with_connection, not lease_connection: inside a scoped checkout
+      # (a thread or job wrapped in `with_connection`), lease_connection
+      # would turn it into a permanent lease, and the connection would stay
+      # checked out after the block, held by a thread that may already be
+      # gone.
+      def violated_by?(error, record)
+        on = record.class
+        conflict = -> { taken?(record.public_send(name).to_s, on, except: record) }
         on.with_connection do |connection|
-          UniqueViolation.of?(error, table: on.table_name, column: name, rules: rules, connection: connection)
+          UniqueViolation.of?(error, table: on.table_name, column: name, rules: rules, connection: connection,
+                                     conflict: conflict)
         end
       end
 
@@ -366,7 +373,7 @@ module Usernames
               begin
                 return self.class.transaction(requires_new: true) { yield }
               rescue ActiveRecord::RecordNotUnique => error
-                raise unless self.class._usernames.fetch(:#{column}).violated_by?(error, self.class)
+                raise unless self.class._usernames.fetch(:#{column}).violated_by?(error, self)
 
                 if redraw && (attempts += 1) <= 3
                   draw_#{column}                              # generated names only
