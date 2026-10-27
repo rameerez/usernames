@@ -56,7 +56,19 @@ module Usernames
     def initialize(**options)
       assign(options)
       @format_checks = build_format_checks
+      # Left unfrozen on purpose: the reserved and offensive matchers keep
+      # what they build from these rules here (see #compiled).
+      @compiled = {}
       freeze
+    end
+
+    # What a content matcher built from these rules (a reserved set, the
+    # offensive exemptions), built on first use and kept for as long as the
+    # rules are: Configuration#rules_for caches the rules, so every check
+    # after the first reuses it. Two threads may build the same thing once
+    # each; both results are equal, so either may win. :nodoc:
+    def compiled(name)
+      @compiled.fetch(name) { @compiled[name] = yield }
     end
 
     # Short enough to read in a console or a failing test: the lists can

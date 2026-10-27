@@ -11,6 +11,9 @@ require_relative "usernames/phrase"
 require_relative "usernames/result"
 require_relative "usernames/reserved"
 require_relative "usernames/offensive"
+require_relative "usernames/words"
+require_relative "usernames/generator"
+require_relative "usernames/candidates"
 require_relative "usernames/rules"
 require_relative "usernames/configuration"
 require_relative "usernames/validator"
@@ -111,14 +114,28 @@ module Usernames
       configuration.rules_for(**).for_browser
     end
 
-    # TODO(p2): PRD §12.
-    def generate(**)
-      raise NotImplementedError, "Usernames.generate is not available in this version yet"
+    # Usernames.generate                          # => "quiet_otter_42"
+    # Usernames.generate(from: "José García")     # => "jose_garcia"
+    #
+    # A name the rules allow (PRD §12). Eligibility only, like check: whether
+    # somebody already has it is for the database to say — has_username's
+    # generate_username takes the whole batch there in one query.
+    # NOTE(p2): raises NoFreeNameError when the rules leave nothing to draw
+    # (a word list emptied, a minimum length no shape reaches) rather than
+    # returning nil, which a model would store as a missing username.
+    def generate(from: nil, **)
+      name = Generator.candidates(from: from, rules: configuration.rules_for(**)).first
+      return name if name
+
+      raise NoFreeNameError, "no name these rules allow could be generated; check length, separators and the generator's word lists"
     end
 
-    # TODO(p2): PRD §13.
-    def candidates_for(_seed, **)
-      raise NotImplementedError, "Usernames.candidates_for is not available in this version yet"
+    # Usernames.candidates_for("Javi R", count: 5)  # => ["javi_r", "javir", "javi_r_42", …]
+    #
+    # Up to 3 × count allowed names, ordered, deduplicated (PRD §13). May be
+    # fewer, never raises for running out.
+    def candidates_for(seed, count:, **)
+      Candidates.for(seed, count: count, rules: configuration.rules_for(**))
     end
   end
 end

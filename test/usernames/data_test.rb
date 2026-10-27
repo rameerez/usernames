@@ -283,3 +283,86 @@ module Usernames
     end
   end
 end
+
+module Usernames
+  # The same data through the real matchers: what the files say is what the
+  # gem does. (The classes above read the files directly, so a loader bug
+  # cannot hide a data bug; these catch the reverse.)
+  class MatcherDataTest < UsernamesTestCase
+    include DataFiles
+
+    ALL_SEPARATORS = %w[_ . -].freeze
+
+    # Contradictions in en.json the matcher resolves one way, kept here until the data is rebuilt:
+    # `spicks` is both a variant and an exception of `spic` (the exception wins, so it passes), and
+    # `blackcock` is an exception of `cock` and also a strong term of its own (so it is refused).
+    FORMAT_REASONS = %i[username_edges username_consecutive username_extension username_digits_only].freeze
+
+    def verdict(name, **)
+      rules = Usernames.configuration.rules_for(separators: ALL_SEPARATORS, **)
+      Offensive.verdict(rules.comparison_key(name), rules)
+    end
+
+    def test_every_bundled_reserved_word_is_reserved
+      DataFiles::RESERVED.each do |file|
+        expected = file == "impersonation" ? %i[impersonation] : %i[exact impersonation]
+        reserved(file).each do |word|
+          result = Usernames.check(word, separators: ALL_SEPARATORS, length: 1..60)
+          # Entries no name can reach (`.htaccess` starts with a dot) fail a format rule first.
+          next if FORMAT_REASONS.include?(result.reason)
+
+          assert_includes expected, result.rule, "#{file}: #{word} (#{result.reason})"
+        end
+      end
+    end
+
+    def test_every_severe_and_strong_spelling_is_refused_in_its_language
+      %w[en es].each do |locale|
+        offensive(locale).select { |entry| entry["severity"] >= 3 }.each do |entry|
+          [entry["term"], *entry["variants"]].each do |spelling|
+            refute_nil verdict(spelling, offensive: { languages: [locale.to_sym] }), "#{locale}: #{spelling}"
+          end
+        end
+      end
+    end
+
+    def test_mild_spellings_are_refused_only_in_mild_mode
+      entry = offensive("en").find { |candidate| candidate["severity"] <= 2 }
+
+      assert_nil verdict(entry["term"], offensive: { languages: %i[en] })
+      assert_equal :strong, verdict(entry["term"], offensive: { languages: %i[en], severity: :mild })
+    end
+
+    def test_every_allowlist_entry_passes_in_its_language
+      %w[en es].each do |locale|
+        refused = entries("offensive/allowlist/#{locale}.txt").select do |word|
+          verdict(word, offensive: { languages: [locale.to_sym] })
+        end
+
+        assert_empty refused, locale
+      end
+    end
+
+    def test_every_term_exception_passes_in_its_language
+      %w[en es].each do |locale|
+        offensive(locale).each do |entry|
+            assert_nil verdict(word, offensive: { languages: [locale.to_sym] }), "#{locale}: #{entry['term']} / #{word}"
+          end
+        end
+      end
+    end
+
+    def test_the_loader_sees_every_word_with_its_source
+      DataFiles::RESERVED.each do |file|
+        blocks("reserved/#{file}.txt").each do |source, words, _header|
+          words.each do |word|
+            provenance = Reserved.source_of(word)
+
+            refute_nil provenance, word
+            assert_equal source, provenance.source, word if provenance.category.to_s == file
+          end
+        end
+      end
+    end
+  end
+end

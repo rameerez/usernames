@@ -107,6 +107,18 @@ en = en.sort_by { [-_1["severity"], _1["term"]] }.filter_map do |e|
 end
 puts "en: spellings shared between dsojevic ids, kept with the stricter one: #{merged.join(' ')}"
 
+# An exception that is itself a blocked spelling would exempt the very thing a tier refuses:
+# dsojevic lists `spicks` as both a variant and an exception of `spic`, and `blackcock` as an
+# exception of `cock` while it is a strong term of its own. The tier wins; the exception goes.
+spellings = en.flat_map { [_1["term"], *_1["variants"]] }.to_set
+en.each do |e|
+  dropped = e["exceptions"].select { spellings.include?(_1) }
+  next if dropped.empty?
+
+  puts "en: exceptions of #{e['term']} that are blocked spellings, dropped: #{dropped.join(' ')}"
+  e["exceptions"] = e["exceptions"] - dropped
+end
+
 # ================================================================================================
 # es — wooorm/cuss es (MIT) + AllProfanity spanish (MIT), tiered by hand from the research
 # candidates (docs/research/sources/offensive2/lists/severe_candidates/es.tsv). AWAITS REVIEW.

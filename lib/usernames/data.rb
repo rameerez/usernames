@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require "json"
+require "yaml"
+
 module Usernames
   # The word lists that ship in data/, read once per process and frozen.
   #
@@ -20,6 +23,13 @@ module Usernames
     # Matched the way impersonators type them (PRD §9.2).
     IMPERSONATION_FILES = %w[reserved/impersonation.txt].freeze
 
+    # `# source: gitlab (MIT) — GitLab top-level and project wildcard routes`
+    SOURCE_LINE = /\A#\s*source:\s*(?<name>\S+)\s+\((?<licence>[^)]+)\)\s*(?:—\s*(?<reason>.*))?\z/
+
+    # Where one bundled reserved word comes from: its file (:impersonation,
+    # :system, :mailboxes, :web) and the `# source:` comment of its block.
+    Provenance = ::Data.define(:category, :source, :licence, :reason)
+
     class << self
       # What `config.reserved` starts from.
       def reserved
@@ -31,15 +41,49 @@ module Usernames
         @impersonation ||= IMPERSONATION_FILES.flat_map { |file| list(file) }.uniq.freeze
       end
 
+      # { word => Provenance } over every bundled reserved file. The
+      # impersonation file is read first: a word in it and in a mailbox list
+      # (`postmaster`) is matched the stricter way, so that is its source.
+      def reserved_provenance
+        @reserved_provenance ||= (IMPERSONATION_FILES + EXACT_FILES).each_with_object({}) do |file, words|
+          category = File.basename(file, ".txt").to_sym
+          sourced(file).each { |word, source| words[word] ||= Provenance.new(category: category, **source) }
+        end.freeze
+      end
+
       # The generator's vocabulary (PRD §12.1).
       def adjectives
         @adjectives ||= list("words/adjectives.txt")
       end
 
-      # NOTE(p1a): the PRD calls the default nouns ANIMALS; read from
-      # data/words/animals.txt until the generator phase settles the file name.
+      # data/words/animals.txt, published as Usernames::Words::ANIMALS.
       def nouns
         @nouns ||= list("words/animals.txt")
+      end
+
+      # The parsed entries of data/offensive/<locale>.json, or [] for a
+      # language that ships no data.
+      def offensive(locale)
+        (@offensive ||= {})[locale.to_sym] ||= begin
+          path = File.expand_path("offensive/#{locale}.json", ROOT)
+          File.file?(path) ? deep_freeze(JSON.parse(File.read(path))) : [].freeze
+        end
+      end
+
+      # data/offensive/allowlist/<locale>.txt (each line `word # source`).
+      def allowlist(locale)
+        (@allowlist ||= {})[locale.to_sym] ||= list("offensive/allowlist/#{locale}.txt")
+      end
+
+      # data/offensive/hate.yml (PRD §10.3).
+      def hate
+        @hate ||= yaml("offensive/hate.yml")
+      end
+
+      # data/offensive/leet.yml: the digit folds both matchers use, and the
+      # rewrites only the offensive matcher uses.
+      def leet
+        @leet ||= yaml("offensive/leet.yml")
       end
 
       # The entries of one data file, relative to data/ (or an absolute path).
@@ -51,6 +95,39 @@ module Usernames
           entry = line.sub(/#.*/, "").strip
           entry.freeze unless entry.empty?
         end.freeze
+      end
+
+      # [[entry, { source:, licence:, reason: }], …] for one data file: each
+      # entry with the `# source:` comment of the block it sits in (nils for
+      # an entry before any).
+      def sourced(path)
+        path = File.expand_path(path, ROOT)
+        return [] unless File.file?(path)
+
+        source = { source: nil, licence: nil, reason: nil }
+        File.foreach(path, chomp: true).filter_map do |line|
+          if (match = SOURCE_LINE.match(line.strip))
+            source = { source: match[:name], licence: match[:licence], reason: match[:reason] }
+            next
+          end
+          entry = line.sub(/#.*/, "").strip
+          [entry, source] unless entry.empty?
+        end
+      end
+
+      private
+
+      def yaml(relative)
+        path = File.expand_path(relative, ROOT)
+        deep_freeze(File.file?(path) ? YAML.safe_load_file(path) || {} : {})
+      end
+
+      def deep_freeze(value)
+        case value
+        when Hash then value.each_value { |item| deep_freeze(item) }
+        when Array then value.each { |item| deep_freeze(item) }
+        end
+        value.freeze
       end
     end
   end

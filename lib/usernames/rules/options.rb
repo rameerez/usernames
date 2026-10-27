@@ -22,8 +22,10 @@ module Usernames
       ADAPTER_FAILURE_MODES = %i[allow reject].freeze
 
       # A locale code such as :en, :es or :"pt-BR".
-      # NOTE(p1a): checked for shape only. Phase 2 checks it against the
-      # languages data/offensive/ actually ships, once that data exists.
+      # NOTE(p2): still checked for shape only, not against the languages
+      # data/offensive/ ships: a language without data refuses nothing
+      # (hate rules and adapters still apply), so an app can list :pt today
+      # and get its words when they ship. A typo (`:sp`) is silent as a result.
       LANGUAGE = /\A[a-z]{2,3}(?:-[A-Za-z0-9]+)*\z/
 
       OffensiveSettings = ::Data.define(*OFFENSIVE_NAMES)

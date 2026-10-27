@@ -66,15 +66,16 @@ class CheckTest < UsernamesTestCase
     assert_equal :severe, seen.last.offensive.severity
   end
 
-  def test_the_phase_one_content_matchers_allow_everything
-    assert_nil Usernames::Reserved.verdict("admin", Usernames.configuration.rules_for)
-    assert_nil Usernames::Offensive.verdict("admin", Usernames.configuration.rules_for)
+  def test_content_verdicts_reach_the_result
+    assert_equal(%i[username_reserved impersonation], Usernames.check("Ad_min").then { [_1.reason, _1.rule] })
+    assert_equal(%i[username_not_allowed severe], Usernames.check("BigCunt").then { [_1.reason, _1.rule] })
+    assert_equal "is reserved", Usernames.check("Ad_min").message
   end
 
-  def test_generate_and_candidates_for_are_not_available_yet
-    assert_raises(NotImplementedError) { Usernames.generate }
-    assert_raises(NotImplementedError) { Usernames.generate(from: "Jos\u{E9} Garc\u{ED}a") }
-    assert_raises(NotImplementedError) { Usernames.candidates_for("Javi R", count: 5) }
+  def test_generate_and_candidates_for
+    assert_predicate Usernames.check(Usernames.generate), :ok?
+    assert_equal "jose_garcia", Usernames.generate(from: "Jos\u{E9} Garc\u{ED}a")
+    assert_equal "javi_r", Usernames.candidates_for("Javi R", count: 5).first
   end
 
   def test_error_classes
