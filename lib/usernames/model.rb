@@ -48,7 +48,7 @@ module Usernames
     # other record a generated name.
     #
     # And the class helpers, named after the column: `username_available?`,
-    # `suggest_usernames`, `generate_username`, `find_by_username`,
+    # `suggest_usernames`, `generate_username`, `find_by_username` (and `!`),
     # `username_options`, `check_username`, `username_rules_for_browser`
     # (`handle_available?`, `suggest_handles`, … for `has_username :handle`).
     #
@@ -244,12 +244,20 @@ module Usernames
         end
       end
 
-      # User.find_by_username("@Javi") — normalised, then compared as the index compares.
+      # User.find_by_username("@Javi") — normalised, then compared as the index
+      # compares; nil when nobody has it. User.find_by_username!("@Javi") raises
+      # ActiveRecord::RecordNotFound instead, as find_by! does, so a profile
+      # route answers 404.
       def self.find_by(helpers, column)
-        helpers.define_method(:"find_by_#{column.name}") do |value|
+        finder = :"find_by_#{column.name}"
+        helpers.define_method(finder) do |value|
           rules = column.rules
           canonical = rules.normalize(value)
           find_by("#{column.sql(self)} = ?", rules.comparison_key(canonical)) unless canonical.empty?
+        end
+        helpers.define_method(:"#{finder}!") do |value|
+          public_send(finder, value) ||
+            raise(ActiveRecord::RecordNotFound.new("Couldn't find #{name} with #{column.name} #{value.inspect}", name))
         end
       end
 

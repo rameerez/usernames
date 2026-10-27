@@ -258,6 +258,8 @@ get "@:username", to: "profiles#show", as: :profile, format: false,
     constraints: { username: Usernames.route }
 ```
 
+In the controller, `User.find_by_username!(params[:username])` finds `@Javi` as `javi` and raises `ActiveRecord::RecordNotFound` — a 404 — when nobody has the name, as `find_by!` does.
+
 `Usernames.route` is deliberately permissive (`/[A-Za-z0-9._-]+/`): it decides what *routes*, your database decides what *exists*, and your validator decides what can be *registered*. That way an account grandfathered in with a name today's rules would refuse still has a page.
 
 **GitHub-style `/username`** — declare it **last**, after every other route; the gem already reserves your static paths so a new page can't shadow a person.

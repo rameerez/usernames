@@ -398,6 +398,18 @@ class ModelTest < UsernamesTestCase
     assert_nil User.find_by_username("nobody")
   end
 
+  def test_find_by_username_bang_raises_record_not_found
+    user = User.create!(username: "javi", email: "j@example.com")
+
+    assert_equal user, User.find_by_username!("@Javi")
+    error = assert_raises(ActiveRecord::RecordNotFound) { User.find_by_username!("nobody") }
+
+    assert_equal %(Couldn't find User with username "nobody"), error.message
+    assert_equal "User", error.model
+    assert_raises(ActiveRecord::RecordNotFound) { User.find_by_username!("  ") }
+    assert_equal Player.create!(handle: "Javi"), Player.find_by_handle!("JAVI")
+  end
+
   def test_username_available
     User.create!(username: "javi", email: "j@example.com")
 
