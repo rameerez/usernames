@@ -41,7 +41,7 @@ class AvailabilityControllerTest < UsernamesTestCase
     Rails.logger = Logger.new(IO::NULL)
     User.delete_all
     Player.delete_all
-    json_renders!
+    skip_unless_json_encodes
   end
 
   def teardown
@@ -332,13 +332,5 @@ class AvailabilityControllerTest < UsernamesTestCase
     yield
   ensure
     config["action_dispatch.show_exceptions"] = previous
-  end
-
-  # Active Support 7.2's encoder passes json 3's removed `quirks_mode`, so on
-  # that pairing no controller can `render json:` at all.
-  def json_renders!
-    ActiveSupport::JSON.encode({})
-  rescue ArgumentError => e
-    skip "this Active Support cannot encode JSON with this json gem (#{e.message})"
   end
 end

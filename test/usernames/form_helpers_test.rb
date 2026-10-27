@@ -64,7 +64,7 @@ class FormHelpersTest < UsernamesTestCase
     assert_equal "user_username", input["id"]
     assert_equal "user[username]", input["name"]
     assert_equal({ "data-controller" => "username-check", "data-action" => "input->username-check#check",
-                   "data-username-check-rules-value" => User.username_rules_for_browser.to_json,
+                   "data-username-check-rules-value" => JSON.generate(User.username_rules_for_browser),
                    "data-username-check-lowercase-value" => "true",
                    "data-username-check-status-id-value" => "user_username_status",
                    "data-username-check-url-value" => "/usernames/availability",
@@ -215,6 +215,7 @@ class FormHelpersTest < UsernamesTestCase
   end
 
   def test_the_callers_other_data_and_aria_are_kept_and_the_fields_own_values_win
+    skip_unless_json_encodes # Rails encodes a non-String data value as JSON
     input = field(User.new, data: { username_check_delay_value: 500, username_check_url_value: "/elsewhere",
                                     turbo_permanent: true },
                             aria: { label: "Handle" })

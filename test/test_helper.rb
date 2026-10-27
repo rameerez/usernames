@@ -174,6 +174,15 @@ module UsernamesTestHelper
     end
   end
 
+  # Active Support 7.2's encoder passes json 3's removed `quirks_mode`, so on
+  # that pairing nothing in Rails can encode JSON: no `render json:`, no
+  # `to_json`, and so no endpoint or form field to test.
+  def skip_unless_json_encodes
+    ActiveSupport::JSON.encode({})
+  rescue ArgumentError => e
+    skip "this Active Support cannot encode JSON with this json gem (#{e.message})"
+  end
+
   # Captures Rails.logger output for the duration of the block.
   def capture_log
     output = StringIO.new

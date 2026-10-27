@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "json"
+
 module Usernames
   # A username field with live hints and the availability check:
   #
@@ -123,12 +125,14 @@ module Usernames
       private
 
       # What the browser needs for its format hints: the rules (in the model's
-      # words), the case mode and the saved name.
+      # words), the case mode and the saved name. Every value a String, and
+      # the rules encoded by the json gem itself, so rendering a field never
+      # depends on Active Support's JSON encoder.
       def hints(object, model, column)
         {
           "controller" => "username-check",
           "action" => "input->username-check#check",
-          "username-check-rules-value" => model.public_send(:"#{column}_rules_for_browser").to_json,
+          "username-check-rules-value" => JSON.generate(model.public_send(:"#{column}_rules_for_browser")),
           "username-check-lowercase-value" => (model._usernames.fetch(column).mode != :preserve).to_s,
           "username-check-persisted-value" => persisted(object, column)
         }

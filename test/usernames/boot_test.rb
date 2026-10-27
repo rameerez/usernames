@@ -49,19 +49,33 @@ class BootTest < UsernamesTestCase
       "reserved" => Usernames.check("usernames").rule,
       "importmap" => defined?(Importmap) ? true : false
     )
-    begin
+    # Active Support 7.2's encoder passes json 3's removed `quirks_mode`: on
+    # that pairing nothing in Rails can encode JSON, the importmap included.
+    result["json"] = begin
       ActiveSupport::JSON.encode({})
+      true
+    rescue ArgumentError
+      false
+    end
+    if result["json"]
       response = Rack::MockRequest.new(Rails.application)
         .get("/usernames/availability?username=ana&target=user", "HTTP_HOST" => "localhost")
       result["answer"] = [response.status, JSON.parse(response.body)]
-    rescue ArgumentError
-      result["answer"] = "this Active Support cannot encode JSON with this json gem"
     end
     if defined?(Importmap)
       result["pins"] = Rails.application.importmap.packages.keys
-      result["map"] = JSON.parse(Rails.application.importmap.to_json(resolver: ActionController::Base.helpers))["imports"]
-      Rails.application.assets.processor.process
-      result["compiled"] = Dir.glob("usernames/*.js", base: Rails.root.join("public/assets").to_s).sort
+      if result["json"]
+        result["map"] = JSON.parse(Rails.application.importmap.to_json(resolver: ActionController::Base.helpers))["imports"]
+      end
+      result["compiled"] =
+        if result["json"] # compiled for real; the manifest is JSON too
+          Rails.application.assets.processor.process
+          Dir.glob("usernames/*.js", base: Rails.root.join("public/assets").to_s).sort
+        else
+          %w[usernames/index.js usernames/username_check_controller.js].map do |path|
+            Rails.application.assets.load_path.find(path).digested_path.to_s
+          end
+        end
     end
     puts JSON.generate(result)
   RUBY
@@ -84,7 +98,7 @@ class BootTest < UsernamesTestCase
   def assert_the_check_works(result)
     assert_equal({ "controller" => "usernames/availability", "action" => "show" }, result["route"])
     assert_equal "route", result["reserved"], "the endpoint's own first segment is reserved"
-    return if result["answer"].is_a?(String)
+    return unless result["json"]
 
     assert_equal [200, { "state" => "free", "message" => "is available" }], result["answer"]
   end
@@ -105,6 +119,10 @@ class BootTest < UsernamesTestCase
     assert_the_check_works(result)
     assert_includes result["pins"], "usernames"
     assert_includes result["pins"], "usernames/username-check"
+    assert_match %r{\Ausernames/index-\h+\.js usernames/username_check_controller-\h+\.js\z},
+                 result["compiled"].join(" ")
+    skip "this Active Support cannot encode JSON with this json gem" unless result["json"]
+
     assert_match %r{\A/assets/usernames/index-\h+\.js\z}, result["map"]["usernames"]
     assert_match %r{\A/assets/usernames/username_check_controller-\h+\.js\z}, result["map"]["usernames/username-check"]
     assert_equal result["map"].values_at("usernames", "usernames/username-check").map { |path|
