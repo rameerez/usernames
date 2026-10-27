@@ -35,7 +35,7 @@ Nothing changes for a model with `has_username` and no availability check. If yo
 - **"Already your name" is the browser's call now.** The endpoint no longer asks who is signed in: the field carries the record's saved name and shows `unchanged` without asking. A server-side `current_user` check in a copied controller is yours to keep or drop.
 - **Staging needs a cache store that counts.** See *Changed*: a `NullStore` there now turns the endpoint off (503) rather than letting it run unlimited.
 - **Devise drops fields it doesn't know.** If people choose their name at sign-up, permit it: `devise_parameter_sanitizer.permit(:sign_up, keys: [:handle])` and `:account_update`.
-- **New locale key** `usernames.availability.error` ("couldn't be checked just now"; Spanish and Portuguese ship). In a language the gem doesn't ship, the field uses the English text — your app's own English wording of the key, if it has one — until you add the key to that language's locale file; it never shows "Translation missing", with or without I18n fallbacks.
+- **New locale key** `usernames.availability.error` ("couldn't be checked just now"; Spanish and Portuguese ship). In a language the gem doesn't ship, it and `usernames.available` read in English — your app's own English wording, if it has one, else the gem's, even in an app whose available locales leave English out — until you add them to that language's locale file. They never read "Translation missing", with or without I18n fallbacks.
 - **A new record saved with a custom validation context now gets a generated name** (see *Fixed*). If you relied on it staying blank, pass `generate: false` or a condition.
 - `clearable:` defaults to `true`: names can still be cleared, as in 0.1. Pass `clearable: false` to stop that.
 

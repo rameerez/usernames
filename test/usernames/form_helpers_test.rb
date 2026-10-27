@@ -116,6 +116,23 @@ class FormHelpersTest < UsernamesTestCase
     I18n.locale = :en
   end
 
+  # A French-only app: with English left out of the available locales, I18n
+  # never loads it at all. The field still renders, with the gem's English.
+  def test_the_error_message_on_a_backend_that_never_loaded_english
+    available = I18n.available_locales
+    I18n.available_locales = %i[fr]
+    I18n.locale = :fr
+    I18n.backend.reload!
+    I18n.backend.store_translations(:fr, usernames: { available: "est disponible" })
+
+    refute I18n.backend.exists?(:en, :error, scope: %i[usernames availability]), "English was never loaded"
+    assert_equal "couldn't be checked just now", field(User.new)["data-username-check-error-message-value"]
+  ensure
+    I18n.available_locales = available
+    I18n.locale = :en
+    I18n.backend.reload!
+  end
+
   def test_a_preserve_mode_column
     input = field(Player.new, :handle)
 

@@ -81,8 +81,6 @@ module Usernames
 
     NESTED = %w[data aria].freeze
 
-    ERROR_MESSAGE = %i[usernames availability].freeze
-
     MISSING_TARGET_LOGGED = Concurrent::AtomicBoolean.new(false)
 
     class << self
@@ -160,14 +158,10 @@ module Usernames
           "username-check-error-message-value" => error_message }
       end
 
-      # In the page's language, or — in one the app translates the gem into
-      # but hasn't given this key yet — in English (the app's own English
-      # wording of it, if it has one), never "Translation missing". Read from
-      # the backend, so it holds where English isn't an available locale.
+      # In the page's language, else in English, never "Translation missing"
+      # (see Usernames::Locale).
       def error_message
-        I18n.t(:error, scope: ERROR_MESSAGE, raise: true)
-      rescue I18n::MissingTranslationData
-        I18n.backend.translate(:en, :error, scope: ERROR_MESSAGE)
+        Locale.t(:usernames, :availability, :error)
       end
 
       # Through the app's route helper (`main_app` from inside an engine's

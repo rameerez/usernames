@@ -26,6 +26,7 @@ require_relative "usernames/comparison"
 require_relative "usernames/unique_violation"
 require_relative "usernames/model"
 require_relative "usernames/targets"
+require_relative "usernames/locale"
 require_relative "usernames/engine" if defined?(Rails::Engine)
 
 module Usernames

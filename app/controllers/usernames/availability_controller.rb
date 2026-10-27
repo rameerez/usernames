@@ -159,7 +159,7 @@ module Usernames
       elsif FORMAT_FAILURES.include?(result.reason)
         { state: "invalid", message: result.message }
       elsif result.ok? && @model.public_send(:"#{@column}_available?", result.canonical)
-        { state: "free", message: I18n.t(:available, scope: :usernames) }
+        { state: "free", message: Locale.t(:usernames, :available) }
       else
         { state: "taken", message: message(:taken) }
       end
