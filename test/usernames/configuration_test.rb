@@ -464,18 +464,31 @@ class ConfigurationTest < UsernamesTestCase
   # The whole gem, copied with one data file broken: requiring it fails,
   # naming the file, before a single name is checked.
   def test_a_broken_install_fails_when_the_gem_loads
-    {
-      "reserved/web.txt" => nil,
-      "offensive/en.json" => %([{"term": "x", "severity": 9}]),
-      "offensive/leet.yml" => "digits: {}\n",
-      "offensive/es.json" => "[{"
-    }.each do |file, content|
+    [
+      ["reserved/web.txt", nil],
+      ["offensive/en.json", %([{"term": "x", "severity": 9}])],
+      ["offensive/en.json", %([{"term": "x", "severity": 2, "variants": "x", "tags": [], "exceptions": []}])],
+      ["offensive/es.json", %([{"term": "x", "severity": 2}])],
+      ["offensive/es.json", "[{"],
+      ["offensive/allowlist/en.txt", "# nothing\n"],
+      ["offensive/leet.yml", "digits: {}\n"],
+      ["offensive/hate.yml", "always: []\n"]
+    ].each do |file, content|
       output, status = require_a_copy_with(file, content)
 
       refute_predicate status, :success?, "#{file}: the gem loaded"
-      assert_match(%r{data/#{Regexp.escape(file)} (is missing|is not a list|needs|can't be parsed)}, output)
+      assert_match(%r{data/#{Regexp.escape(file)} (is missing|has no entries|is not a list|needs|can't be parsed)}, output)
       assert_match(/\(Usernames::DataError\)/, output)
     end
+  end
+
+  # An empty offensive list parses, and would screen nothing: `fuck` would
+  # pass while `admin` was still reserved.
+  def test_an_empty_offensive_list_fails_when_the_gem_loads
+    output, status = require_a_copy_with("offensive/en.json", "[]")
+
+    refute_predicate status, :success?
+    assert_match(%r{data/offensive/en\.json has no entries\..*\(Usernames::DataError\)}, output)
   end
 
   def test_the_bundled_data_loads

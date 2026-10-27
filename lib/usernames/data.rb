@@ -17,6 +17,9 @@ module Usernames
   module Data
     ROOT = File.expand_path("../../data", __dir__)
 
+    # The lists every offensive entry carries, besides its term and severity.
+    TERM_LISTS = %w[variants tags exceptions].freeze
+
     # Matched exactly: system words, mailboxes, web paths.
     EXACT_FILES = %w[reserved/system.txt reserved/mailboxes.txt reserved/web.txt].freeze
 
@@ -72,12 +75,15 @@ module Usernames
       end
 
       # The parsed entries of data/offensive/<locale>.json: each a Hash with
-      # a "term" and a "severity" from 1 to 4.
+      # a "term", a "severity" from 1 to 4, and lists of "variants", "tags"
+      # and "exceptions". An empty list is as broken as a missing file: it
+      # would screen nothing in that language.
       def offensive(locale)
         (@offensive ||= {})[locale.to_sym] ||= read("offensive/#{locale}.json") do |path|
           entries = JSON.parse(File.read(path))
+          broken!(path, "has no entries") if entries == []
           unless entries.is_a?(Array) && entries.all? { |entry| term?(entry) }
-            broken!(path, "is not a list of {\"term\", \"severity\" 1–4} entries")
+            broken!(path, "is not a list of {term, severity 1–4, variants, tags, exceptions} entries")
           end
 
           deep_freeze(entries)
@@ -171,7 +177,12 @@ module Usernames
 
       def term?(entry)
         entry.is_a?(Hash) && entry["term"].is_a?(String) && !entry["term"].empty? &&
-          (1..4).cover?(entry["severity"])
+          entry["severity"].is_a?(Integer) && (1..4).cover?(entry["severity"]) &&
+          term_lists?(entry) && [nil, true, false].include?(entry["segment_only"])
+      end
+
+      def term_lists?(entry)
+        TERM_LISTS.all? { |key| entry[key].is_a?(Array) && entry[key].all?(String) }
       end
 
       def broken!(path, problem)
