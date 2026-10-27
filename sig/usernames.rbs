@@ -1,5 +1,6 @@
 # The public surface of the usernames gem: the module functions, the result
-# of a check, the errors, and the has_username macro.
+# of a check, the errors, the has_username macro, the form helpers, the
+# availability routing method and its configuration.
 module Usernames
   VERSION: String
   ROUTE: Regexp
@@ -16,7 +17,7 @@ module Usernames
   class DataError < Error
   end
 
-  type rule = :impersonation | :exact | :route | :custom | :severe | :strong | :hate_number | :adapter
+  type rule = :impersonation | :exact | :route | :custom | :reserved_if | :severe | :strong | :hate_number | :adapter
 
   # Usernames.check("Ad_min") # => #<data Usernames::Result ok?=false, reason=:username_reserved, …>
   class Result
@@ -52,24 +53,50 @@ module Usernames
     attr_accessor reserved: Array[String]
     attr_accessor forbidden: Array[String]
     attr_accessor allowed: Array[String]
+    attr_accessor reserved_if: (^(String) -> boolish)?
     attr_accessor on_adapter_failure: :allow | :reject
     attr_accessor unique_index: (String | Symbol)?
     def offensive: () -> untyped
     def generator: () -> untyped
+    def availability: () -> Availability
     def generator=: (untyped callable) -> untyped
     def validate!: () -> self
+
+    # config.availability: the built-in "is this name free?" endpoint.
+    class Availability
+      attr_accessor path: (String | false)?
+      # { "user" => "User#handle" }: alias => "Model#column"
+      attr_accessor targets: Hash[String, String]
+      attr_accessor parent_controller: String?
+      attr_accessor rate_limit: { to: Integer, within: Numeric }
+      attr_accessor rate_limit_store: untyped
+    end
   end
 
-  # has_username(column = :username, required: false, generate: nil, **rules)
+  # f.username_field / f.username_status, on every ActionView form builder.
+  module FormBuilder
+    def username_field: (?(Symbol | String) column, ?availability: bool, ?static: bool, **untyped html) -> String
+    def username_status: (?(Symbol | String) column, **untyped html) -> String
+  end
+
+  # `usernames_availability` in config/routes.rb, above a catch-all.
+  module Routes
+    def usernames_availability: (?String? path) -> void
+  end
+
+  # has_username(column = :username, required: false, generate: nil, seed: nil, clearable: true, **rules)
   #
   # required: and generate: take true, false, a method name or a proc,
-  # evaluated on the record like Rails' if:. generate: nil (the default)
-  # means: wherever a name is not required.
+  # evaluated on the record like Rails' if:; required: also takes
+  # { on: context } (or an Array of contexts). generate: nil (the default)
+  # means: wherever a name is not required. seed: is a method name or a
+  # proc whose value a generated name starts from; clearable: false
+  # refuses saving a saved name blank.
   #
   # Also defines, named after the column: <column>_available?, suggest_<column>s,
   # generate_<column>, find_by_<column>, find_by_<column>!, <column>_options, check_<column>,
   # <column>_rules_for_browser, and <column>_generated? on instances.
   module Model
-    def has_username: (?(Symbol | String) column, ?required: (bool | Symbol | Proc), ?generate: (bool | Symbol | Proc)?, **untyped rules) -> void
+    def has_username: (?(Symbol | String) column, ?required: (bool | Symbol | Proc | { on: Symbol | Array[Symbol] }), ?generate: (bool | Symbol | Proc)?, ?seed: (Symbol | Proc)?, ?clearable: bool, **untyped rules) -> void
   end
 end

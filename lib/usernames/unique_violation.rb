@@ -49,7 +49,6 @@ module Usernames
       # connection is used. `conflict` answers whether another row has the
       # record's name under the gem's comparison; without one, an ambiguous
       # SQLite message is not ours.
-      # rubocop:disable-next Metrics/ParameterLists -- each is one fact about the save, all by keyword
       def of?(error, table:, column:, rules: Usernames.configuration.rules_for, connection: nil, conflict: nil)
         target = Target.new(table: table.to_s, bare_table: table.to_s.split(".").last, column: column.to_s,
                             index: rules.unique_index&.to_s, mode: rules.case, connection: connection,

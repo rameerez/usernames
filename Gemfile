@@ -19,6 +19,10 @@ group :test do
   gem "simplecov", require: false
   # Reads test/fixtures/username_table.csv; a bundled (not default) gem since Ruby 3.4.
   gem "csv"
+  # The asset side of the engine, booted for real in a fresh app by
+  # test/usernames/boot_test.rb (and never required by the main test app).
+  gem "importmap-rails", require: false
+  gem "propshaft", require: false
   gem "rubocop", require: false
   gem "rubocop-minitest", require: false
   gem "rubocop-performance", require: false

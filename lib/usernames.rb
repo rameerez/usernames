@@ -20,11 +20,14 @@ require_relative "usernames/words"
 require_relative "usernames/generator"
 require_relative "usernames/candidates"
 require_relative "usernames/rules"
+require_relative "usernames/routes"
 require_relative "usernames/configuration"
 require_relative "usernames/validator"
 require_relative "usernames/comparison"
 require_relative "usernames/unique_violation"
 require_relative "usernames/model"
+require_relative "usernames/targets"
+require_relative "usernames/locale"
 require_relative "usernames/engine" if defined?(Rails::Engine)
 
 module Usernames

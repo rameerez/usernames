@@ -364,4 +364,29 @@ class FormatRulesTest < UsernamesTestCase
     assert_equal "can't end like a file name (.json, .png…)", Usernames.check("john.json", separators: %w[_ .]).message
     assert_equal "is too short (minimum is 1 character)", Usernames.check("", length: 1..5).message
   end
+
+  # The format reasons, derived from the rules themselves: every reason a
+  # format check can give under any options, in the order they are checked,
+  # and nothing else.
+  def test_format_reasons_are_what_the_format_rules_give
+    produced = [{}, { separators: %w[_ . -], first_character: :letter }, { separators: [] }, { case: :preserve },
+                { separators: %w[.], edge_separators: true }].flat_map do |options|
+      Usernames.configuration.rules_for(**options).format_checks.map(&:first)
+    end
+
+    assert_equal produced.uniq.sort, Usernames::Rules.format_reasons.sort
+    assert_equal Usernames.configuration.rules_for.format_checks.map(&:first),
+                 Usernames::Rules.format_reasons & Usernames.configuration.rules_for.format_checks.map(&:first),
+                 "in the order the rules check"
+    assert_predicate Usernames::Rules.format_reasons, :frozen?
+  end
+
+  # Every format failure the fixture table expects is one; no content one is.
+  def test_the_table_agrees_with_the_format_reasons
+    reasons = username_table.map { |_input, expected, _options| expected } - [:ok]
+    content = %i[username_reserved username_not_allowed]
+
+    assert_empty reasons - content - Usernames::Rules.format_reasons
+    assert_empty content & Usernames::Rules.format_reasons
+  end
 end

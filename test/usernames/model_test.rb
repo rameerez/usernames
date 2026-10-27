@@ -132,7 +132,8 @@ class ModelTest < UsernamesTestCase
     assert_raises(Usernames::ConfigurationError) { Class.new(ApplicationRecord) { has_username length: 3 } }
     error = assert_raises(Usernames::ConfigurationError) { Class.new(ApplicationRecord) { has_username required: "yes" } }
 
-    assert_match(/required: must be true, false, a method name or a proc \(got "yes"\)/, error.message)
+    assert_match(/required: must be true, false, a method name, a proc or \{ on: :context \} \(got "yes"\)/,
+                 error.message)
     error = assert_raises(Usernames::ConfigurationError) { Class.new(ApplicationRecord) { has_username generate: 1 } }
 
     assert_match(/generate: must be true, false, a method name or a proc/, error.message)

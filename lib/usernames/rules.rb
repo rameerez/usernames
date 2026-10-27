@@ -51,6 +51,14 @@ module Usernames
       defined?(Mime::EXTENSION_LOOKUP) ? Mime::EXTENSION_LOOKUP.keys.map(&:to_s) : []
     end
 
+    # Every reason a format rule can give, in the order the rules check:
+    # those of rules with every optional format rule switched on (all three
+    # separators, a letter first), so a new rule is in it the day it exists.
+    def self.format_reasons
+      @format_reasons ||= Configuration.new.rules_for(separators: Options::SEPARATORS, first_character: :letter)
+        .format_checks.map(&:first).freeze
+    end
+
     attr_reader :format_checks
 
     def initialize(**options)
@@ -143,7 +151,7 @@ module Usernames
     # Reserved words are matched on the comparison key alone; the offensive
     # matcher also reads the case the name was typed in (Offensive.verdict).
     def content_failure(string)
-      if (rule = Reserved.verdict(comparison_key(string), self))
+      if (rule = Reserved.verdict(comparison_key(string), self, string))
         Failure.new(reason: :username_reserved, rule: rule)
       elsif (rule = Offensive.verdict(string, self))
         Failure.new(reason: :username_not_allowed, rule: rule)

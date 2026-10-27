@@ -12,10 +12,9 @@ module Usernames
         say "\nTo complete the setup:"
         say "  1. Run 'rails db:migrate'#{migration_summary}."
         say "  2. Add `#{macro_line}` to your #{model_name} model."
-        say "  3. Optionally, run 'rails generate usernames:availability' for a live \"is this name free?\" " \
-            "check on your sign-up form."
         say "\nUsernames are unique from the moment the index exists: the database decides, " \
             "with the same comparison the gem uses everywhere."
+        integration_message
       end
 
       # On a populated column no index is a promise — not even one already in
@@ -35,7 +34,47 @@ module Usernames
         say "  4. Add `#{macro_line}` to your #{model_name} model. Existing names that break today's rules " \
             "keep working; only a change is validated."
         say "  See \"Adopting an existing column\" in the README."
+        integration_message
       end
+
+      # Then, in the forms: the field and its status, and the one line of
+      # JavaScript behind them.
+      def integration_message
+        say "\nThen, in any form for a #{model_name}, a username field that checks names as people type:"
+        say "  <%= f.label :#{column} %> <%= f.username_field :#{column} %> <%= f.username_status :#{column} %>"
+        say "  #{JAVASCRIPT_STEPS.fetch(javascript_setup)}"
+        devise_message if defined?(::Devise)
+        say "  In production, the check counts requests in Rails.cache: give it a shared store (Solid Cache, " \
+            "Redis, Memcached). It answers 503 until one counts."
+      end
+
+      # Devise permits only its own attributes: without these lines a sign-up
+      # form says the name is free, and the save drops it.
+      def devise_message
+        say "  Devise drops attributes it doesn't know, so permit :#{column} where people choose or change " \
+            "it (in ApplicationController, before_action ... if: :devise_controller?):"
+        say "    devise_parameter_sanitizer.permit(:sign_up, keys: [:#{column}])"
+        say "    devise_parameter_sanitizer.permit(:account_update, keys: [:#{column}])"
+      end
+
+      JAVASCRIPT_STEPS = {
+        ready: %(Added `import "usernames"` to app/javascript/application.js.),
+        imported: %(app/javascript/application.js already has `import "usernames"`.),
+        no_importmap: "No importmap here: run 'rails generate usernames:javascript' to copy the Stimulus controller " \
+                      "into app/javascript/controllers (then it is yours to keep up to date).",
+        no_entrypoint: %(No app/javascript/application.js: add `import "usernames"` to your importmap entrypoint.),
+        no_stimulus: "No app/javascript/controllers/application.js (stimulus-rails' Stimulus setup): the field " \
+                     "works as a plain input; with stimulus-rails, add `import \"usernames\"` for the live check.",
+        uncertain_source: "Didn't add `import \"usernames\"`: app/javascript/controllers/application.js has " \
+                          "constructs the installer won't guess at (template interpolation or a regular " \
+                          "expression). Add the line yourself if that file exports `application`.",
+        no_application_export: "Didn't add `import \"usernames\"`: app/javascript/controllers/application.js " \
+                               "doesn't export the Stimulus application by the name `application` " \
+                               "(`export { application }`), which it imports, and a missing export would stop " \
+                               "app/javascript/application.js loading at all. Export it under that name and add the " \
+                               "line, or register \"usernames/username-check\" on your application yourself."
+      }.freeze
+      private_constant :JAVASCRIPT_STEPS
 
       def index_doubt
         return "the unique index isn't trustworthy yet (it may not even be addable)" if add_index?

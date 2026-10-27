@@ -9,7 +9,7 @@ module Usernames
     module Options
       NAMES = %i[
         length separators edge_separators case first_character reserve_routes app_name
-        reserved forbidden allowed offensive on_adapter_failure generator unique_index
+        reserved forbidden allowed reserved_if offensive on_adapter_failure generator unique_index
       ].freeze
 
       OFFENSIVE_NAMES = %i[severity languages allowed adapters].freeze
@@ -53,6 +53,7 @@ module Usernames
         @reserved = valid_words(:reserved, options.fetch(:reserved))
         @forbidden = valid_words(:forbidden, options.fetch(:forbidden))
         @allowed = valid_words(:allowed, options.fetch(:allowed))
+        @reserved_if = valid_callable(:reserved_if, options.fetch(:reserved_if), "->(name) { … }")
         @on_adapter_failure = one_of(:on_adapter_failure, options.fetch(:on_adapter_failure), ADAPTER_FAILURE_MODES)
       end
 
@@ -145,6 +146,13 @@ module Usernames
 
       # nil detects the name from the Rails application; false opts out; a
       # String names it explicitly (an app whose brand is not its module name).
+      # nil, or anything that answers `call`.
+      def valid_callable(name, value, example)
+        invalid!(name, value, "nil or a callable such as #{example}") unless value.nil? || value.respond_to?(:call)
+
+        value
+      end
+
       def valid_app_name(value)
         valid = value.nil? || value == false || (value.is_a?(String) && !value.strip.empty?)
         invalid!(:app_name, value, "a String, false to opt out, or nil to detect it") unless valid

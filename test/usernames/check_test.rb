@@ -36,7 +36,7 @@ class CheckTest < UsernamesTestCase
   # the reserved or offensive matchers.
   def test_content_rules_run_only_on_well_formed_names
     asked = []
-    record = ->(key, _rules) { (asked << key) && nil }
+    record = ->(key, _rules, *) { (asked << key) && nil }
 
     Usernames::Reserved.stub(:verdict, record) do
       Usernames::Offensive.stub(:verdict, record) do
@@ -62,13 +62,15 @@ class CheckTest < UsernamesTestCase
     seen = nil
     reserved = nil
     verdict = Usernames::Reserved.method(:verdict)
-    Usernames::Reserved.stub(:verdict, ->(key, rules) { (reserved = key) && verdict.call(key, rules) }) do
+    Usernames::Reserved.stub(:verdict, lambda { |key, rules, name|
+      (reserved = [key, name]) && verdict.call(key, rules, name)
+    }) do
       Usernames::Offensive.stub(:verdict, ->(name, rules) { (seen = [name, rules]) && nil }) do
         Usernames.check("JaVi", case: :preserve, offensive: { severity: :severe })
       end
     end
 
-    assert_equal "javi", reserved
+    assert_equal %w[javi JaVi], reserved, "the key for the lists, the name as stored for config.reserved_if"
     assert_equal "JaVi", seen.first
     assert_equal :severe, seen.last.offensive.severity
   end
