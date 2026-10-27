@@ -151,9 +151,16 @@ module Usernames
       end
 
       # Whether a RecordNotUnique raised while saving a record of `on` came
-      # from this column's unique index.
+      # from this column's unique index, read on the connection the save is
+      # using. with_connection, not lease_connection: inside a scoped
+      # checkout (a thread or job wrapped in `with_connection`),
+      # lease_connection would turn it into a permanent lease, and the
+      # connection would stay checked out after the block, held by a thread
+      # that may already be gone.
       def violated_by?(error, on)
-        UniqueViolation.of?(error, table: on.table_name, column: name, rules: rules, connection: on.lease_connection)
+        on.with_connection do |connection|
+          UniqueViolation.of?(error, table: on.table_name, column: name, rules: rules, connection: connection)
+        end
       end
 
       private

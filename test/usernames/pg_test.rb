@@ -70,7 +70,13 @@ class PostgresTest < UsernamesTestCase
     end
     saves.size.times { arrived.pop }
     saves.size.times { release << true }
-    threads.map(&:value)
+    results = threads.map(&:value)
+    # Each racer checked its connection out for the block only: none may be
+    # left leased to a finished thread, waiting for the pool to reap it.
+    leased = ActiveRecord::Base.connection_pool.connections.count { |held| held.in_use? && held.owner != Thread.current }
+
+    assert_equal 0, leased, "a racer's connection outlived its with_connection block"
+    results
   ensure
     PostgresRacer.gate = nil
   end
