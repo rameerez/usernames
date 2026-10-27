@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "test_helper"
+require "usernames/audit"
 
 # Comparison::IndexContract against indexes the database itself reads back:
 # what the installer, the audit and UniqueViolation accept as "the index that
@@ -105,7 +106,39 @@ class IndexContractTest < UsernamesTestCase
   def test_a_column_with_a_linguistic_collation
     create_table(collation: LINGUISTIC.delete('"'))
 
-    assert_match(/compares under collation "#{LINGUISTIC.delete('"')}"/, verdict(:username))
+    assert_match(/\Ais on a column compared under collation "#{LINGUISTIC.delete('"')}"/, verdict(:username))
+  end
+
+  # In lowercase mode the queries compare the column under its own
+  # collation, so a byte-wise collation on the index alone is not enough.
+  def test_a_bytewise_index_on_a_linguistic_column
+    create_table(collation: LINGUISTIC.delete('"'))
+
+    assert_match(/\Ais on a column compared under collation "#{LINGUISTIC.delete('"')}", not byte by byte\z/,
+                 verdict("username COLLATE #{POSTGRESQL ? '"C"' : 'BINARY'}"))
+  end
+
+  # The schema as written by hand: the index takes javi and JAVI as two
+  # names, while the query the gem asks finds both.
+  def test_a_binary_index_on_a_nocase_column_is_not_the_contract
+    skip "SQLite only" if POSTGRESQL
+    connection.drop_table(TABLE)
+    connection.execute("CREATE TABLE #{TABLE} (id INTEGER PRIMARY KEY, username VARCHAR COLLATE NOCASE)")
+    connection.execute("CREATE UNIQUE INDEX binary_on_nocase ON #{TABLE} (username COLLATE BINARY)")
+    connection.execute("INSERT INTO #{TABLE} (username) VALUES ('javi'), ('JAVI')")
+
+    assert_equal 2, connection.select_value("SELECT count(*) FROM #{TABLE} WHERE username = 'javi'")
+    index = connection.indexes(TABLE).find { |each| each.name == "binary_on_nocase" }
+
+    assert_match(/compared under collation "NOCASE"/, contract.violation(index))
+    audit = StringIO.new
+    Usernames::Audit.new(Class.new(ActiveRecord::Base) { self.table_name = TABLE.to_s }.tap do |model|
+      model.define_singleton_method(:name) { "ContractUser" }
+    end).report(audit)
+
+    assert_match(/VARCHAR, COLLATE NOCASE: the contract is SQLite's default BINARY/, audit.string)
+    assert_match(/binary_on_nocase \(unique on username\) — is on a column compared under collation "NOCASE"/,
+                 audit.string)
   end
 
   def test_preserve_mode_on_postgresql_ignores_the_columns_collation

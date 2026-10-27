@@ -50,7 +50,13 @@ module Usernames
 
         # Every name in `sql`, keyword or not, as a Column.
         def names(sql)
-          tokens(sql).filter_map { |kind, text| Column.new(text, kind == :identifier) if NAMES.include?(kind) }
+          tokens(sql).filter_map { |token| name(token) }
+        end
+
+        # A token as a Column, when it is a name.
+        def name(token)
+          kind, text = token
+          Column.new(text, kind == :identifier) if NAMES.include?(kind)
         end
 
         # [kind, text] pairs: :identifier (quoted, unquoted), :word (bare),

@@ -33,8 +33,11 @@ module Usernames
     #   are unique indexes, but not on the identity.
     # * byte-wise: a `COLLATE NOCASE` index on SQLite, or a PostgreSQL index
     #   under a linguistic collation, decides "the same name" differently
-    #   from Ruby. On PostgreSQL that is the index's own collation, else the
-    #   column's, else the database's.
+    #   from Ruby. And in every mode but PostgreSQL's preserve (whose
+    #   expression carries its own COLLATE "C"), the queries compare the
+    #   column under the column's collation, so that one has to compare
+    #   bytes too: a BINARY index on a NOCASE column takes `javi` and `JAVI`
+    #   while `WHERE username = 'javi'` finds both.
     # * valid: PostgreSQL keeps an interrupted CREATE INDEX CONCURRENTLY as
     #   an invalid index that enforces nothing.
     class IndexContract
@@ -84,6 +87,21 @@ module Usernames
         return "isn't valid (an interrupted concurrent build enforces nothing)" if index.try(:valid?) == false
 
         key_violation(index) || predicate_violation(index) || collation_violation(index)
+      end
+
+      # The collation the column itself compares under (nil: SQLite's
+      # default BINARY). On PostgreSQL a column without one has the
+      # database's. SQLite keeps its CREATE TABLE as written, and Active
+      # Record reads a collation back from it only when quoted — to it
+      # `username VARCHAR COLLATE NOCASE` has none — so there the definition
+      # itself is read.
+      def column_collation
+        found = @connection.columns(table).find { |each| each.name == column }&.collation
+        return found if found
+        return sqlite_column_collation if adapter == :sqlite
+        return unless postgresql?
+
+        @connection.select_value("SELECT datcollate FROM pg_database WHERE datname = current_database()")
       end
 
       # Whether `index` involves the column at all, so the audit lists it.
@@ -145,29 +163,48 @@ module Usernames
         "only covers rows WHERE #{index.where}"
       end
 
+      # The index's own collations, then the column's: in every mode but
+      # PostgreSQL's preserve the queries compare the column under its own
+      # collation, whatever the index says.
       def collation_violation(index)
-        collation = effective_collation(index)
-        return if collation.nil? || self.class.bytewise?(adapter, collation)
+        own = collations_in(index_sql(index)).find { |name| !self.class.bytewise?(adapter, name) }
+        return "compares under collation #{own.inspect}, not byte by byte" if own
 
-        "compares under collation #{collation.inspect}, not byte by byte"
-      end
+        collation = column_collation
+        return if self.class.column_collation_ok?(adapter, mode, collation)
 
-      # What the index compares under. In preserve mode on PostgreSQL the key
-      # itself is `lower(column COLLATE "C")` (checked above), so only an
-      # extra collation on the index could change it.
-      def effective_collation(index)
-        own = collations_in(index_sql(index)).reject { |name| mode == :preserve && postgresql? && name.casecmp?("C") }
-        return own.first if own.any?
-        return if mode == :preserve && postgresql?
-
-        column_collation
+        "is on a column compared under collation #{collation.inspect}, not byte by byte"
       end
 
       # Every name that follows a COLLATE in the index's own SQL.
       def collations_in(sql)
-        Expression.tokens(sql).each_cons(2).filter_map do |(kind, text), (_, name)|
+        tokens = sql.is_a?(Array) ? sql : Expression.tokens(sql)
+        tokens.each_cons(2).filter_map do |(kind, text), (_, name)|
           name if kind == :word && text.casecmp?("collate")
         end
+      end
+
+      def sqlite_column_collation
+        sql = @connection.select_value("SELECT sql FROM sqlite_master WHERE type = 'table' " \
+                                       "AND name = #{@connection.quote(table.split('.').last)}")
+        definitions = column_definitions(Expression.tokens(sql))
+        definition = definitions.find { |tokens| Expression.name(tokens.first)&.named?(column) }
+        collations_in(definition.to_a).last
+      end
+
+      # The comma-separated definitions inside CREATE TABLE's parentheses,
+      # each as its tokens.
+      def column_definitions(tokens)
+        definitions = [[]]
+        depth = 0
+        tokens.each do |token|
+          depth -= 1 if token == [:symbol, ")"]
+          if depth == 1 && token == [:symbol, ","] then definitions << []
+          elsif depth >= 1 then definitions.last << token
+          end
+          depth += 1 if token == [:symbol, "("]
+        end
+        definitions
       end
 
       # The index as the database itself prints it: Active Record reads back
@@ -182,15 +219,6 @@ module Usernames
           @connection.select_value("SELECT pg_get_indexdef(#{@connection.quote(@connection.quote_table_name(qualified))}" \
                                    "::regclass)")
         end
-      end
-
-      # The column's own collation; on PostgreSQL a column without one has
-      # the database's.
-      def column_collation
-        found = @connection.columns(table).find { |each| each.name == column }&.collation
-        return found if found || !postgresql?
-
-        @connection.select_value("SELECT datcollate FROM pg_database WHERE datname = current_database()")
       end
     end
   end

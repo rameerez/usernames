@@ -96,9 +96,9 @@ module Usernames
     end
 
     def type_and_collation(definition)
-      collation = definition.collation
+      collation = contract.column_collation
       case adapter
-      when :postgresql then postgresql_column(definition.sql_type, collation || database_collation)
+      when :postgresql then postgresql_column(definition.sql_type, collation)
       when :mysql then expect_collation(definition.sql_type, collation, "utf8mb4_bin")
       else sqlite_column(definition.sql_type, collation)
       end
@@ -111,34 +111,37 @@ module Usernames
       end
 
       problem("#{type} is not text or character varying") unless POSTGRESQL_TYPES.match?(type)
-      # Preserve mode compares lower(column COLLATE "C"): the explicit
-      # collation wins, so the column's own one only decides ORDER BY.
-      return ok(%(#{type}, collation #{collation.inspect} (compared through COLLATE "C"))) if mode == :preserve
-
-      if collation == "C"
-        ok %(#{type}, collation "C")
-      else
+      if !column_collation_ok?(:postgresql, collation)
         problem(%(#{type}, collation #{collation.inspect}: equality and lower() follow it; set collation: "C"))
+        problem(%(collation #{collation.inspect} is nondeterministic: it can ignore case or punctuation)) unless
+          deterministic?(collation)
+      elsif mode == :preserve
+        # lower(column COLLATE "C"): the explicit collation wins, so the
+        # column's own one only decides ORDER BY.
+        ok %(#{type}, collation #{collation.inspect} (compared through COLLATE "C"))
+      else
+        ok %(#{type}, collation #{collation.inspect})
       end
-      problem(%(collation #{collation.inspect} is nondeterministic: it can ignore case or punctuation)) unless
-        deterministic?(collation)
     end
 
     def expect_collation(type, collation, expected)
-      return ok("#{type}, collation #{expected}") if collation == expected
+      return ok("#{type}, collation #{expected}") if column_collation_ok?(:mysql, collation)
 
       problem("#{type}, collation #{collation.inspect}: set collation: #{expected.inspect}, a byte-wise comparison")
     end
 
     # SQLite's default BINARY is the contract; NOCASE (or any custom one) is not.
     def sqlite_column(type, collation)
-      return ok("#{type}, default BINARY collation") if collation.nil? || collation.casecmp?("binary")
+      return ok("#{type}, default BINARY collation") if column_collation_ok?(:sqlite, collation)
 
       problem("#{type}, COLLATE #{collation}: the contract is SQLite's default BINARY")
     end
 
-    def database_collation
-      connection.select_value("SELECT datcollate FROM pg_database WHERE datname = current_database()")
+    # The index verifier's own rule and its reading of the column's
+    # collation (Comparison::IndexContract), so the column check here and
+    # the index verdict below can never disagree.
+    def column_collation_ok?(adapter, collation)
+      Comparison::IndexContract.column_collation_ok?(adapter, mode, collation)
     end
 
     def deterministic?(collation)
