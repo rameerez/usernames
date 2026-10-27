@@ -50,6 +50,21 @@ class PackagingTest < UsernamesTestCase
     assert_includes contents, "LICENSE.txt"
   end
 
+  # The shipped code explains itself: no pointer into the unpublished
+  # design documents (section numbers, decision ids, phase notes), which a
+  # reader of the gem — or of a file a generator copied into their app —
+  # could never follow.
+  def test_shipped_code_never_points_into_unpublished_documents
+    pointers = /PRD|§|\bD-\d+\b|\bR\d-\d+\b|NOTE\(p|research \d+/
+    found = contents.grep(%r{\A(lib|config|sig)/}).flat_map do |file|
+      File.readlines(File.join(ROOT, file)).each_with_index.filter_map do |line, index|
+        "#{file}:#{index + 1}" if line.match?(pointers)
+      end
+    end
+
+    assert_empty found
+  end
+
   def test_leaves_development_files_out
     %w[docs/ test/ script/ bin/ gemfiles/ .github/].each do |prefix|
       assert_empty contents.grep(/\A#{Regexp.escape(prefix)}/), "#{prefix} is not packaged"

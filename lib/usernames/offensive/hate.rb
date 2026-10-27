@@ -2,7 +2,7 @@
 
 module Usernames
   module Offensive
-    # Rule c (PRD §10.3): hate tokens and numbers, from data/offensive/hate.yml.
+    # Rule c: hate tokens and numbers, from data/offensive/hate.yml.
     #
     # A bare number is not evidence. `88` is a birth year (`mike88`), ham
     # radio's "love and kisses" and a lucky number; `31488210` is a phone
@@ -39,8 +39,8 @@ module Usernames
         end
 
         # `x1488`, `14_88`, `1.488` — but never inside a longer run.
-        # NOTE(p2): "two parts joined by one separator" is read as the number
-        # split at any point (14_88, 1_488, 148_8), not only in the middle.
+        # Two parts joined by one separator means the number split at any
+        # point (14_88, 1_488, 148_8), not only in the middle.
         def digit_run?(key)
           key.scan(/\d+/).any? { |run| digit_runs.include?(run) } || joined_runs&.match?(key)
         end
@@ -49,7 +49,7 @@ module Usernames
         # (`hh88`, `heil_88`, `88hitler`), in either form (`h3il88` is
         # `heil88` folded). The neighbour must be a whole run: `88` after
         # `ahh` is not after `hh`.
-        # NOTE(p2): number tokens (`14`, `18`, `88`) are whole digit runs, so
+        # Number tokens (`14`, `18`, `88`) are whole digit runs, so
         # `14_88` counts but `1888` (a year) does not.
         def adjacent?(name)
           name.forms.any? { |form| adjacency.match?(form) }

@@ -14,7 +14,7 @@ module Usernames
       SEVERE = 4
 
       # Below this length a severe term must equal a segment: `gc`, `mj`
-      # inside a segment would refuse gcastro and mjordan (D-15).
+      # inside a segment would refuse gcastro and mjordan.
       SUBSTRING_MINIMUM = 4
 
       # One spelling of a term, as folded. `whole` means it is matched only
@@ -116,13 +116,13 @@ module Usernames
       # a-2 when it straddles a separator (`fu_ck`): refused, with no
       # exemption — such an occurrence lies inside no exempt unit — and
       # without a-1's whole-segment special cases: a separator in the middle
-      # of `rape` reads as evasion, so `gr_ape` is refused (PRD §10.2, the
-      # documented trade-off of review R4-3).
+      # of `rape` reads as evasion, so `gr_ape` is refused — a documented
+      # trade-off: a real name split exactly there is rarer than the evasion.
       #
       # a-1 otherwise: refused unless the unit it sits in — its segment, or
       # for a spelling with a digit its part — is exempt. Whole-segment
       # spellings are #whole_severe?'s, not matched as substrings.
-      # NOTE(p2): spellings under four letters are left out of a-2 as of
+      # Spellings under four letters are left out of a-2 as of
       # a-1 (none ships today); across separators they would refuse innocent
       # joins of short segments.
       def severe_at?(whole, spelling, position, allowed)

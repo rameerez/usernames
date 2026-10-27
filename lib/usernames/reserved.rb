@@ -3,7 +3,7 @@
 require "active_support/core_ext/string/inflections"
 
 module Usernames
-  # Reserved names (PRD §9): the exact list (config.reserved, your routes,
+  # Reserved names: the exact list (config.reserved, your routes,
   # the bundled system, mailbox and web words) and the impersonation list
   # (config.forbidden, the bundled impersonation words, your app's name),
   # with config.allowed lifting individual words.
@@ -39,7 +39,8 @@ module Usernames
       #
       # config.allowed lifts any of them, but only for exactly that name:
       # allowing `help` frees `help`, not `help_desk`.
-      # NOTE(p2): a word in config.forbidden is matched as an impersonation
+      #
+      # A word in config.forbidden is matched as an impersonation
       # word and reported as :impersonation; :custom names a config.reserved
       # word that is not bundled. A reserved prefix (`.well-known`, `xn--`)
       # is reported as :exact.
@@ -98,7 +99,7 @@ module Usernames
         @routes = nil
       end
 
-      # The app's own name as it would be typed (PRD §9.1): `config.app_name`
+      # The app's own name as it would be typed: `config.app_name`
       # when it is a String, else the module of the Rails application —
       # `FestivalPlanner::Application` reserves `festival_planner` and
       # `festivalplanner`. None when opted out (`false`) or when there is no
@@ -127,9 +128,8 @@ module Usernames
         end
       end
 
-      # Each word as PRD §9.2 stores it: itself, leet-folded, and the plural
-      # of both.
-      # NOTE(p2): plus, for an entry written with separators (`my_app`), the
+      # Each word as the matcher stores it: itself, leet-folded, and the plural
+      # of both; and, for an entry written with separators (`my_app`), the
       # same again without them — the name side is read without separators
       # too, and an entry with one could otherwise only ever match literally.
       def impersonation_entries(words)
@@ -167,7 +167,7 @@ module Usernames
       end
     end
 
-    # The first path segment of an app's static routes (PRD §9.3), so a user
+    # The first path segment of an app's static routes, so a user
     # called `login` cannot take /login from under the app's feet.
     module Routes
       # What a route's first segment may be: anything a username could be.

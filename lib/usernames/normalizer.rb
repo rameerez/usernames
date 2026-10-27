@@ -2,7 +2,7 @@
 
 module Usernames
   # Turns whatever someone typed (or pasted) into the one spelling the gem
-  # validates, stores and looks up (PRD §7.1).
+  # validates, stores and looks up.
   #
   # The property that matters is IDEMPOTENCE: normalize(normalize(x)) ==
   # normalize(x) for every x. Rails applies `normalizes` on assignment AND in

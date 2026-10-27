@@ -143,9 +143,8 @@ module Usernames
         value.dup.freeze
       end
 
-      # nil detects the name from the Rails application; false opts out.
-      # NOTE(p1a): the README says "auto-detected; false to opt out"; a String
-      # names it explicitly (an app whose brand is not its module name).
+      # nil detects the name from the Rails application; false opts out; a
+      # String names it explicitly (an app whose brand is not its module name).
       def valid_app_name(value)
         valid = value.nil? || value == false || (value.is_a?(String) && !value.strip.empty?)
         invalid!(:app_name, value, "a String, false to opt out, or nil to detect it") unless valid

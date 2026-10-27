@@ -3,7 +3,7 @@
 require_relative "comparison/index_contract"
 
 module Usernames
-  # How the database compares two usernames (PRD §11.1).
+  # How the database compares two usernames.
   #
   # "The same name" has to mean one thing in Ruby, in the unique index and in
   # every query, or the validator says a name is free that the index then

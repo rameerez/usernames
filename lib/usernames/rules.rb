@@ -8,7 +8,7 @@ module Usernames
   # Build them with `Usernames.configuration.rules_for(**options)`, which
   # caches them — every check after the first reuses the compiled regexes.
   #
-  # The format rules (PRD §8.1) are an ordered list of
+  # The format rules are an ordered list of
   #
   #   [reason, test, browser_source]
   #
@@ -31,7 +31,7 @@ module Usernames
     # friendlier :username_unicode message.
     NON_ASCII_LETTER = /\A(?=[^\x00-\x7F])[\p{L}\p{M}]\z/
 
-    # Endings that read as a file when dots are enabled (PRD §8.3), on top of
+    # Endings that read as a file when dots are enabled, on top of
     # every extension Rails' Mime registry knows: Discourse's
     # CONFUSING_EXTENSIONS, Gitea's reserved patterns, git, and what a web
     # server would execute or serve as a secret.
@@ -44,9 +44,9 @@ module Usernames
 
     # Every extension Rails' Mime registry knows when rules are built,
     # including any the app registered in an initializer. None without
-    # Action Dispatch: then there is no Rails router to confuse.
-    # NOTE(p1a): "at boot" (PRD §8.3) is read as "when the rules are
-    # compiled" — the first check, or the first after a configuration change.
+    # Action Dispatch: then there is no Rails router to confuse. Read when
+    # the rules are compiled: the first check, or the first after a
+    # configuration change.
     def self.rails_extensions
       defined?(Mime::EXTENSION_LOOKUP) ? Mime::EXTENSION_LOOKUP.keys.map(&:to_s) : []
     end
@@ -87,8 +87,9 @@ module Usernames
       Normalizer.call(value, @case)
     end
 
-    # PRD §7.3. ASCII-only on purpose: it is exactly what PostgreSQL's
-    # lower() does under COLLATE "C", so Ruby and the database agree.
+    # What two names are compared by. ASCII-only on purpose: it is exactly
+    # what PostgreSQL's lower() does under COLLATE "C", so Ruby and the
+    # database agree.
     def comparison_key(canonical)
       canonical.downcase(:ascii)
     end
@@ -110,7 +111,7 @@ module Usernames
     end
 
     # Hints for a form, as [{ rule:, pattern:, message: }] in the current
-    # locale (PRD §8.2). Advisory only: Ruby's strip and JavaScript's trim()
+    # locale. Advisory only: Ruby's strip and JavaScript's trim()
     # disagree on NUL, U+FEFF and U+1680, so the browser approximates
     # normalisation and the server stays the only authority. A pattern
     # MATCHES a name that breaks the rule, and is written in the subset both
@@ -162,8 +163,8 @@ module Usernames
     # underscores and periods"). With none there is no list to finish, so the
     # message is a different translation of the same error type — not a
     # :zero plural, which pluralizers such as rails-i18n's Spanish one ignore.
-    # NOTE(p1a): username_characters_without_separators is a key PRD §15
-    # does not list; it is the same error type, only worded for no separators.
+    # username_characters_without_separators is that translation: the same
+    # error type, only worded for no separators.
     def characters_details
       letters = Phrase.letters(@case)
       return { message: :username_characters_without_separators, letters: letters } if separators.empty?
@@ -222,9 +223,9 @@ module Usernames
 
     # Rule 6. With :alphanumeric any letter or digit may come first, and a
     # separator first is rule 4's business, so there is nothing to check.
-    # NOTE(p1a): with :letter the first character must be a letter even when
-    # edge_separators allows `_javi` — the PRD does not say which wins; the
-    # stricter reading is the one that matches "must start with a letter".
+    # With :letter the first character must be a letter even when
+    # edge_separators allows `_javi`: the stricter reading is the one that
+    # matches "must start with a letter".
     def first_character_checks
       return [] unless first_character == :letter
 
@@ -232,8 +233,8 @@ module Usernames
       [[:username_first_character, /\A[^#{letters}]/, "^[^#{letters}]"]]
     end
 
-    # Rule 8 (PRD §8.3), only when dots are allowed: `/@john.json` confuses
-    # routers, CDNs and crawlers. Not a browser hint (§8.2 hints rules 1–7).
+    # Rule 8, only when dots are allowed: `/@john.json` confuses
+    # routers, CDNs and crawlers. Not a browser hint: the hints stop at rule 7.
     def extension_checks
       return [] unless separators.include?(".")
 

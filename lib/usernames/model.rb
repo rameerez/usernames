@@ -27,12 +27,12 @@ module Usernames
 
     # has_username(column = :username, required: false, generate: true, **rules)
     #
-    # Installs, for that column (PRD §6.1):
+    # Installs, for that column:
     #
     # 1. `normalizes`, so " @Javi " is stored as "javi" and a blank as nil;
     # 2. the username rules, checked only when the value changes — a rule
     #    added later never stops an old account from saving its other
-    #    attributes (D-11);
+    #    attributes;
     # 3. with `required: true`, presence — on create, and on an update that
     #    changes it (a legacy blank still saves unrelated changes);
     # 4. uniqueness, compared the way the unique index compares (Comparison);
@@ -71,7 +71,7 @@ module Usernames
         @model = model
         @name = name.to_sym
         @required = boolean(:required, required)
-        # PRD §6.1: `required: true` turns generation off — the person chooses.
+        # `required: true` turns generation off: the person chooses.
         @generate = boolean(:generate, generate) && !@required
         # Resolving them now raises ConfigurationError for a bad option when
         # the model is defined, and pins the case mode (see has_username).
@@ -214,8 +214,8 @@ module Usernames
 
       # The rule options of this column, for Usernames.check,
       # Usernames.comparison_key and Usernames.rules_for_browser.
-      # NOTE(p3): not in PRD §6.1's list; the availability generator needs
-      # the model's own rules to tell "invalid" from "taken".
+      # The availability check needs the model's own rules to tell
+      # "invalid" from "taken".
       def self.options(helpers, column)
         helpers.define_method(:"#{column.name}_options") { column.options }
       end

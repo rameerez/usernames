@@ -4,7 +4,7 @@ require_relative "audit/values"
 require_relative "audit/output"
 
 module Usernames
-  # `rails usernames:audit[User,username]` (PRD §11.5): what stands between an
+  # `rails usernames:audit[User,username]`: what stands between an
   # existing column and the gem's guarantees. Read-only — it never writes a
   # row, an index or a setting.
   #
@@ -14,7 +14,7 @@ module Usernames
   # audit lists exactly that, plus whether the column's type, collation and
   # indexes give the comparison contract (Usernames::Comparison), and which
   # stored names today's rules would refuse — those keep working (only a
-  # change is validated, D-11); they are listed so nobody is surprised.
+  # change is validated); they are listed so nobody is surprised.
   #
   # Fixing what it finds is the app's own migration, under a username-write
   # freeze (README, "Adopting an existing column"): the gem deliberately
@@ -26,7 +26,7 @@ module Usernames
     EXAMPLES = 20
     BATCH = 10_000
 
-    # The types the comparison contract covers (PRD §11.1); citext is excluded (D-17).
+    # The types the comparison contract covers; citext is excluded.
     POSTGRESQL_TYPES = /\A(text|character varying(\(\d+\))?)\z/
     MODES = %i[lowercase preserve].freeze
 
@@ -82,7 +82,7 @@ module Usernames
            "in #{mode} mode#{mode_hint}"
     end
 
-    # --- the column (PRD §11.1 criteria per adapter) ------------------------------------------------
+    # --- the column (the criteria per adapter) ------------------------------------------------
 
     def column_section
       section "Column"
@@ -106,7 +106,7 @@ module Usernames
 
     def postgresql_column(type, collation)
       if type == "citext"
-        return problem("citext is incompatible: its case-insensitivity follows the database locale (D-17); " \
+        return problem("citext is incompatible: its case-insensitivity follows the database locale; " \
                        "use a string column with collation \"C\"")
       end
 

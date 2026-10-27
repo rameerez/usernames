@@ -4,7 +4,7 @@ require "securerandom"
 require "active_support/inflector"
 
 module Usernames
-  # Default and seeded names (PRD §12): `quiet_otter_42`, or `jose_garcia`
+  # Default and seeded names: `quiet_otter_42`, or `jose_garcia`
   # from "José García".
   #
   # Pure: it draws a batch of candidates and keeps those the rules allow; it
@@ -12,7 +12,7 @@ module Usernames
   # batch to the database in ONE query, which is why it is a batch: twenty
   # names at once instead of a retry loop of queries.
   #
-  # The order inside each draw is fixed (D-19): assemble the name, shorten it
+  # The order inside each draw is fixed: assemble the name, shorten it
   # to fit, and only then run the full check. Shortening can make a name
   # the check refuses (an all-digit stem, a word cut into something else), and
   # a check run before it would have passed a name that is not the one
@@ -22,7 +22,7 @@ module Usernames
     # Draws per batch. Every shape, fallback and retry fits inside it.
     DRAWS = 20
 
-    # Local parts that say nothing about the person (PRD §12.2): from
+    # Local parts that say nothing about the person: from
     # info@acme.com the domain label is the better seed.
     GENERIC_LOCAL_PARTS = %w[i me info support admin webmaster hello mail office contact team].freeze
 
@@ -36,13 +36,13 @@ module Usernames
     class << self
       # Up to DRAWS distinct names the rules allow, in the order drawn.
       #
-      #   Generator.candidates(rules: rules)                  # §12.1 shapes
+      #   Generator.candidates(rules: rules)                  # the default shapes
       #   Generator.candidates(from: "José García", rules: rules)
       #
       # With a seed: the cleaned seed, the seed with two random digits (three
       # times) and with three (twice), then default shapes for the rest of
-      # the batch (PRD §12.2).
-      # NOTE(p2): the default shapes after a seed count their own attempts
+      # the batch.
+      # The default shapes after a seed count their own attempts
       # from 1, so they start at two digits as an unseeded batch does.
       def candidates(rules:, from: nil)
         base = from.nil? ? "" : clean(from, rules)
@@ -61,7 +61,7 @@ module Usernames
         compact?(rules) ? compact_shape(attempt, rules) : default_shape(attempt, rules)
       end
 
-      # A seed as a name (PRD §12.2 step 1–2): the useful half of an email,
+      # A seed as a name: the useful half of an email,
       # normalised, transliterated to ASCII, with every run of characters the
       # rules do not allow turned into the first separator, runs of
       # separators collapsed and the edges trimmed. May be "".
@@ -144,7 +144,7 @@ module Usernames
       end
 
       # Two digits for the first three draws, three for the next two, four
-      # for the next three, then six hex characters (PRD §12.1): short names
+      # for the next three, then six hex characters: short names
       # first, and more room as the obvious ones turn out taken.
       def suffix(attempt)
         case attempt
@@ -185,8 +185,8 @@ module Usernames
 
       # The local part, without a +tag, unless it is generic or empty
       # (`@javi` is a handle, not an address): then the domain's first label.
-      # NOTE(p2): "the domain label" is read as the first label
-      # (`acme` of acme.co.uk); the +tag is dropped (`javi+news`).
+      # The first label, so acme.co.uk gives `acme`; the +tag is dropped
+      # (`javi+news`).
       def email_seed(text)
         local, _, domain = text.rpartition("@")
         local = local.split("+", 2).first.to_s.strip

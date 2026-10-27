@@ -11,7 +11,7 @@ module ActiveModel
     # The rules only — format, reserved, offensive — with no database: you
     # keep your own uniqueness validation and index (has_username brings both).
     #
-    # It validates the value AS SUPPLIED (PRD §6.2). In lowercase mode `Javi`
+    # It validates the value AS SUPPLIED. In lowercase mode `Javi`
     # fails "can only contain lowercase letters…", because `Javi` is not what
     # would be stored: validate what you store. Pair it with
     #

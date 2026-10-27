@@ -17,10 +17,10 @@ module Usernames
   module Data
     ROOT = File.expand_path("../../data", __dir__)
 
-    # Matched exactly (PRD §9.1): system words, mailboxes, web paths.
+    # Matched exactly: system words, mailboxes, web paths.
     EXACT_FILES = %w[reserved/system.txt reserved/mailboxes.txt reserved/web.txt].freeze
 
-    # Matched the way impersonators type them (PRD §9.2).
+    # Matched the way impersonators type them.
     IMPERSONATION_FILES = %w[reserved/impersonation.txt].freeze
 
     # `# source: gitlab (MIT) — GitLab top-level and project wildcard routes`
@@ -51,7 +51,7 @@ module Usernames
         end.freeze
       end
 
-      # The generator's vocabulary (PRD §12.1).
+      # The generator's vocabulary.
       def adjectives
         @adjectives ||= list("words/adjectives.txt")
       end

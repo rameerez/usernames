@@ -30,9 +30,9 @@ module Usernames
 
       class_option :model, type: :string, default: "User", desc: "The model that gets has_username"
       class_option :column, type: :string, default: "username", desc: "The column that holds the username"
-      # NOTE(p3): PRD §16 lists --model and --column only. The index depends
-      # on the case mode, so the generator reads it from the model's
-      # has_username (or config.case) and --case overrides that.
+      # The index depends on the case mode, so the generator reads it from
+      # the model's has_username (or config.case), and --case overrides that
+      # for a model that does not declare it yet.
       class_option :case, type: :string,
                           desc: "lowercase or preserve (default: the model's has_username, else config.case)"
 
@@ -91,7 +91,7 @@ module Usernames
       def add_column? = database.column.nil?
 
       # Adopting a PostgreSQL column: set "C" when it is anything else, and
-      # make citext a plain string (D-17). In preserve mode the comparison
+      # make citext a plain string. In preserve mode the comparison
       # carries its own COLLATE "C", so only citext changes: the column keeps
       # the collation its ORDER BY sorts by. MySQL's change_column restates
       # the whole column definition, so there the migration only shows the line.
@@ -126,7 +126,7 @@ module Usernames
 
       def collation = Usernames::Comparison.column_collation(adapter, mode)
 
-      # As the PRD writes it: 'lower(username COLLATE "C")', not an escaped string.
+      # Readable in the migration: 'lower(username COLLATE "C")', not an escaped string.
       def index_column
         wanted = index[:column]
         return wanted.inspect unless wanted.is_a?(String) && wanted.include?('"') && !wanted.include?("'")

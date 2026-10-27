@@ -23,7 +23,7 @@ module Usernames
       app.config.after_initialize { Usernames.configuration.validate! }
     end
 
-    # The app's static top-level paths are reserved (PRD §9.3). They are
+    # The app's static top-level paths are reserved. They are
     # collected lazily, on the first check after the routes load; in
     # development the routes reload when config/routes.rb changes, and a
     # page added there is reserved from the next check on.

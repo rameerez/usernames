@@ -6,7 +6,7 @@ module Usernames
   module Generators
     # rails generate usernames:availability [--model=User] [--column=username]
     #
-    # Copies a live "is this name free?" check into the app (PRD §14):
+    # Copies a live "is this name free?" check into the app:
     # nothing is mounted behind its back, and every file is the app's to edit.
     #
     #   app/controllers/usernames/availability_controller.rb   GET /usernames/availability?username=…
