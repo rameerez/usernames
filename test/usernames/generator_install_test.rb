@@ -159,7 +159,7 @@ class GeneratorInstallTest < Rails::Generators::TestCase
      "const application = {}; const url = \"https://example.test\"; export { application }\n",
      "const url = 'https://example.test/*'; export const application = {}\n",
      "const a = \"say \\\"hi\\\" // not a comment\"; export { a as application }\n",
-     "const t = `line one\n// still the template ${\"x\"}`; export { t as application }\n"].each do |stimulus|
+     "const t = `line one\n// still the template`; export { t as application }\n"].each do |stimulus|
       prepare_destination
       importmap_app(stimulus: stimulus)
       run_generator %w[--model=Account]
@@ -193,6 +193,59 @@ class GeneratorInstallTest < Rails::Generators::TestCase
       assert_match(/Didn't add `import "usernames"`: .* doesn't export the Stimulus application by the name /,
                    output)
     end
+  end
+
+  # What the reading doesn't follow, it doesn't guess at: template
+  # interpolation and regular expressions (or division) decline the line,
+  # whether or not the file really exports `application`.
+  def test_no_import_where_the_source_is_uncertain
+    ["const application = Application.start()\nconst t = `outer ${`inner ${\"x\"}`}`\nexport { application }\n",
+     "const t = `outer ${`export { application }`}`\nexport default {}\n",
+     "const application = Application.start()\nconst t = `outer ${`/*`}`\nexport { application }\n",
+     "const x = /export { application }/\nexport default {}\n",
+     "const application = Application.start()\nconst half = 1 / 2\nexport { application }\n"].each do |stimulus|
+      prepare_destination
+      importmap_app(stimulus: stimulus)
+      output = run_generator %w[--model=Account]
+
+      assert_equal :uncertain_source, generator.send(:javascript_setup), stimulus
+      refute_includes application_js, "usernames", stimulus
+      assert_match(/Didn't add `import "usernames"`: .* has constructs the installer won't guess at /, output)
+      assert_match(/\(template interpolation or a regular expression\)\. Add the line yourself/, output)
+    end
+  end
+
+  # The file stimulus-rails generates, word for word: the line goes in.
+  def test_the_stimulus_rails_application_file
+    importmap_app(stimulus: <<~JS)
+      import { Application } from "@hotwired/stimulus"
+
+      const application = Application.start()
+
+      // Configure Stimulus development experience
+      application.debug = false
+      window.Stimulus   = application
+
+      export { application }
+    JS
+    run_generator %w[--model=Account]
+
+    assert_includes application_js, %(import "usernames")
+  end
+
+  # Only controllers/application.js is held to that: the entrypoint is read
+  # for its imports, whatever else it holds.
+  def test_an_entrypoint_with_templates_and_regexps_is_still_read
+    importmap_app(application_js: %(import "controllers"\nconst r = /x/\nconst t = `${r}`\nimport "usernames"\n))
+    output = run_generator %w[--model=Account]
+
+    assert_match(/already has `import "usernames"`/, output)
+
+    prepare_destination
+    importmap_app(application_js: %(import "controllers"\nconst r = /x/\nconst t = `${r}`\n))
+    run_generator %w[--model=Account]
+
+    assert_equal 1, application_js.scan(%(import "usernames")).size
   end
 
   def test_a_commented_out_import_is_not_an_import

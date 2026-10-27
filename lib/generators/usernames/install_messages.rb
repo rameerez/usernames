@@ -65,6 +65,9 @@ module Usernames
         no_entrypoint: %(No app/javascript/application.js: add `import "usernames"` to your importmap entrypoint.),
         no_stimulus: "No app/javascript/controllers/application.js (stimulus-rails' Stimulus setup): the field " \
                      "works as a plain input; with stimulus-rails, add `import \"usernames\"` for the live check.",
+        uncertain_source: "Didn't add `import \"usernames\"`: app/javascript/controllers/application.js has " \
+                          "constructs the installer won't guess at (template interpolation or a regular " \
+                          "expression). Add the line yourself if that file exports `application`.",
         no_application_export: "Didn't add `import \"usernames\"`: app/javascript/controllers/application.js " \
                                "doesn't export the Stimulus application by the name `application` " \
                                "(`export { application }`), which it imports, and a missing export would stop " \

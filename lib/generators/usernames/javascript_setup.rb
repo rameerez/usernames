@@ -36,6 +36,7 @@ module Usernames
           elsif !File.exist?(destination(APPLICATION_JS)) then :no_entrypoint
           elsif code(APPLICATION_JS, strings: true).match?(IMPORTED) then :imported
           elsif !File.exist?(destination(STIMULUS_APPLICATION)) then :no_stimulus
+          elsif uncertain?(STIMULUS_APPLICATION) then :uncertain_source
           elsif !exports_application?(code(STIMULUS_APPLICATION)) then :no_application_export
           else :ready
           end
@@ -52,18 +53,37 @@ module Usernames
       # template literal `""` (so `"export { application }"` exports
       # nothing, and the `//` in `"https://…"` starts no comment).
       # `strings: true` keeps '…' and "…" strings as written, to read an
-      # import's specifier. Regular-expression literals are read as code:
-      # nothing in a Stimulus setup file needs them told apart.
+      # import's specifier.
       def code(path, strings: false)
+        scan(path, strings).first
+      end
+
+      # Whether the file has what this reading doesn't follow, and so won't
+      # guess about: a template literal interpolating `${…}` (which may nest
+      # code, comments and more templates) or a `/` that starts no comment —
+      # division, or a regular-expression literal that may hold anything.
+      # stimulus-rails' generated controllers/application.js has neither.
+      def uncertain?(path)
+        scan(path, false).last
+      end
+
+      # [code, uncertain]
+      def scan(path, strings)
         source = File.read(destination(path), encoding: "UTF-8")
         code = +""
+        uncertain = false
         index = 0
         while index < source.length
           finish = token_end(source, index)
+          uncertain ||= finish ? interpolates?(source, index, finish) : source[index] == "/"
           code << (finish ? token(source, index, finish, strings) : source[index])
           index = finish || (index + 1)
         end
-        code
+        [code, uncertain]
+      end
+
+      def interpolates?(source, start, finish)
+        source[start] == "`" && source[start...finish].include?("${")
       end
 
       # Where the comment or literal starting at `index` ends, or nil for
