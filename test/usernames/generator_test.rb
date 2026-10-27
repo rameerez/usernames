@@ -163,7 +163,30 @@ class GeneratorTest < UsernamesTestCase
 
       assert_equal %w[pedro_gonzales pedro_10 pedro_100], names.first(3)
     end
-    assert_equal "pedrogonzal", Usernames.generate(from: "Pedro Gonzales", separators: [], length: 3..11)
+  end
+
+  # A single word longer than the budget is skipped, never cut: the batch
+  # moves on (to the seed with digits when that fits, to default shapes when not).
+  def test_from_is_never_cut_mid_word
+    names = predictably { candidates(from: "a" * 40) }
+
+    assert_equal "#{ADJECTIVE}_#{ANIMAL}_10", names.first
+    assert(names.none? { |name| name.start_with?("aaa") })
+    refute_match(/\Apedrog/, Usernames.generate(from: "Pedro Gonzales", separators: [], length: 3..11))
+    assert_equal "maximiliano", Usernames.generate(from: "Maximiliano", length: 3..11)
+    refute_equal "maximilia", Usernames.generate(from: "Maximiliano", length: 3..9)
+  end
+
+  # Repaired into UTF-8 before anything else, as the normaliser repairs a
+  # typed name: no seed can make generation or suggestions raise.
+  def test_seeds_in_any_encoding
+    assert_equal "javi", Usernames.generate(from: "Javi".encode("UTF-16LE"))
+    assert_equal "javi_r", Usernames.generate(from: "Javi R".encode("UTF-16BE"))
+    assert_equal "javi", Usernames.generate(from: "Javi\xFF".b)
+    assert_equal "jose_garcia", Usernames.generate(from: "Jos\u{E9} Garc\u{ED}a".encode("UTF-16LE"))
+    assert_equal "acme", Usernames.generate(from: "info@acme.com".encode("UTF-16LE"))
+    assert_equal %w[javi_r javir], Usernames.candidates_for("Javi R".encode("UTF-16LE"), count: 1).first(2)
+    assert_predicate Usernames.candidates_for("\xFF\xFE".b, count: 2), :any?
   end
 
   def test_a_seed_the_rules_refuse_is_skipped
@@ -178,7 +201,8 @@ class GeneratorTest < UsernamesTestCase
 
     assert_equal "pedro_gonzales", Usernames::Generator.fit("pedro_gonzales_armillon", 14, rules)
     assert_equal "pedro", Usernames::Generator.fit("pedro_gonzales_armillon", 13, rules)
-    assert_equal "pedr", Usernames::Generator.fit("pedro_gonzales", 4, rules)
+    assert_nil Usernames::Generator.fit("pedro_gonzales", 4, rules), "never mid-word"
+    assert_nil Usernames::Generator.fit("maximilianus", 7, rules)
     assert_nil Usernames::Generator.fit("pedro", 0, rules)
     assert_nil Usernames::Generator.fit("", 5, rules)
   end

@@ -81,17 +81,17 @@ module Usernames
         prepare(seed, rules).split(/[^A-Za-z0-9]+/).reject(&:empty?)
       end
 
-      # `base` cut to at most `budget` characters, at a separator when one
-      # falls inside the budget (`pedro_gonzales_armillon` → `pedro_gonzales`),
-      # else hard (a single long word). nil when nothing fits.
-      # NOTE(p2): a first word longer than the budget is cut mid-word; the
-      # PRD only says "at a word boundary", which a single word does not have.
+      # `base` cut to at most `budget` characters, at a separator that falls
+      # inside the budget (`pedro_gonzales_armillon` → `pedro_gonzales`).
+      # nil when not even the first word fits: a name is never cut mid-word
+      # (`maximilianus` is not `maximil`), so the batch moves on to its next
+      # candidate instead.
       def fit(base, budget, rules)
         return if budget < 1 || base.empty?
         return base if base.length <= budget
 
         boundary = rules.separators.empty? ? nil : base.rindex(Regexp.union(rules.separators), budget)
-        boundary&.positive? ? base[0, boundary] : base[0, budget]
+        base[0, boundary] if boundary&.positive?
       end
 
       # `base` + separator + random digits from `range`, the base shortened
@@ -174,8 +174,10 @@ module Usernames
         end
       end
 
+      # Repaired into UTF-8 first, as the normaliser does: a UTF-16 or
+      # binary seed must not reach the String operations below.
       def prepare(seed, rules)
-        text = seed.to_s
+        text = Normalizer.utf8(seed)
         text = email_seed(text) if text.include?("@")
         text = transliterate(rules.normalize(text)).delete("?")
         rules.lowercase? ? text.downcase : text
