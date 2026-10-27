@@ -43,7 +43,7 @@ module Usernames
 
       # The English file with its top-level key swapped, and a note saying so.
       def translated_copy
-        english = File.read(File.join(self.class.source_root, "usernames.en.yml"))
+        english = File.read(File.join(self.class.source_root, "usernames.en.yml"), encoding: "UTF-8")
         note = "# Copied from the usernames gem's English messages by `rails generate usernames:locale --locale=#{locale}`.\n"
         note + english.sub(/^en:$/, "#{locale}:")
       end

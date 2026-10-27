@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "test_helper"
+require "open3"
 require "json"
 require "yaml"
 
@@ -303,6 +304,22 @@ module Usernames
   # gem does. (The classes above read the files directly, so a loader bug
   # cannot hide a data bug; these catch the reverse.)
   class MatcherDataTest < UsernamesTestCase
+    # The bundled lists are UTF-8 whatever the host's locale says. With no
+    # LANG in the environment Ruby's default external encoding is US-ASCII,
+    # and the gem must still load and match its non-ASCII entries.
+    def test_loads_under_a_us_ascii_default_external_encoding
+      script = <<~RUBY
+        require "usernames"
+        abort Encoding.default_external.to_s unless Encoding.default_external == Encoding::US_ASCII
+        puts [Usernames.allowed?("quiet_otter_42"), Usernames.allowed?("fuck_bob"), Usernames.allowed?("admin")].join(" ")
+      RUBY
+      root = File.expand_path("../..", __dir__)
+      output, error, status = Open3.capture3(Gem.ruby, "-E", "US-ASCII", "-Ilib", "-e", script, chdir: root)
+
+      assert_predicate status, :success?, error
+      assert_equal "true false false", output.strip
+    end
+
     include DataFiles
 
     ALL_SEPARATORS = %w[_ . -].freeze

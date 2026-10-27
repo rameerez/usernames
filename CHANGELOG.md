@@ -1,5 +1,11 @@
 ## [Unreleased]
 
+## [0.1.2] - 2026-10-27
+
+### Fixed
+
+- **The bundled lists are read as UTF-8 whatever the host's locale.** The data files were opened with Ruby's default external encoding, which is US-ASCII wherever `LANG` is unset (a cron job, a systemd unit, a bare container), and the non-ASCII entries then raised `invalid byte sequence in US-ASCII` while the gem loaded. Every read now names UTF-8; a test loads the gem under `-E US-ASCII`.
+
 ## [0.1.1] - 2026-10-27
 
 ### Fixed

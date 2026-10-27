@@ -80,7 +80,7 @@ module Usernames
       # would screen nothing in that language.
       def offensive(locale)
         (@offensive ||= {})[locale.to_sym] ||= read("offensive/#{locale}.json") do |path|
-          entries = JSON.parse(File.read(path))
+          entries = JSON.parse(File.read(path, encoding: "UTF-8"))
           broken!(path, "has no entries") if entries == []
           unless entries.is_a?(Array) && entries.all? { |entry| term?(entry) }
             broken!(path, "is not a list of {term, severity 1–4, variants, tags, exceptions} entries")
@@ -108,9 +108,12 @@ module Usernames
       end
 
       # The entries of one data file, relative to data/ (or an absolute path).
+      # Every bundled file is read as UTF-8 explicitly: the host's locale
+      # (Encoding.default_external, US-ASCII where LANG is unset) must never
+      # decide how the lists are decoded.
       def list(path)
         read(path) do |file|
-          entries = File.foreach(file, chomp: true).filter_map do |line|
+          entries = File.foreach(file, chomp: true, encoding: "UTF-8").filter_map do |line|
             entry = line.sub(/#.*/, "").strip
             entry.freeze unless entry.empty?
           end
@@ -125,7 +128,7 @@ module Usernames
       def sourced(path)
         read(path) do |file|
           source = { source: nil, licence: nil, reason: nil }
-          File.foreach(file, chomp: true).filter_map do |line|
+          File.foreach(file, chomp: true, encoding: "UTF-8").filter_map do |line|
             if (match = SOURCE_LINE.match(line.strip))
               source = { source: match[:name], licence: match[:licence], reason: match[:reason] }
               next
