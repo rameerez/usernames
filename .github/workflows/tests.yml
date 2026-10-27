@@ -1,0 +1,108 @@
+name: Tests
+
+on:
+  pull_request:
+    paths-ignore:
+      - "*.md"
+      - "LICENSE.txt"
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - "*.md"
+      - "LICENSE.txt"
+
+jobs:
+  # Main test suite - tests Ruby versions and Rails compatibility (in-memory SQLite)
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby_version: ["3.3", "3.4", "4.0"]
+        gemfile:
+          - Gemfile
+          - gemfiles/rails_7.2.gemfile
+          - gemfiles/rails_8.0.gemfile
+          - gemfiles/rails_8.1.gemfile
+
+    env:
+      RAILS_ENV: test
+      BUNDLE_GEMFILE: ${{ github.workspace }}/${{ matrix.gemfile }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby ${{ matrix.ruby_version }}
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby_version }}
+          bundler-cache: true
+
+      - name: Run tests
+        run: bundle exec rake test
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-sqlite-ruby-${{ matrix.ruby_version }}-${{ strategy.job-index }}
+          path: test/reports/
+          retention-days: 7
+
+  # The same suite against a real PostgreSQL: collations (the "C" comparison
+  # contract, ICU and nondeterministic collations) and unique-violation
+  # diagnostics are exactly where SQLite and PostgreSQL disagree.
+  postgres:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: usernames_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      RAILS_ENV: test
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/usernames_test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - name: Run tests against PostgreSQL
+        run: bundle exec rake test
+
+  # Style and lint.
+  rubocop:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - name: Run RuboCop
+        run: bundle exec rubocop --format github

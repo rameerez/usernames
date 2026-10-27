@@ -1,0 +1,49 @@
+# Cópia em português de usernames. Qualquer chave nos config/locales da tua
+# app substitui-a: o Rails carrega os ficheiros de um engine ANTES dos da app,
+# por isso a tua tradução ganha sempre.
+#
+# (usernames' Portuguese copy. Rails loads an engine's locale files BEFORE the
+# host's, so a key in your app's own config/locales always wins. See
+# usernames.en.yml for what each message may interpolate; none may use %{value}.)
+pt:
+  errors:
+    messages:
+      username_spaces: "não pode conter espaços"
+      username_characters:
+        one: "só pode conter %{letters}, números e %{separators_phrase}"
+        other: "só pode conter %{letters}, números, %{separators_phrase}"
+      username_characters_without_separators: "só pode conter %{letters} e números"
+      username_unicode: "só pode usar as letras a–z (sem acentos nem outros alfabetos)"
+      username_edges: "não pode começar nem terminar com %{edge_separators_phrase}"
+      username_consecutive: "não pode ter dois símbolos seguidos"
+      username_first_character: "deve começar com uma letra"
+      username_digits_only: "não pode ter só números"
+      username_extension: "não pode terminar como um nome de arquivo (.json, .png…)"
+      username_reserved: "está reservado"
+      username_not_allowed: "não é permitido"
+      blank: "não pode ficar em branco"
+      taken: "já está em uso"
+      too_short:
+        one: "é muito curto (mínimo: 1 caractere)"
+        other: "é muito curto (mínimo: %{count} caracteres)"
+      too_long:
+        one: "é muito longo (máximo: 1 caractere)"
+        other: "é muito longo (máximo: %{count} caracteres)"
+  usernames:
+    letters:
+      lowercase: "letras minúsculas"
+      any_case: "letras"
+    separators:
+      underscore:
+        plural: "sublinhados"
+        singular: "um sublinhado"
+      period:
+        plural: "pontos"
+        singular: "um ponto"
+      dash:
+        plural: "hífens"
+        singular: "um hífen"
+      connectors:
+        words: ", "
+        and: " e "
+        or: " ou "

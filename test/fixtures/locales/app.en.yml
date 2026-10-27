@@ -1,0 +1,6 @@
+# The test application's own locale file. Its key is unrelated to the gem's,
+# so the engine test can check the ORDER Rails loads them in without the two
+# disagreeing about any translation.
+en:
+  test_app:
+    greeting: "hello"

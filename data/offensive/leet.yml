@@ -1,0 +1,22 @@
+# Leetspeak folding (PRD §9.2, §10.2; research 17 §3; D-15). Applied to the input AND, at load
+# time, to every term, so terms are stored un-folded in <locale>.json.
+
+# Digit → letter. Used by BOTH the reserved impersonation check (R1) and the offensive matcher.
+digits:
+  "0": o
+  "1": i
+  "3": e
+  "4": a
+  "5": s
+  "7": t
+
+# Multi-letter rewrites used by the offensive matcher ONLY, applied after the digit folds, in
+# this order. Measured cost on 235,974 web2 words: vv→w and x→ks add 0 innocent hits, ph→f adds 11.
+offensive_only:
+  vv: w
+  ph: f
+  x: ks
+
+# Deliberately NOT folded (measured, research 17 §3): cl→d (+879 innocent words), rn→m (+30),
+# l↔i (+26), ck→k (+24), and blanket repeated-letter collapsing (8,053 vs 2,798 baseline;
+# `ass`→`as`). Stretched spellings (fuuuck) are listed as variants in the term data instead.

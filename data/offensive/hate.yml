@@ -1,0 +1,51 @@
+# Hate tokens and numbers (PRD §10.3, research 17 §2). Not subject to allowlist exemptions.
+# Meanings follow the ADL hate-symbol database, the Simon Wiesenthal Center and Wikipedia;
+# nothing of theirs is copied — the rules below are this project's own (data/NOTICE: usernames).
+# A bare number is not evidence (Wiesenthal guide): numbers count only in the forms listed here.
+#
+# W  = the compact name with separators removed, leet-folded (data/offensive/leet.yml).
+# R0 = the comparison key before folding; digit runs are read from R0.
+
+# Blocked anywhere as a substring of W (all >= 4 letters).
+always:
+  - wpww          # White Pride World Wide
+  - rahowa        # "racial holy war"
+  - heilhitler
+  - siegheil
+  - sonnenrad     # the "black sun" emblem
+  - whitepower
+  - waffenss
+  - goyimdefense  # Goyim Defense League
+  - goyimknow
+
+# Blocked when the digits form a whole digit run of R0, or two parts joined by one separator
+# (14_88, 14.88, 14-88). Never inside a longer run: 31488210 is a phone fragment.
+digit_runs:
+  - "1488"
+  - "8814"
+
+# A number blocked only when it sits next to one of these tokens (before or after, with or
+# without a separator): hh88, heil88, 88_hitler, combat18, 14words, 14_88.
+adjacent:
+  "88": [heil, sieg, hitler, nazi, wp, hh, "14", "18"]
+  "14": [words, "88"]
+  "18": [combat, "88"]
+
+# Blocked only when the token is a whole segment, and only in the listed locale.
+# kkk is laughter in pt-BR; zog is also King Zog of Albania (segment only).
+whole_token:
+  en: [kkk, zog]
+  es: []
+
+# Never blocked on their own: birth years (mike88), ham-radio "88" (love and kisses), the
+# Chinese lucky number, the band 311 (explicitly not hate per the ADL), 1312/ACAB (policy, not
+# hate), 420, 69, 100.
+never:
+  - "88"
+  - "18"
+  - "14"
+  - "311"
+  - "1312"
+  - "420"
+  - "69"
+  - "100"

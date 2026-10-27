@@ -34,7 +34,7 @@ Gem::Specification.new do |spec|
   # Bundled data (data/**, NOTICE, LICENSES/**) ships; the research record (docs/) and
   # maintainer scripts (script/) do not.
   gemspec = File.basename(__FILE__)
-  development_files = %w[.simplecov .rubocop.yml AGENTS.md Appraisals CLAUDE.md Rakefile context7.json]
+  development_files = %w[.ruby-version .simplecov .rubocop.yml AGENTS.md Appraisals CLAUDE.md Rakefile context7.json]
   spec.files = IO.popen(%w[git ls-files -z], chdir: __dir__, err: IO::NULL) do |ls|
     ls.readlines("\x0", chomp: true).reject do |f|
       (f == gemspec) || development_files.include?(f) ||

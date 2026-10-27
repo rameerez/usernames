@@ -1,0 +1,66 @@
+# usernames' default English copy. Override any key in your app's own
+# config/locales: Rails loads an engine's locale files BEFORE the host's, so
+# your translation always wins.
+en:
+  # The errors `has_username` and `validates :username, username: true` add,
+  # one at a time, for the first rule that fails. Override one per model and
+  # attribute the usual Active Record way
+  # (activerecord.errors.models.<model>.attributes.<attribute>.username_reserved).
+  #
+  # None of them repeats what was typed — never interpolate %{value} here: a
+  # message must not echo abuse back, and a `%{` someone pasted must not reach
+  # I18n. What they may interpolate:
+  #   %{letters}                 "lowercase letters", or "letters" when the typed case is kept
+  #   %{separators_phrase}       every allowed separator: "underscores, periods and dashes"
+  #   %{edge_separators_phrase}  any separator that may not start or end a name: "an underscore or a period"
+  #   %{count}                   the length limit (too_short, too_long); the number of
+  #                              separators allowed (username_characters)
+  errors:
+    messages:
+      username_spaces: "can't contain spaces"
+      # %{count} is how many separators are allowed: one finishes the list itself
+      # ("…, numbers and underscores"), more continue it ("…, numbers, underscores and periods").
+      username_characters:
+        one: "can only contain %{letters}, numbers and %{separators_phrase}"
+        other: "can only contain %{letters}, numbers, %{separators_phrase}"
+      # The same error when no separators are allowed at all.
+      username_characters_without_separators: "can only contain %{letters} and numbers"
+      # The same rule, when every character it refuses is a letter outside a–z (josé, иван).
+      username_unicode: "can only use the letters a–z (no accents or other alphabets)"
+      username_edges: "can't start or end with %{edge_separators_phrase}"
+      username_consecutive: "can't have two symbols in a row"
+      username_first_character: "must start with a letter"
+      username_digits_only: "can't be only numbers"
+      username_extension: "can't end like a file name (.json, .png…)"
+      username_reserved: "is reserved"
+      username_not_allowed: "isn't allowed"
+      # Rails' own errors, as Rails words them; here so every message a
+      # username can get ships in every language this gem ships.
+      blank: "can't be blank"
+      taken: "has already been taken"
+      too_short:
+        one: "is too short (minimum is 1 character)"
+        other: "is too short (minimum is %{count} characters)"
+      too_long:
+        one: "is too long (maximum is 1 character)"
+        other: "is too long (maximum is %{count} characters)"
+  # The pieces the phrases above are built from.
+  usernames:
+    letters:
+      lowercase: "lowercase letters"
+      any_case: "letters"
+    separators:
+      underscore:
+        plural: "underscores"
+        singular: "an underscore"
+      period:
+        plural: "periods"
+        singular: "a period"
+      dash:
+        plural: "dashes"
+        singular: "a dash"
+      # "underscores, periods and dashes" / "an underscore, a period or a dash"
+      connectors:
+        words: ", "
+        and: " and "
+        or: " or "

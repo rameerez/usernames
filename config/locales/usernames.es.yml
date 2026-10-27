@@ -1,0 +1,49 @@
+# Copia en español de usernames. Cualquier clave de los config/locales de tu
+# app la sustituye: Rails carga los archivos de un engine ANTES que los de la
+# app, así que tu traducción siempre gana.
+#
+# (usernames' Spanish copy. Rails loads an engine's locale files BEFORE the
+# host's, so a key in your app's own config/locales always wins. See
+# usernames.en.yml for what each message may interpolate; none may use %{value}.)
+es:
+  errors:
+    messages:
+      username_spaces: "no puede contener espacios"
+      username_characters:
+        one: "solo puede contener %{letters}, números y %{separators_phrase}"
+        other: "solo puede contener %{letters}, números, %{separators_phrase}"
+      username_characters_without_separators: "solo puede contener %{letters} y números"
+      username_unicode: "solo puede usar las letras a–z (sin tildes ni otros alfabetos)"
+      username_edges: "no puede empezar ni terminar con %{edge_separators_phrase}"
+      username_consecutive: "no puede tener dos símbolos seguidos"
+      username_first_character: "tiene que empezar por una letra"
+      username_digits_only: "no puede ser solo números"
+      username_extension: "no puede terminar como un nombre de archivo (.json, .png…)"
+      username_reserved: "está reservado"
+      username_not_allowed: "no está permitido"
+      blank: "no puede estar en blanco"
+      taken: "ya está en uso"
+      too_short:
+        one: "es demasiado corto (1 carácter mínimo)"
+        other: "es demasiado corto (%{count} caracteres mínimo)"
+      too_long:
+        one: "es demasiado largo (1 carácter máximo)"
+        other: "es demasiado largo (%{count} caracteres máximo)"
+  usernames:
+    letters:
+      lowercase: "letras minúsculas"
+      any_case: "letras"
+    separators:
+      underscore:
+        plural: "guiones bajos"
+        singular: "un guion bajo"
+      period:
+        plural: "puntos"
+        singular: "un punto"
+      dash:
+        plural: "guiones"
+        singular: "un guion"
+      connectors:
+        words: ", "
+        and: " y "
+        or: " o "

@@ -1,0 +1,93 @@
+input,expected,options
+javi,ok,
+javi_r,ok,
+ @Javi_R ,ok,
+\u{FF2A}\u{FF41}\u{FF56}\u{FF49},ok,
+\u{1D2E}\u{1D35}\u{1D33}\u{1D2E}\u{1D35}\u{1D3F}\u{1D30},ok,
+\u{212A}elvin,ok,
+\u{FB01}fa,ok,
+\u{3000}javi\u{3000},ok,
+@javi,ok,
+3nn,ok,
+12345a,ok,
+123_456,username_digits_only,
+j_a_v_i,ok,
+abc,ok,
+abcdefghijabcdefghijabcdefghij,ok,
+ja\xFFvi,ok,
+x\nadmin,username_spaces,
+ja vi,username_spaces,
+ja\tvi,username_spaces,
+ja\u{3000}vi,username_spaces,
+ja\u{A0}vi,username_spaces,
+ja\u{2028}vi,username_spaces,
+ja\u{85}vi,username_spaces,
+ja\u{1680}vi,username_spaces,
+ja\u{202F}vi,username_spaces,
+x\nadmin,username_spaces,case=preserve
+ja\u{200B}vi,username_characters,
+ja\u{FEFF}vi,username_characters,
+ja\u{202E}vi,username_characters,
+ja\u{200D}vi,username_characters,
+ja\u{2063}vi,username_characters,
+jav\u{0}i,username_characters,
+javi\u{1F600},username_characters,
+jos\u{E9}!,username_characters,
+ja.vi,username_characters,
+ja-vi,username_characters,
+ja@vi,username_characters,
+@@javi,username_characters,
+@_javi,username_characters,
+--javi,username_characters,
+"a,b,c",username_characters,
+'apos',username_characters,
+ja%{value}vi,username_characters,
+oliver.__-hjj,username_characters,
+jos\u{E9},username_unicode,
+jose\u{301},username_unicode,
+\u{438}\u{432}\u{430}\u{43D},username_unicode,
+j\u{430}vi,username_unicode,
+\u{130}smail,username_unicode,
+stra\u{DF}e,username_unicode,
+\u{3A3}\u{391}\u{3A3},username_unicode,
+,too_short,
+   ,too_short,
+a,too_short,
+ab,too_short,
+ab ,too_short,
+abcdefghijabcdefghijabcdefghijk,too_long,
+_javi,username_edges,
+javi_,username_edges,
+ja__vi,username_consecutive,
+12345,username_digits_only,
+123,username_digits_only,
+1488,username_digits_only,
+Javi,ok,case=preserve
+Javi_R,ok,case=preserve
+jos\u{E9},username_unicode,case=preserve
+oliver.__-hjj,username_consecutive,separators=_.-
+john.doe,ok,separators=_.
+john.json,username_extension,separators=_.
+john.JSON,username_extension,separators=_. case=preserve
+john.git,username_extension,separators=_.
+john.csv,username_extension,separators=_.
+.john,username_edges,separators=_.
+john.,username_edges,separators=_.
+_javi_,ok,edge_separators=true
+ja__vi,username_consecutive,edge_separators=true
+.javi,username_edges,separators=_. edge_separators=true
+_javi.,username_edges,separators=_. edge_separators=true
+-javi,ok,separators=- edge_separators=true
+-javi,username_edges,separators=-
+ja--vi,username_consecutive,separators=-
+ja_vi,username_characters,separators=-
+3nn,username_first_character,first_character=letter
+nn3,ok,first_character=letter
+_nn,username_first_character,first_character=letter edge_separators=true
+JAVI,ok,case=preserve first_character=letter
+ab,ok,length=2..15
+a,too_short,length=2..15
+abcdefghijklmnop,too_long,length=2..15
+abcdefghijklmno,ok,length=2..15
+javi,ok,separators=
+ja_vi,username_characters,separators=

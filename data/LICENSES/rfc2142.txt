@@ -1,0 +1,9 @@
+RFC 2142, "Mailbox Names for Common Services, Roles and Functions" (D. Crocker, May 1997)
+https://www.rfc-editor.org/rfc/rfc2142.txt
+------------------------------------------------------------------------------
+
+Only the 15 mailbox names the RFC specifies are used (abuse ftp hostmaster info marketing news
+noc postmaster sales security support usenet uucp webmaster www). They are standards facts, not
+copyrightable expression; no RFC text is reproduced. The RFC's own status notice reads:
+"Distribution of this memo is unlimited." (RFC 2142 predates the IETF Trust Legal Provisions and
+carries no other licence statement.)

@@ -1,0 +1,1014 @@
+[
+  {
+    "term": "bollera",
+    "severity": 4,
+    "variants": [
+      "bolleras"
+    ],
+    "tags": [
+      "homophobic"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "bujarron",
+    "severity": 4,
+    "variants": [
+      "bujarra",
+      "bujarrones"
+    ],
+    "tags": [
+      "homophobic"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "chinorris",
+    "severity": 4,
+    "variants": [],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "joto",
+    "severity": 4,
+    "variants": [
+      "jotos"
+    ],
+    "tags": [
+      "homophobic"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "machorra",
+    "severity": 4,
+    "variants": [
+      "machorras"
+    ],
+    "tags": [
+      "homophobic"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "marica",
+    "severity": 4,
+    "variants": [
+      "maricas"
+    ],
+    "tags": [
+      "homophobic"
+    ],
+    "exceptions": [],
+    "segment_only": true
+  },
+  {
+    "term": "maricon",
+    "severity": 4,
+    "variants": [
+      "maricones"
+    ],
+    "tags": [
+      "homophobic"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "maricona",
+    "severity": 4,
+    "variants": [
+      "mariconas"
+    ],
+    "tags": [
+      "homophobic"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "mariconazo",
+    "severity": 4,
+    "variants": [
+      "mariconazos"
+    ],
+    "tags": [
+      "homophobic"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "marikon",
+    "severity": 4,
+    "variants": [
+      "marikones"
+    ],
+    "tags": [
+      "homophobic"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "marimacho",
+    "severity": 4,
+    "variants": [
+      "marimachos"
+    ],
+    "tags": [
+      "homophobic"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "mongolico",
+    "severity": 4,
+    "variants": [
+      "mongolica",
+      "mongolicas",
+      "mongolicos"
+    ],
+    "tags": [
+      "ableist"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "mongolo",
+    "severity": 4,
+    "variants": [
+      "mongola",
+      "mongolas",
+      "mongolos"
+    ],
+    "tags": [
+      "ableist"
+    ],
+    "exceptions": [],
+    "segment_only": true
+  },
+  {
+    "term": "negrata",
+    "severity": 4,
+    "variants": [
+      "negratas"
+    ],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "puto",
+    "severity": 4,
+    "variants": [
+      "putos"
+    ],
+    "tags": [
+      "homophobic"
+    ],
+    "exceptions": [],
+    "segment_only": true
+  },
+  {
+    "term": "sidoso",
+    "severity": 4,
+    "variants": [
+      "sidosa",
+      "sidosas",
+      "sidosos"
+    ],
+    "tags": [
+      "ableist"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "sudaca",
+    "severity": 4,
+    "variants": [
+      "sudacas"
+    ],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "tortillera",
+    "severity": 4,
+    "variants": [
+      "tortilleras"
+    ],
+    "tags": [
+      "homophobic"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "travelo",
+    "severity": 4,
+    "variants": [
+      "travelos"
+    ],
+    "tags": [
+      "transphobic"
+    ],
+    "exceptions": [],
+    "segment_only": true
+  },
+  {
+    "term": "cabron",
+    "severity": 3,
+    "variants": [
+      "cabrona",
+      "cabronaza",
+      "cabronazo",
+      "cabrones"
+    ],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "chingar",
+    "severity": 3,
+    "variants": [
+      "chingada",
+      "chingadera",
+      "chingado"
+    ],
+    "tags": [
+      "general"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "chocho",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "chupapollas",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "cojones",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "comemierda",
+    "severity": 3,
+    "variants": [
+      "comemierdas"
+    ],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "cono",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "culear",
+    "severity": 3,
+    "variants": [
+      "culeado"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "culero",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "culo",
+    "severity": 3,
+    "variants": [
+      "culos"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "follar",
+    "severity": 3,
+    "variants": [
+      "follador"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "gabacho",
+    "severity": 3,
+    "variants": [
+      "gabachos"
+    ],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "gilipollas",
+    "severity": 3,
+    "variants": [
+      "jilipollas"
+    ],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "hijoputa",
+    "severity": 3,
+    "variants": [
+      "hijadeputa",
+      "hijodeputa",
+      "hijueputa"
+    ],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "joder",
+    "severity": 3,
+    "variants": [
+      "jodete",
+      "jodida",
+      "jodido",
+      "jodienda"
+    ],
+    "tags": [
+      "general"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "lameculos",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "malparido",
+    "severity": 3,
+    "variants": [
+      "malnacida",
+      "malnacido",
+      "malparida"
+    ],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "mamada",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "mamahuevo",
+    "severity": 3,
+    "variants": [
+      "mamahuevos"
+    ],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "mamon",
+    "severity": 3,
+    "variants": [
+      "mamona"
+    ],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "mierda",
+    "severity": 3,
+    "variants": [
+      "mierdas",
+      "mierdosa",
+      "mierdoso"
+    ],
+    "tags": [
+      "general"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "ojete",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "pajero",
+    "severity": 3,
+    "variants": [
+      "pajearse"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "panocha",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "pelotudo",
+    "severity": 3,
+    "variants": [
+      "pelotuda"
+    ],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "pendejo",
+    "severity": 3,
+    "variants": [
+      "pendeja"
+    ],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "picha",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "pinga",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "polla",
+    "severity": 3,
+    "variants": [
+      "pollas"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "poronga",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "puta",
+    "severity": 3,
+    "variants": [
+      "putamadre",
+      "putas",
+      "putazo",
+      "putero",
+      "putita",
+      "putona"
+    ],
+    "tags": [
+      "insult",
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "soplapollas",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "subnormal",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "ableist"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "verga",
+    "severity": 3,
+    "variants": [
+      "vergas",
+      "vergazo"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "violador",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "baboso",
+    "severity": 2,
+    "variants": [
+      "babosa"
+    ],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "boludo",
+    "severity": 2,
+    "variants": [
+      "boluda"
+    ],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "cagar",
+    "severity": 2,
+    "variants": [
+      "cagada",
+      "cagado"
+    ],
+    "tags": [
+      "general"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "cagon",
+    "severity": 2,
+    "variants": [
+      "cagona"
+    ],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "capullo",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "carajo",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "general"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "cenutrio",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "ceporro",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "cornudo",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "cretino",
+    "severity": 2,
+    "variants": [
+      "cretina"
+    ],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "energumeno",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "estupido",
+    "severity": 2,
+    "variants": [
+      "estupida"
+    ],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "gilipuertas",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "guarro",
+    "severity": 2,
+    "variants": [
+      "guarra"
+    ],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "hostia",
+    "severity": 2,
+    "variants": [
+      "ostia"
+    ],
+    "tags": [
+      "general"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "huevon",
+    "severity": 2,
+    "variants": [
+      "huevona"
+    ],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "idiota",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "imbecil",
+    "severity": 2,
+    "variants": [
+      "imbeciles"
+    ],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "majadero",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "malandro",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "mamarla",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "mentecato",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "mequetrefe",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "orto",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "paja",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "papanatas",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "pazguato",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "pedo",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "general"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "perra",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "pija",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "pinche",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "general"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "pito",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "prostituta",
+    "severity": 2,
+    "variants": [
+      "prostituto"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "ramera",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "retrasado",
+    "severity": 2,
+    "variants": [
+      "retrasada"
+    ],
+    "tags": [
+      "ableist"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "sexo",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "tarado",
+    "severity": 2,
+    "variants": [
+      "tarada"
+    ],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "teta",
+    "severity": 2,
+    "variants": [
+      "tetas"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "violar",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "vulva",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "zopenco",
+    "severity": 2,
+    "variants": [
+      "zopenca"
+    ],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "zoquete",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "zorra",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "insult"
+    ],
+    "exceptions": []
+  }
+]

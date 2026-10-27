@@ -1,0 +1,5718 @@
+[
+  {
+    "term": "1man1jar",
+    "severity": 4,
+    "variants": [
+      "1m1j",
+      "onejaroneman",
+      "onemanonejar"
+    ],
+    "tags": [
+      "shock"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "2girls1cup",
+    "severity": 4,
+    "variants": [
+      "2g1c",
+      "onecuptwogirls",
+      "twogirlsonecup"
+    ],
+    "tags": [
+      "shock"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "barelylegal",
+    "severity": 4,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "bluewaffle",
+    "severity": 4,
+    "variants": [],
+    "tags": [
+      "shock"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "chink",
+    "severity": 4,
+    "variants": [
+      "chinks",
+      "chinky"
+    ],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": [
+      "chinkapin",
+      "chinkapins",
+      "chinkara",
+      "chinked",
+      "chinker",
+      "chinkerinchee",
+      "chinkier",
+      "chinkiest",
+      "chinking",
+      "chinkle",
+      "pachinko",
+      "pachinkos",
+      "unchinked"
+    ]
+  },
+  {
+    "term": "clusterfuck",
+    "severity": 4,
+    "variants": [],
+    "tags": [
+      "general"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "coon",
+    "severity": 4,
+    "variants": [
+      "coons"
+    ],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": [
+      "barracoon",
+      "cacoon",
+      "carcoon",
+      "coccoon",
+      "coccooned",
+      "cocoon",
+      "cocoonery",
+      "cocoons",
+      "cooncan",
+      "coonhound",
+      "coonily",
+      "cooniness",
+      "coonroot",
+      "coonskin",
+      "coontail",
+      "coontie",
+      "coony",
+      "flocoon",
+      "puccoon",
+      "raccoon",
+      "racoon",
+      "scoon",
+      "tycoon"
+    ]
+  },
+  {
+    "term": "cunt",
+    "severity": 4,
+    "variants": [
+      "cunnnnt",
+      "cunnnt",
+      "cunnt",
+      "cunts",
+      "cuunnnnt",
+      "cuunnnt",
+      "cuunnt",
+      "cuunt",
+      "cuuunnnnt",
+      "cuuunnnt",
+      "cuuunnt",
+      "cuuunt",
+      "cuuuunnnnt",
+      "cuuuunnnt",
+      "cuuuunnt",
+      "cuuuunt",
+      "kunt",
+      "kunts",
+      "kuunt",
+      "kuuunt",
+      "kuuuunt"
+    ],
+    "tags": [
+      "general"
+    ],
+    "exceptions": [
+      "eduskunta",
+      "placuntitis",
+      "placuntoma",
+      "pokunt",
+      "scunthorpe"
+    ]
+  },
+  {
+    "term": "daterape",
+    "severity": 4,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "faggot",
+    "severity": 4,
+    "variants": [
+      "faaaagggggoooot",
+      "faaaagggggooot",
+      "faaaagggggoot",
+      "faaaagggggot",
+      "faaaaggggoooot",
+      "faaaaggggooot",
+      "faaaaggggoot",
+      "faaaaggggot",
+      "faaaagggoooot",
+      "faaaagggooot",
+      "faaaagggoot",
+      "faaaagggot",
+      "faaaaggoooot",
+      "faaaaggooot",
+      "faaaaggoot",
+      "faaaaggot",
+      "faaagggggoooot",
+      "faaagggggooot",
+      "faaagggggoot",
+      "faaagggggot",
+      "faaaggggoooot",
+      "faaaggggooot",
+      "faaaggggoot",
+      "faaaggggot",
+      "faaagggoooot",
+      "faaagggooot",
+      "faaagggoot",
+      "faaagggot",
+      "faaaggoooot",
+      "faaaggooot",
+      "faaaggoot",
+      "faaaggot",
+      "faagggggoooot",
+      "faagggggooot",
+      "faagggggoot",
+      "faagggggot",
+      "faaggggoooot",
+      "faaggggooot",
+      "faaggggoot",
+      "faaggggot",
+      "faagggoooot",
+      "faagggooot",
+      "faagggoot",
+      "faagggot",
+      "faaggoooot",
+      "faaggooot",
+      "faaggoot",
+      "faaggot",
+      "fagggggoooot",
+      "fagggggooot",
+      "fagggggoot",
+      "fagggggot",
+      "faggggoooot",
+      "faggggooot",
+      "faggggoot",
+      "faggggot",
+      "fagggoooot",
+      "fagggooot",
+      "fagggoot",
+      "fagggot",
+      "faggoooot",
+      "faggooot",
+      "faggoot",
+      "fagot"
+    ],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": [
+      "contrafagotto",
+      "esophagotome",
+      "esophagotomy",
+      "fagoter",
+      "fagoting",
+      "fagottino",
+      "fagottist",
+      "fagoty",
+      "unfagoted"
+    ]
+  },
+  {
+    "term": "fuck",
+    "severity": 4,
+    "variants": [
+      "fucccck",
+      "fuccccken",
+      "fuccccker",
+      "fucccckin",
+      "fuccccking",
+      "fuccck",
+      "fucccken",
+      "fucccker",
+      "fuccckin",
+      "fucccking",
+      "fucck",
+      "fuccken",
+      "fuccker",
+      "fucckin",
+      "fuccking",
+      "fucken",
+      "fucker",
+      "fuckers",
+      "fuckin",
+      "fucking",
+      "fucks",
+      "fuucccck",
+      "fuuccccken",
+      "fuuccccker",
+      "fuucccckin",
+      "fuuccccking",
+      "fuuccck",
+      "fuucccken",
+      "fuucccker",
+      "fuuccckin",
+      "fuucccking",
+      "fuucck",
+      "fuuccken",
+      "fuuccker",
+      "fuucckin",
+      "fuuccking",
+      "fuuck",
+      "fuucken",
+      "fuucker",
+      "fuuckers",
+      "fuuckin",
+      "fuucking",
+      "fuuucccck",
+      "fuuuccccken",
+      "fuuuccccker",
+      "fuuucccckin",
+      "fuuuccccking",
+      "fuuuccck",
+      "fuuucccken",
+      "fuuucccker",
+      "fuuuccckin",
+      "fuuucccking",
+      "fuuucck",
+      "fuuuccken",
+      "fuuuccker",
+      "fuuucckin",
+      "fuuuccking",
+      "fuuuck",
+      "fuuucken",
+      "fuuucker",
+      "fuuuckers",
+      "fuuuckin",
+      "fuuucking",
+      "fuuuucccck",
+      "fuuuuccccken",
+      "fuuuuccccker",
+      "fuuuucccckin",
+      "fuuuuccccking",
+      "fuuuuccck",
+      "fuuuucccken",
+      "fuuuucccker",
+      "fuuuuccckin",
+      "fuuuucccking",
+      "fuuuucck",
+      "fuuuuccken",
+      "fuuuuccker",
+      "fuuuucckin",
+      "fuuuuccking",
+      "fuuuuck",
+      "fuuuucken",
+      "fuuuucker",
+      "fuuuuckers",
+      "fuuuuckin",
+      "fuuuucking"
+    ],
+    "tags": [
+      "general"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "fuckhead",
+    "severity": 4,
+    "variants": [
+      "fuckheads"
+    ],
+    "tags": [
+      "general"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "fucktard",
+    "severity": 4,
+    "variants": [
+      "fucktards"
+    ],
+    "tags": [
+      "general"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "fuckwad",
+    "severity": 4,
+    "variants": [
+      "fuckwads"
+    ],
+    "tags": [
+      "general"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "fuckwit",
+    "severity": 4,
+    "variants": [
+      "fuckwhit",
+      "fuckwits"
+    ],
+    "tags": [
+      "general"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "goatse",
+    "severity": 4,
+    "variants": [
+      "goatcx"
+    ],
+    "tags": [
+      "shock"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "gook",
+    "severity": 4,
+    "variants": [
+      "gookeye",
+      "gookie",
+      "gooks",
+      "gooky"
+    ],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": [
+      "gobbledegook",
+      "gobbledegooks",
+      "gobbledygook",
+      "gobbledygooks"
+    ]
+  },
+  {
+    "term": "goregasm",
+    "severity": 4,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "incest",
+    "severity": 4,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "jailbait",
+    "severity": 4,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "kike",
+    "severity": 4,
+    "variants": [
+      "kiiiike",
+      "kiiike",
+      "kiike"
+    ],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "lemonparty",
+    "severity": 4,
+    "variants": [],
+    "tags": [
+      "shock"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "meatspin",
+    "severity": 4,
+    "variants": [],
+    "tags": [
+      "shock"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "mrhands",
+    "severity": 4,
+    "variants": [],
+    "tags": [
+      "shock"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "nambla",
+    "severity": 4,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "nigger",
+    "severity": 4,
+    "variants": [
+      "niggeeeer",
+      "niggeeer",
+      "niggeer",
+      "nigggeeeer",
+      "nigggeeer",
+      "nigggeer",
+      "niggger",
+      "niggggeeeer",
+      "niggggeeer",
+      "niggggeer",
+      "nigggger",
+      "nigggggeeeer",
+      "nigggggeeer",
+      "nigggggeer",
+      "niggggger",
+      "niiggeeeer",
+      "niiggeeer",
+      "niiggeer",
+      "niigger",
+      "niigggeeeer",
+      "niigggeeer",
+      "niigggeer",
+      "niiggger",
+      "niiggggeeeer",
+      "niiggggeeer",
+      "niiggggeer",
+      "niigggger",
+      "niigggggeeeer",
+      "niigggggeeer",
+      "niigggggeer",
+      "niiggggger",
+      "niiiggeeeer",
+      "niiiggeeer",
+      "niiiggeer",
+      "niiigger",
+      "niiigggeeeer",
+      "niiigggeeer",
+      "niiigggeer",
+      "niiiggger",
+      "niiiggggeeeer",
+      "niiiggggeeer",
+      "niiiggggeer",
+      "niiigggger",
+      "niiigggggeeeer",
+      "niiigggggeeer",
+      "niiigggggeer",
+      "niiiggggger",
+      "niiiiggeeeer",
+      "niiiiggeeer",
+      "niiiiggeer",
+      "niiiigger",
+      "niiiigggeeeer",
+      "niiiigggeeer",
+      "niiiigggeer",
+      "niiiiggger",
+      "niiiiggggeeeer",
+      "niiiiggggeeer",
+      "niiiiggggeer",
+      "niiiigggger",
+      "niiiigggggeeeer",
+      "niiiigggggeeer",
+      "niiiigggggeer",
+      "niiiiggggger"
+    ],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": [
+      "snigger",
+      "sniggered",
+      "sniggerer",
+      "sniggering",
+      "sniggers"
+    ]
+  },
+  {
+    "term": "paki",
+    "severity": 4,
+    "variants": [],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": [
+      "pakihi",
+      "pakistan",
+      "pakistani",
+      "pakistanis",
+      "rapakivi"
+    ]
+  },
+  {
+    "term": "pedobear",
+    "severity": 4,
+    "variants": [
+      "paedobear"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "pisspig",
+    "severity": 4,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "rape",
+    "severity": 4,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": [],
+    "segment_only": true
+  },
+  {
+    "term": "raping",
+    "severity": 4,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": [],
+    "segment_only": true
+  },
+  {
+    "term": "rapist",
+    "severity": 4,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": [],
+    "segment_only": true
+  },
+  {
+    "term": "sandnigger",
+    "severity": 4,
+    "variants": [
+      "sandniggeeeer",
+      "sandniggeeer",
+      "sandniggeer",
+      "sandnigggeeeer",
+      "sandnigggeeer",
+      "sandnigggeer",
+      "sandniggger",
+      "sandniggggeeeer",
+      "sandniggggeeer",
+      "sandniggggeer",
+      "sandnigggger",
+      "sandnigggggeeeer",
+      "sandnigggggeeer",
+      "sandnigggggeer",
+      "sandniggggger",
+      "sandniiggeeeer",
+      "sandniiggeeer",
+      "sandniiggeer",
+      "sandniigger",
+      "sandniigggeeeer",
+      "sandniigggeeer",
+      "sandniigggeer",
+      "sandniiggger",
+      "sandniiggggeeeer",
+      "sandniiggggeeer",
+      "sandniiggggeer",
+      "sandniigggger",
+      "sandniigggggeeeer",
+      "sandniigggggeeer",
+      "sandniigggggeer",
+      "sandniiggggger",
+      "sandniiiggeeeer",
+      "sandniiiggeeer",
+      "sandniiiggeer",
+      "sandniiigger",
+      "sandniiigggeeeer",
+      "sandniiigggeeer",
+      "sandniiigggeer",
+      "sandniiiggger",
+      "sandniiiggggeeeer",
+      "sandniiiggggeeer",
+      "sandniiiggggeer",
+      "sandniiigggger",
+      "sandniiigggggeeeer",
+      "sandniiigggggeeer",
+      "sandniiigggggeer",
+      "sandniiiggggger",
+      "sandniiiiggeeeer",
+      "sandniiiiggeeer",
+      "sandniiiiggeer",
+      "sandniiiigger",
+      "sandniiiigggeeeer",
+      "sandniiiigggeeer",
+      "sandniiiigggeer",
+      "sandniiiiggger",
+      "sandniiiiggggeeeer",
+      "sandniiiiggggeeer",
+      "sandniiiiggggeer",
+      "sandniiiigggger",
+      "sandniiiigggggeeeer",
+      "sandniiiigggggeeer",
+      "sandniiiigggggeer",
+      "sandniiiiggggger"
+    ],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "shota",
+    "severity": 4,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": [],
+    "segment_only": true
+  },
+  {
+    "term": "strappado",
+    "severity": 4,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "timbernigger",
+    "severity": 4,
+    "variants": [
+      "timberniggeeeer",
+      "timberniggeeer",
+      "timberniggeer",
+      "timbernigggeeeer",
+      "timbernigggeeer",
+      "timbernigggeer",
+      "timberniggger",
+      "timberniggggeeeer",
+      "timberniggggeeer",
+      "timberniggggeer",
+      "timbernigggger",
+      "timbernigggggeeeer",
+      "timbernigggggeeer",
+      "timbernigggggeer",
+      "timberniggggger",
+      "timberniiggeeeer",
+      "timberniiggeeer",
+      "timberniiggeer",
+      "timberniigger",
+      "timberniigggeeeer",
+      "timberniigggeeer",
+      "timberniigggeer",
+      "timberniiggger",
+      "timberniiggggeeeer",
+      "timberniiggggeeer",
+      "timberniiggggeer",
+      "timberniigggger",
+      "timberniigggggeeeer",
+      "timberniigggggeeer",
+      "timberniigggggeer",
+      "timberniiggggger",
+      "timberniiiggeeeer",
+      "timberniiiggeeer",
+      "timberniiiggeer",
+      "timberniiigger",
+      "timberniiigggeeeer",
+      "timberniiigggeeer",
+      "timberniiigggeer",
+      "timberniiiggger",
+      "timberniiiggggeeeer",
+      "timberniiiggggeeer",
+      "timberniiiggggeer",
+      "timberniiigggger",
+      "timberniiigggggeeeer",
+      "timberniiigggggeeer",
+      "timberniiigggggeer",
+      "timberniiiggggger",
+      "timberniiiiggeeeer",
+      "timberniiiiggeeer",
+      "timberniiiiggeer",
+      "timberniiiigger",
+      "timberniiiigggeeeer",
+      "timberniiiigggeeer",
+      "timberniiiigggeer",
+      "timberniiiiggger",
+      "timberniiiiggggeeeer",
+      "timberniiiiggggeeer",
+      "timberniiiiggggeer",
+      "timberniiiigggger",
+      "timberniiiigggggeeeer",
+      "timberniiiigggggeeer",
+      "timberniiiigggggeer",
+      "timberniiiiggggger"
+    ],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "tranny",
+    "severity": 4,
+    "variants": [
+      "trannie"
+    ],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "tubgirl",
+    "severity": 4,
+    "variants": [],
+    "tags": [
+      "shock"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "wetback",
+    "severity": 4,
+    "variants": [],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "zippocat",
+    "severity": 4,
+    "variants": [],
+    "tags": [
+      "shock"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "acrotomophilia",
+    "severity": 3,
+    "variants": [
+      "acrotomophile"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "alabamahotpocket",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "alabamatunamelt",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "alaskanpipeline",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "algophilia",
+    "severity": 3,
+    "variants": [
+      "algophile"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "analassassin",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "analastronaut",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "anilingus",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "apotemnophilia",
+    "severity": 3,
+    "variants": [
+      "apotemnophile"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "arsehole",
+    "severity": 3,
+    "variants": [
+      "arsehoole",
+      "arsehooole",
+      "arsehoooole",
+      "asshole",
+      "asshoole",
+      "asshooole",
+      "asshoooole",
+      "assshole",
+      "assshoole",
+      "assshooole",
+      "assshoooole",
+      "asssshole",
+      "asssshoole",
+      "asssshooole",
+      "asssshoooole",
+      "assssshole",
+      "assssshoole",
+      "assssshooole",
+      "assssshoooole"
+    ],
+    "tags": [
+      "general"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "assbandit",
+    "severity": 3,
+    "variants": [
+      "arsebandit"
+    ],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "autoerotic",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "babeland",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "babybatter",
+    "severity": 3,
+    "variants": [
+      "babygravy",
+      "babyjuice",
+      "ballbatter",
+      "ballgravy"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "ballcuzi",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "ballgag",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "ballkicking",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "balllicking",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "ballsack",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "ballsucking",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "bangbros",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "bangbus",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "bareback",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "bastard",
+    "severity": 3,
+    "variants": [
+      "baaaastaaaard",
+      "baaaastaaard",
+      "baaaastaard",
+      "baaaastard",
+      "baaastaaaard",
+      "baaastaaard",
+      "baaastaard",
+      "baaastard",
+      "baastaaaard",
+      "baastaaard",
+      "baastaard",
+      "baastard",
+      "bastaaaard",
+      "bastaaard",
+      "bastaard"
+    ],
+    "tags": [
+      "general"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "bastinado",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "battyboy",
+    "severity": 3,
+    "variants": [
+      "battyboi"
+    ],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "bdsm",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "beaner",
+    "severity": 3,
+    "variants": [
+      "beaners"
+    ],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": [
+      "beaneries",
+      "beanery"
+    ]
+  },
+  {
+    "term": "beanflicker",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "beanqueen",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "beastiality",
+    "severity": 3,
+    "variants": [
+      "beestiality",
+      "bestiality"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "beavercleaver",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "beaverlips",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "bellend",
+    "severity": 3,
+    "variants": [
+      "belllend",
+      "bellllend",
+      "belllllend"
+    ],
+    "tags": [
+      "general"
+    ],
+    "exceptions": [
+      "bellenden"
+    ]
+  },
+  {
+    "term": "bellesa",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "bicon",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": [
+      "biconcave",
+      "biconcavities",
+      "biconcavity",
+      "biconvex",
+      "biconvexities",
+      "biconvexity"
+    ]
+  },
+  {
+    "term": "bigboobs",
+    "severity": 3,
+    "variants": [
+      "bigbreasts",
+      "bigknockers",
+      "bigtits"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "birdlock",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "bitch",
+    "severity": 3,
+    "variants": [
+      "biiiitch",
+      "biiiitches",
+      "biiitch",
+      "biiitches",
+      "biitch",
+      "biitches",
+      "bitches"
+    ],
+    "tags": [
+      "general"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "blackcock",
+    "severity": 3,
+    "variants": [
+      "bigcock",
+      "giantcock",
+      "hugecock",
+      "massivecock",
+      "throbbingcock"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "blowjob",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "blowyourload",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "blumpkin",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "boner",
+    "severity": 3,
+    "variants": [
+      "ragingboner",
+      "throbbingboner"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "bonesmuggler",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "bootybuffer",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "bootycall",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "bostongeorge",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "brownieking",
+    "severity": 3,
+    "variants": [
+      "browniequeen"
+    ],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "brownpiper",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "brownshower",
+    "severity": 3,
+    "variants": [
+      "brownshowers"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "buddhahead",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "bufter",
+    "severity": 3,
+    "variants": [
+      "bufty"
+    ],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "bukkake",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "bulldyke",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "bulletvibe",
+    "severity": 3,
+    "variants": [
+      "bulletvibrator"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "bumchum",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "bumdriller",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "buttboy",
+    "severity": 3,
+    "variants": [
+      "bumboy"
+    ],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "buttholeengineer",
+    "severity": 3,
+    "variants": [
+      "bumholeengineer"
+    ],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "buttpilot",
+    "severity": 3,
+    "variants": [
+      "bumpilot"
+    ],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "buttpirate",
+    "severity": 3,
+    "variants": [
+      "bumpirate"
+    ],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "buttrider",
+    "severity": 3,
+    "variants": [
+      "bumrider"
+    ],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "buttrobber",
+    "severity": 3,
+    "variants": [
+      "bumrobber"
+    ],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "buttrustler",
+    "severity": 3,
+    "variants": [
+      "bumrustler"
+    ],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "cameljockey",
+    "severity": 3,
+    "variants": [
+      "cameljockies"
+    ],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "cameltoe",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "canadianporchswing",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "carpetmuncher",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "cheeseeatingsurrendermonkey",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "chichiman",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "chickenqueen",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "chocolaterosebud",
+    "severity": 3,
+    "variants": [
+      "chocolaterosebuds"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "cholerophilia",
+    "severity": 3,
+    "variants": [
+      "cholerophile"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "cialis",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "circlejerk",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "cishet",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "cissy",
+    "severity": 3,
+    "variants": [
+      "cissie"
+    ],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "claustrophilia",
+    "severity": 3,
+    "variants": [
+      "claustrophile"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "clevelandaccordion",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "clevelandhotwaffle",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "clevelandsteamer",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "clit",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": [
+      "anaclitic",
+      "clitella",
+      "clitellum",
+      "clitic",
+      "cliticize",
+      "cliticized",
+      "cliticizes",
+      "cliticizing",
+      "clitics",
+      "cyclitol",
+      "cyclitols",
+      "enclitic",
+      "enclitics",
+      "heteroclite",
+      "heteroclites",
+      "paclitaxel",
+      "paclitaxels",
+      "proclitic",
+      "proclitics"
+    ]
+  },
+  {
+    "term": "clitoris",
+    "severity": 3,
+    "variants": [
+      "cliiiitoriiiis",
+      "cliiiitoriiis",
+      "cliiiitoriis",
+      "cliiiitoris",
+      "cliiitoriiiis",
+      "cliiitoriiis",
+      "cliiitoriis",
+      "cliiitoris",
+      "cliitoriiiis",
+      "cliitoriiis",
+      "cliitoriis",
+      "cliitoris",
+      "clitoriiiis",
+      "clitoriiis",
+      "clitoriis"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "cloverclamps",
+    "severity": 3,
+    "variants": [
+      "cloverclamp"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "clunge",
+    "severity": 3,
+    "variants": [
+      "cluunge",
+      "cluuunge",
+      "cluuuunge"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "cockpipecosmonaut",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "cockstructionworker",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "coimetrophilia",
+    "severity": 3,
+    "variants": [
+      "coimetrophile"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "collaring",
+    "severity": 3,
+    "variants": [
+      "collared"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "coprophilia",
+    "severity": 3,
+    "variants": [
+      "coprolagnia",
+      "coprophile"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "cornhole",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "craftybutcher",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "creampie",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "cum",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "cumming",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "cumshot",
+    "severity": 3,
+    "variants": [
+      "cumshots"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "cunnilingus",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "cuntboy",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "currymuncher",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "darkie",
+    "severity": 3,
+    "variants": [
+      "darkey",
+      "darkies",
+      "darky"
+    ],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "ddlg",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "deepthroat",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "dendrophilia",
+    "severity": 3,
+    "variants": [
+      "dendrophile"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "dickgirl",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "dildo",
+    "severity": 3,
+    "variants": [
+      "dildos"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "dipsea",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "dirtypillows",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "dirtysanchez",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "dishabiliophilia",
+    "severity": 3,
+    "variants": [
+      "dishabiliophile"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "doggiestyle",
+    "severity": 3,
+    "variants": [
+      "doggystyle",
+      "dogstyle"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "dolcett",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "domination",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "dominatrix",
+    "severity": 3,
+    "variants": [
+      "domme",
+      "dommes"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "donkeypunch",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "donutmuncher",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "donutpuncher",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "doublepenetration",
+    "severity": 3,
+    "variants": [
+      "dpaction"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "dryhump",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "dunecoon",
+    "severity": 3,
+    "variants": [
+      "dooncoon"
+    ],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "dutchrudder",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "dyke",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": [
+      "vandyke",
+      "vandyked",
+      "vandykes"
+    ]
+  },
+  {
+    "term": "dystychiphilia",
+    "severity": 3,
+    "variants": [
+      "dystychiphile"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "edgeplay",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "ejaculate",
+    "severity": 3,
+    "variants": [
+      "ejaculated",
+      "ejaculating",
+      "ejaculation"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "electroplay",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "emetophilia",
+    "severity": 3,
+    "variants": [
+      "emetophile"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "enby",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": [
+      "allenby",
+      "asenby",
+      "brookenby",
+      "caenby",
+      "denby",
+      "frozenbyte",
+      "gatenby",
+      "holdenby",
+      "lackenby",
+      "lazenby",
+      "navenby",
+      "ottenby",
+      "renbygda",
+      "tenby",
+      "warrenby",
+      "whenby"
+    ]
+  },
+  {
+    "term": "eskimotrebuchet",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "fag",
+    "severity": 3,
+    "variants": [
+      "faaaag",
+      "faaag",
+      "faag"
+    ],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": [
+      "leafage",
+      "leafages",
+      "serfage",
+      "serfages",
+      "wharfage",
+      "wharfages"
+    ]
+  },
+  {
+    "term": "fagbomb",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "felch",
+    "severity": 3,
+    "variants": [
+      "felching"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "fellatio",
+    "severity": 3,
+    "variants": [
+      "fellating"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "femalesquirting",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "figging",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "fingerbang",
+    "severity": 3,
+    "variants": [
+      "fingerbanging"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "fingering",
+    "severity": 3,
+    "variants": [
+      "fingered"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "finocchio",
+    "severity": 3,
+    "variants": [
+      "finoccio",
+      "finochio"
+    ],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "fisting",
+    "severity": 3,
+    "variants": [
+      "fisted"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "footjob",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "frenchrudder",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "frolicme",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "frotting",
+    "severity": 3,
+    "variants": [
+      "frottage"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "fudgepacker",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "futanari",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "gangbang",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "gaysex",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "gaysian",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "genitorture",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "gerontophilia",
+    "severity": 3,
+    "variants": [
+      "gerontophile"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "girlontop",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "gokkun",
+    "severity": 3,
+    "variants": [
+      "gokun"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "goldenshower",
+    "severity": 3,
+    "variants": [
+      "goldenshowers",
+      "yellowshower",
+      "yellowshowers"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "greyqueen",
+    "severity": 3,
+    "variants": [
+      "grayqueen"
+    ],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "grope",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "groupsex",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "gspot",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "gymbunny",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "handjob",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "hermie",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": [
+      "diathermies",
+      "endothermies",
+      "homeothermies"
+    ]
+  },
+  {
+    "term": "hickoryswitch",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "hippophilia",
+    "severity": 3,
+    "variants": [
+      "hippophile"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "homoerotic",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "horny",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "hotcarl",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "hotrichard",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "humping",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "impactplay",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "intercourse",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "jellydonut",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "jerkmate",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "jigaboo",
+    "severity": 3,
+    "variants": [
+      "jigabooo",
+      "jigaboooo",
+      "jigabooooo",
+      "jiggaboo",
+      "jiggabooo",
+      "jiggaboooo",
+      "jiggabooooo",
+      "jiggerboo",
+      "jiggerbooo",
+      "jiggerboooo",
+      "jiggerbooooo",
+      "jigggaboo",
+      "jigggabooo",
+      "jigggaboooo",
+      "jigggabooooo",
+      "jigggerboo",
+      "jigggerbooo",
+      "jigggerboooo",
+      "jigggerbooooo",
+      "jiggggaboo",
+      "jiggggabooo",
+      "jiggggaboooo",
+      "jiggggabooooo",
+      "jiggggerboo",
+      "jiggggerbooo",
+      "jiggggerboooo",
+      "jiggggerbooooo",
+      "jigggggerboo",
+      "jigggggerbooo",
+      "jigggggerboooo",
+      "jigggggerbooooo"
+    ],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "jizz",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "juggs",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "kennebunkportsurprise",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "kentuckyklondike",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "kentuckytractorpuller",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "kinbaku",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "kittypuncher",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "knobbing",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "kynophilia",
+    "severity": 3,
+    "variants": [
+      "kynophile"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "ladyboy",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "leatherrestraint",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "leatherstraightjacket",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "leningradsteamer",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "lesbo",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": [
+      "blesbok",
+      "blesboks",
+      "lesbos"
+    ]
+  },
+  {
+    "term": "leso",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": [
+      "bunglesome",
+      "chucklesome",
+      "cradlesong",
+      "cradlesongs",
+      "cuddlesome",
+      "dolesome",
+      "meddlesome",
+      "meddlesomeness",
+      "mettlesome",
+      "nettlesome",
+      "troublesome",
+      "troublesomely",
+      "troublesomeness",
+      "unwholesome",
+      "unwholesomely",
+      "wholesome",
+      "wholesomely",
+      "wholesomeness",
+      "wholesomenesses",
+      "wholesomer",
+      "wholesomest"
+    ]
+  },
+  {
+    "term": "lezzie",
+    "severity": 3,
+    "variants": [
+      "lezzies"
+    ],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "lightinthefedora",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "lightintheloafers",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "lightinthepants",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "limpwristed",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "literotica",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "lovemaking",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "malesquirting",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "mdlb",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "meatmasseuse",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "menageatrois",
+    "severity": 3,
+    "variants": [
+      "menagesatrois"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "menophilia",
+    "severity": 3,
+    "variants": [
+      "menophile"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "mexicanpancake",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "milwaukeeblizzard",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "missionaryposition",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "mississippibirdbath",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "muffdiver",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "muffdiving",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "musclemary",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "mvtube",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "necrophilia",
+    "severity": 3,
+    "variants": [
+      "necrophile"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "nigerianhurricane",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "nigga",
+    "severity": 3,
+    "variants": [
+      "niggga",
+      "nigggga",
+      "niggggga",
+      "nigggggs",
+      "niggggs",
+      "nigggs",
+      "niggs",
+      "nignog",
+      "niigga",
+      "niiggga",
+      "niigggga",
+      "niiggggga",
+      "niigggggs",
+      "niiggggs",
+      "niigggs",
+      "niiggs",
+      "niiigga",
+      "niiiggga",
+      "niiigggga",
+      "niiiggggga",
+      "niiigggggs",
+      "niiiggggs",
+      "niiigggs",
+      "niiiggs",
+      "niiiigga",
+      "niiiiggga",
+      "niiiigggga",
+      "niiiiggggga",
+      "niiiigggggs",
+      "niiiiggggs",
+      "niiiigggs",
+      "niiiiggs"
+    ],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "nippleclamps",
+    "severity": 3,
+    "variants": [
+      "nippleclamp"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "nude",
+    "severity": 3,
+    "variants": [
+      "nudity"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "nutten",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "nymphomania",
+    "severity": 3,
+    "variants": [
+      "nimpho",
+      "nimphomania",
+      "nimphomaniac",
+      "nympho",
+      "nymphomaniac"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "octopussy",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "oklahomo",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "omorashi",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "onlyfans",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "orgasm",
+    "severity": 3,
+    "variants": [
+      "orgasmic",
+      "orgasms"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "paedophilia",
+    "severity": 3,
+    "variants": [
+      "paedophile",
+      "pedophile",
+      "pedophilia"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "painslut",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "panamanianpettingzoo",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "pansy",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "panties",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "parthenophilia",
+    "severity": 3,
+    "variants": [
+      "parthenophile"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "pegging",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "peterpuffer",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "petrolsniffer",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "phagophilia",
+    "severity": 3,
+    "variants": [
+      "phagophile"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "pikey",
+    "severity": 3,
+    "variants": [
+      "pikeys"
+    ],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "pissing",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "playboy",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "pleasurechest",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "pnigerophilia",
+    "severity": 3,
+    "variants": [
+      "pnigerophile",
+      "pnigophile",
+      "pnigophilia"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "poinephilia",
+    "severity": 3,
+    "variants": [
+      "poinephile"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "ponyboy",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "ponygirl",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "ponyplay",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "poof",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": [
+      "poofs",
+      "pooftah",
+      "pooftahs",
+      "poofter",
+      "poofters",
+      "poofy",
+      "spoof",
+      "spoofed",
+      "spoofer",
+      "spooferies",
+      "spoofers",
+      "spoofery",
+      "spoofing",
+      "spoofs",
+      "spoofy"
+    ]
+  },
+  {
+    "term": "poon",
+    "severity": 3,
+    "variants": [
+      "poontang"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": [
+      "crampoon",
+      "crampoons",
+      "dessertspoon",
+      "dessertspoonful",
+      "dessertspoons",
+      "harpoon",
+      "harpooned",
+      "harpooner",
+      "harpooners",
+      "harpooning",
+      "harpoons",
+      "lampoon",
+      "lampooned",
+      "lampooner",
+      "lampooneries",
+      "lampooners",
+      "lampoonery",
+      "lampooning",
+      "lampoons",
+      "soupspoon",
+      "soupspoons",
+      "spoon",
+      "spoonbill",
+      "spoonbills",
+      "spooned",
+      "spoonerism",
+      "spoonerisms",
+      "spooney",
+      "spooneys",
+      "spoonful",
+      "spoonfuls",
+      "spoonier",
+      "spoonies",
+      "spooniest",
+      "spoonily",
+      "spooning",
+      "spoons",
+      "spoonsful",
+      "spoony",
+      "tablespoon",
+      "tablespoonful",
+      "tablespoonfuls",
+      "tablespoons",
+      "tablespoonsful",
+      "teaspoon",
+      "teaspoonful",
+      "teaspoonfuls",
+      "teaspoons",
+      "teaspoonsful"
+    ]
+  },
+  {
+    "term": "poopchute",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "pornhub",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "potatoqueen",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "princealbertpiercing",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "proctophilia",
+    "severity": 3,
+    "variants": [
+      "proctophile"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "punani",
+    "severity": 3,
+    "variants": [
+      "punaaaani",
+      "punaaani",
+      "punaani",
+      "punany",
+      "puunaaaani",
+      "puunaaani",
+      "puunaani",
+      "puunani",
+      "puuunaaaani",
+      "puuunaaani",
+      "puuunaani",
+      "puuunani",
+      "puuuunaaaani",
+      "puuuunaaani",
+      "puuuunaani",
+      "puuuunani"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "pussy",
+    "severity": 3,
+    "variants": [
+      "pusssssy",
+      "pussssy",
+      "pusssy",
+      "puusssssy",
+      "puussssy",
+      "puusssy",
+      "puussy",
+      "puuusssssy",
+      "puuussssy",
+      "puuusssy",
+      "puuussy",
+      "puuuusssssy",
+      "puuuussssy",
+      "puuuusssy",
+      "puuuussy"
+    ],
+    "tags": [
+      "general"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "pussypuncher",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "queef",
+    "severity": 3,
+    "variants": [
+      "queaf"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "quim",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "raghead",
+    "severity": 3,
+    "variants": [
+      "ragheads"
+    ],
+    "tags": [
+      "religious"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "ramenyarmulke",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "reversecowgirl",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "rhabdophilia",
+    "severity": 3,
+    "variants": [
+      "rhabdophile"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "rhypophilia",
+    "severity": 3,
+    "variants": [
+      "rhypophile"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "ricequeen",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "rimjob",
+    "severity": 3,
+    "variants": [
+      "rimming"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "ringraider",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "rustytrombone",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "santorum",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "scatophilia",
+    "severity": 3,
+    "variants": [
+      "scatophile"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "schlong",
+    "severity": 3,
+    "variants": [
+      "shlong"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "scissoring",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "seplophilia",
+    "severity": 3,
+    "variants": [
+      "seplophile"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "sex",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "shavedpussy",
+    "severity": 3,
+    "variants": [
+      "shavedbeaver"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "shemale",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "shibari",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "shithead",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "general"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "shrimping",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "sissy",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "skeet",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "skittlesharvest",
+    "severity": 3,
+    "variants": [
+      "skittleharvest"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "slanteye",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "snowballing",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "sodomize",
+    "severity": 3,
+    "variants": [
+      "sodomise",
+      "sodomist",
+      "sodomy"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "spearchucker",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "spic",
+    "severity": 3,
+    "variants": [
+      "spick",
+      "spicks",
+      "spics"
+    ],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": [
+      "allspice",
+      "allspices",
+      "aruspices",
+      "aspic",
+      "aspics",
+      "auspicate",
+      "auspicated",
+      "auspicates",
+      "auspicating",
+      "auspice",
+      "auspices",
+      "auspicious",
+      "auspiciously",
+      "auspiciousness",
+      "conspicuities",
+      "conspicuity",
+      "conspicuous",
+      "conspicuously",
+      "conspicuousness",
+      "despicable",
+      "despicableness",
+      "despicably",
+      "haruspication",
+      "haruspications",
+      "haruspices",
+      "hospice",
+      "hospices",
+      "inauspicious",
+      "inauspiciously",
+      "inconspicuous",
+      "inconspicuously",
+      "mispickel",
+      "mispickels",
+      "overspice",
+      "overspiced",
+      "overspices",
+      "overspicing",
+      "oversuspicious",
+      "perspicacious",
+      "perspicaciously",
+      "perspicacities",
+      "perspicacity",
+      "perspicuities",
+      "perspicuity",
+      "perspicuous",
+      "perspicuously",
+      "perspicuousness",
+      "spica",
+      "spicae",
+      "spicas",
+      "spicate",
+      "spicated",
+      "spiccato",
+      "spiccatos",
+      "spice",
+      "spicebush",
+      "spicebushes",
+      "spiced",
+      "spiceless",
+      "spicer",
+      "spiceries",
+      "spicers",
+      "spicery",
+      "spices",
+      "spicey",
+      "spicier",
+      "spiciest",
+      "spicily",
+      "spiciness",
+      "spicinesses",
+      "spicing",
+      "spicks",
+      "spicula",
+      "spiculae",
+      "spicular",
+      "spiculate",
+      "spiculation",
+      "spiculations",
+      "spicule",
+      "spicules",
+      "spiculum",
+      "spicy",
+      "suspicion",
+      "suspicioned",
+      "suspicioning",
+      "suspicions",
+      "suspicious",
+      "suspiciously",
+      "suspiciousness",
+      "transpicuous",
+      "unsuspicious"
+    ]
+  },
+  {
+    "term": "spicygringo",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "splooge",
+    "severity": 3,
+    "variants": [
+      "sploogemoose",
+      "spooge"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "spunk",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "strapon",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "swampguinea",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "switchhitter",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "taphephilia",
+    "severity": 3,
+    "variants": [
+      "taphephile"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "teabagging",
+    "severity": 3,
+    "variants": [
+      "teabagged"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "tgirl",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "thanatophilia",
+    "severity": 3,
+    "variants": [
+      "thanatophile"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "threesome",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "throating",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "thumbzilla",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "topless",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "towelhead",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "transbian",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "traumatophilia",
+    "severity": 3,
+    "variants": [
+      "traumatophile"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "tribbing",
+    "severity": 3,
+    "variants": [
+      "tribadism"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "twat",
+    "severity": 3,
+    "variants": [
+      "twaaaat",
+      "twaaat",
+      "twaat"
+    ],
+    "tags": [
+      "general"
+    ],
+    "exceptions": [
+      "cutwater",
+      "meltwater",
+      "outwatch",
+      "saltwater",
+      "wristwatch"
+    ]
+  },
+  {
+    "term": "twink",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": [
+      "twinkie",
+      "twinkies",
+      "twinkle",
+      "twinkled",
+      "twinkler",
+      "twinklers",
+      "twinkles",
+      "twinkling",
+      "twinklings",
+      "twinkly"
+    ]
+  },
+  {
+    "term": "urethraplay",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "urophilia",
+    "severity": 3,
+    "variants": [
+      "urophile"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "viagra",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "vibrator",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "violetwand",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "vorarephilia",
+    "severity": 3,
+    "variants": [
+      "vorarephile"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "voyeurweb",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "waxplay",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "wetdream",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "whitepower",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "whore",
+    "severity": 3,
+    "variants": [
+      "whoooore",
+      "whooore",
+      "whoore"
+    ],
+    "tags": [
+      "general"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "wiitwd",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "wolfbagging",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "worldsex",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "wrappingmen",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "wrinkledstarfish",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "xhamster",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "xnxx",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "xtube",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "xvideos",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "xyrophilia",
+    "severity": 3,
+    "variants": [
+      "xyrophile"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "zipperhead",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "zoophilia",
+    "severity": 3,
+    "variants": [
+      "zoophile"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "anal",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "apeshit",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "general"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "arse",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": [
+      "arsen",
+      "catharse",
+      "coarse",
+      "hearse",
+      "hoarse",
+      "katharse",
+      "marseilles",
+      "parse",
+      "sarsen"
+    ]
+  },
+  {
+    "term": "bullshit",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "general"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "chinaman",
+    "severity": 2,
+    "variants": [
+      "chinamen"
+    ],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "chingchong",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "cock",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": [
+      "acock",
+      "bawcock",
+      "bawcocks",
+      "bibcock",
+      "bibcocks",
+      "billycock",
+      "billycocks",
+      "blackcock",
+      "blackcocks",
+      "cockade",
+      "cockaded",
+      "cockades",
+      "cockalorum",
+      "cockalorums",
+      "cockamamie",
+      "cockamamy",
+      "cockapoo",
+      "cockapoos",
+      "cockateel",
+      "cockateels",
+      "cockatiel",
+      "cockatiels",
+      "cockatoo",
+      "cockatoos",
+      "cockatrice",
+      "cockatrices",
+      "cockbill",
+      "cockbilled",
+      "cockbilling",
+      "cockbills",
+      "cockboat",
+      "cockboats",
+      "cockchafer",
+      "cockchafers",
+      "cockcrow",
+      "cockcrows",
+      "cocked",
+      "cocker",
+      "cockered",
+      "cockerel",
+      "cockerels",
+      "cockering",
+      "cockers",
+      "cockeye",
+      "cockeyed",
+      "cockeyedly",
+      "cockeyedness",
+      "cockeyednesses",
+      "cockeyes",
+      "cockhorse",
+      "cockhorses",
+      "cockier",
+      "cockiest",
+      "cockily",
+      "cockiness",
+      "cockinesses",
+      "cocking",
+      "cockish",
+      "cockle",
+      "cocklebur",
+      "cockleburs",
+      "cockled",
+      "cockles",
+      "cockleshell",
+      "cockleshells",
+      "cocklike",
+      "cockling",
+      "cockloft",
+      "cocklofts",
+      "cockney",
+      "cockneyfied",
+      "cockneyfies",
+      "cockneyfy",
+      "cockneyfying",
+      "cockneyish",
+      "cockneyism",
+      "cockneyisms",
+      "cockneys",
+      "cockpit",
+      "cockpits",
+      "cockroach",
+      "cockroaches",
+      "cocks",
+      "cockscomb",
+      "cockscombs",
+      "cocksfoot",
+      "cocksfoots",
+      "cockshies",
+      "cockshut",
+      "cockshuts",
+      "cockshy",
+      "cockspur",
+      "cockspurs",
+      "cocksucker",
+      "cocksuckers",
+      "cocksure",
+      "cocksurely",
+      "cocksureness",
+      "cocksurenesses",
+      "cockswain",
+      "cockswains",
+      "cocktail",
+      "cocktailed",
+      "cocktailing",
+      "cocktails",
+      "cockup",
+      "cockups",
+      "cocky",
+      "coldcock",
+      "coldcocked",
+      "coldcocking",
+      "coldcocks",
+      "gamecock",
+      "gamecocks",
+      "gorcock",
+      "gorcocks",
+      "haycock",
+      "haycocks",
+      "moorcock",
+      "moorcocks",
+      "peacock",
+      "peacocked",
+      "peacockier",
+      "peacockiest",
+      "peacocking",
+      "peacockish",
+      "peacocks",
+      "peacocky",
+      "petcock",
+      "petcocks",
+      "pinchcock",
+      "pinchcocks",
+      "poppycock",
+      "poppycocks",
+      "princock",
+      "princocks",
+      "recock",
+      "recocked",
+      "recocking",
+      "recocks",
+      "seacock",
+      "seacocks",
+      "shuttlecock",
+      "shuttlecocked",
+      "shuttlecocking",
+      "shuttlecocks",
+      "stopcock",
+      "stopcocks",
+      "uncock",
+      "uncocked",
+      "uncocking",
+      "uncocks",
+      "weathercock",
+      "weathercocks",
+      "woodcock",
+      "woodcocks"
+    ]
+  },
+  {
+    "term": "dick",
+    "severity": 2,
+    "variants": [
+      "diick",
+      "diiick",
+      "diiiick"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": [
+      "benedick",
+      "dickcissel",
+      "dicken",
+      "dicker",
+      "medick",
+      "zaddick"
+    ]
+  },
+  {
+    "term": "dogshit",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "general"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "eyetie",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "frogeater",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "ginjockey",
+    "severity": 2,
+    "variants": [
+      "ginjocky"
+    ],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "goddamn",
+    "severity": 2,
+    "variants": [
+      "goddamned"
+    ],
+    "tags": [
+      "religious"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "golliwog",
+    "severity": 2,
+    "variants": [
+      "gollywog"
+    ],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "greaseball",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "hajji",
+    "severity": 2,
+    "variants": [
+      "hadji",
+      "haji",
+      "hajjji",
+      "hajjjji",
+      "hajjjjji"
+    ],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "honkey",
+    "severity": 2,
+    "variants": [
+      "honkeys",
+      "honkies",
+      "honky"
+    ],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "horseshit",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "general"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "hymie",
+    "severity": 2,
+    "variants": [
+      "heimie"
+    ],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": [
+      "alchymies",
+      "pringshymieella",
+      "thymier",
+      "thymiest"
+    ]
+  },
+  {
+    "term": "jackoff",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "jerkoff",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "jesuschrist",
+    "severity": 2,
+    "variants": [
+      "jeeeesuschriiiist",
+      "jeeeesuschriiist",
+      "jeeeesuschriist",
+      "jeeeesuschrist",
+      "jeeeesuuschriiiist",
+      "jeeeesuuschriiist",
+      "jeeeesuuschriist",
+      "jeeeesuuschrist",
+      "jeeeesuuuschriiiist",
+      "jeeeesuuuschriiist",
+      "jeeeesuuuschriist",
+      "jeeeesuuuschrist",
+      "jeeeesuuuuschriiiist",
+      "jeeeesuuuuschriiist",
+      "jeeeesuuuuschriist",
+      "jeeeesuuuuschrist",
+      "jeeesuschriiiist",
+      "jeeesuschriiist",
+      "jeeesuschriist",
+      "jeeesuschrist",
+      "jeeesuuschriiiist",
+      "jeeesuuschriiist",
+      "jeeesuuschriist",
+      "jeeesuuschrist",
+      "jeeesuuuschriiiist",
+      "jeeesuuuschriiist",
+      "jeeesuuuschriist",
+      "jeeesuuuschrist",
+      "jeeesuuuuschriiiist",
+      "jeeesuuuuschriiist",
+      "jeeesuuuuschriist",
+      "jeeesuuuuschrist",
+      "jeesuschriiiist",
+      "jeesuschriiist",
+      "jeesuschriist",
+      "jeesuschrist",
+      "jeesuuschriiiist",
+      "jeesuuschriiist",
+      "jeesuuschriist",
+      "jeesuuschrist",
+      "jeesuuuschriiiist",
+      "jeesuuuschriiist",
+      "jeesuuuschriist",
+      "jeesuuuschrist",
+      "jeesuuuuschriiiist",
+      "jeesuuuuschriiist",
+      "jeesuuuuschriist",
+      "jeesuuuuschrist",
+      "jesuschriiiist",
+      "jesuschriiist",
+      "jesuschriist",
+      "jesuuschriiiist",
+      "jesuuschriiist",
+      "jesuuschriist",
+      "jesuuschrist",
+      "jesuuuschriiiist",
+      "jesuuuschriiist",
+      "jesuuuschriist",
+      "jesuuuschrist",
+      "jesuuuuschriiiist",
+      "jesuuuuschriiist",
+      "jesuuuuschriist",
+      "jesuuuuschrist"
+    ],
+    "tags": [
+      "religious"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "junglebunny",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "masturbate",
+    "severity": 2,
+    "variants": [
+      "maaaasturb8",
+      "maaaasturbate",
+      "maaaastuurb8",
+      "maaaastuurbate",
+      "maaaastuuurb8",
+      "maaaastuuurbate",
+      "maaaastuuuurb8",
+      "maaaastuuuurbate",
+      "maaasturb8",
+      "maaasturbate",
+      "maaastuurb8",
+      "maaastuurbate",
+      "maaastuuurb8",
+      "maaastuuurbate",
+      "maaastuuuurb8",
+      "maaastuuuurbate",
+      "maasturb8",
+      "maasturbate",
+      "maastuurb8",
+      "maastuurbate",
+      "maastuuurb8",
+      "maastuuurbate",
+      "maastuuuurb8",
+      "maastuuuurbate",
+      "masterb8",
+      "masterbate",
+      "masturb8",
+      "masturbating",
+      "masturbation",
+      "mastuurb8",
+      "mastuurbate",
+      "mastuuurb8",
+      "mastuuurbate",
+      "mastuuuurb8",
+      "mastuuuurbate"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "neonazi",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "pieceofshit",
+    "severity": 2,
+    "variants": [
+      "piecesofshit"
+    ],
+    "tags": [
+      "general"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "pissedoff",
+    "severity": 2,
+    "variants": [
+      "piiiissedoff",
+      "piiiisssedoff",
+      "piiiissssedoff",
+      "piiiisssssedoff",
+      "piiissedoff",
+      "piiisssedoff",
+      "piiissssedoff",
+      "piiisssssedoff",
+      "piissedoff",
+      "piisssedoff",
+      "piissssedoff",
+      "piisssssedoff",
+      "pisssedoff",
+      "pissssedoff",
+      "pisssssedoff"
+    ],
+    "tags": [
+      "general"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "pissoff",
+    "severity": 2,
+    "variants": [
+      "piiiissoff",
+      "piiiisssoff",
+      "piiiissssoff",
+      "piiiisssssoff",
+      "piiissoff",
+      "piiisssoff",
+      "piiissssoff",
+      "piiisssssoff",
+      "piissoff",
+      "piisssoff",
+      "piissssoff",
+      "piisssssoff",
+      "pisssoff",
+      "pissssoff",
+      "pisssssoff"
+    ],
+    "tags": [
+      "general"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "pornography",
+    "severity": 2,
+    "variants": [
+      "porn",
+      "porno",
+      "pornographic",
+      "pornos"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "retard",
+    "severity": 2,
+    "variants": [
+      "retarded"
+    ],
+    "tags": [
+      "general"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "sheepshagger",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "shit",
+    "severity": 2,
+    "variants": [
+      "shhhhiiiit",
+      "shhhhiiit",
+      "shhhhiit",
+      "shhhhit",
+      "shhhiiiit",
+      "shhhiiit",
+      "shhhiit",
+      "shhhit",
+      "shhiiiit",
+      "shhiiit",
+      "shhiit",
+      "shhit",
+      "shiiiit",
+      "shiiit",
+      "shiit"
+    ],
+    "tags": [
+      "general"
+    ],
+    "exceptions": [
+      "mishit",
+      "shitake",
+      "shittah",
+      "shittim"
+    ]
+  },
+  {
+    "term": "shitty",
+    "severity": 2,
+    "variants": [
+      "shiiiittttty",
+      "shiiiitttty",
+      "shiiiittty",
+      "shiiiitty",
+      "shiiittttty",
+      "shiiitttty",
+      "shiiittty",
+      "shiiitty",
+      "shiittttty",
+      "shiitttty",
+      "shiittty",
+      "shiitty",
+      "shittttty",
+      "shitttty",
+      "shittty"
+    ],
+    "tags": [
+      "general"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "spastic",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "general"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "swastika",
+    "severity": 2,
+    "variants": [
+      "suastika",
+      "svastika"
+    ],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "tits",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": [
+      "bushtits",
+      "pastits",
+      "tomtits"
+    ]
+  },
+  {
+    "term": "titty",
+    "severity": 2,
+    "variants": [
+      "titties",
+      "tittties",
+      "titttties",
+      "tittttties",
+      "tittttty",
+      "titttty",
+      "tittty"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "tosser",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "general"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "wagonburner",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "wank",
+    "severity": 2,
+    "variants": [
+      "waaaank",
+      "waaank",
+      "waank"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": [
+      "swank",
+      "twank"
+    ]
+  },
+  {
+    "term": "wanker",
+    "severity": 2,
+    "variants": [
+      "waaaanker",
+      "waaanker",
+      "waanker"
+    ],
+    "tags": [
+      "general"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "wigger",
+    "severity": 2,
+    "variants": [
+      "whigger",
+      "wigga"
+    ],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "xxx",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "anus",
+    "severity": 1,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": [
+      "manus",
+      "manuscript",
+      "manuscripts",
+      "pandanus",
+      "pandanuses",
+      "tetanus",
+      "tetanuses"
+    ]
+  },
+  {
+    "term": "ass",
+    "severity": 1,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "bloody",
+    "severity": 1,
+    "variants": [],
+    "tags": [
+      "general"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "bollocks",
+    "severity": 1,
+    "variants": [
+      "bolllllocks",
+      "bollllloocks",
+      "bolllllooocks",
+      "bollllloooocks",
+      "bollllocks",
+      "bolllloocks",
+      "bollllooocks",
+      "bolllloooocks",
+      "bolllocks",
+      "bollloocks",
+      "bolllooocks",
+      "bollloooocks",
+      "bolloocks",
+      "bollooocks",
+      "bolloooocks",
+      "boolllllocks",
+      "boollllloocks",
+      "boolllllooocks",
+      "boollllloooocks",
+      "boollllocks",
+      "boolllloocks",
+      "boollllooocks",
+      "boolllloooocks",
+      "boolllocks",
+      "boollloocks",
+      "boolllooocks",
+      "boollloooocks",
+      "boollocks",
+      "boolloocks",
+      "boollooocks",
+      "boolloooocks",
+      "booolllllocks",
+      "booollllloocks",
+      "booolllllooocks",
+      "booollllloooocks",
+      "booollllocks",
+      "booolllloocks",
+      "booollllooocks",
+      "booolllloooocks",
+      "booolllocks",
+      "booollloocks",
+      "booolllooocks",
+      "booollloooocks",
+      "booollocks",
+      "booolloocks",
+      "booollooocks",
+      "booolloooocks",
+      "boooolllllocks",
+      "boooollllloocks",
+      "boooolllllooocks",
+      "boooollllloooocks",
+      "boooollllocks",
+      "boooolllloocks",
+      "boooollllooocks",
+      "boooolllloooocks",
+      "boooolllocks",
+      "boooollloocks",
+      "boooolllooocks",
+      "boooollloooocks",
+      "boooollocks",
+      "boooolloocks",
+      "boooollooocks",
+      "boooolloooocks"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "boob",
+    "severity": 1,
+    "variants": [
+      "booob",
+      "boooob",
+      "booooob"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": [
+      "boobird",
+      "booboo"
+    ]
+  },
+  {
+    "term": "breasts",
+    "severity": 1,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": [
+      "breaststroke"
+    ]
+  },
+  {
+    "term": "bugger",
+    "severity": 1,
+    "variants": [
+      "buggger",
+      "bugggger",
+      "buggggger"
+    ],
+    "tags": [
+      "general"
+    ],
+    "exceptions": [
+      "debugger",
+      "humbugger"
+    ]
+  },
+  {
+    "term": "christ",
+    "severity": 1,
+    "variants": [
+      "chriiiist",
+      "chriiist",
+      "chriist"
+    ],
+    "tags": [
+      "religious"
+    ],
+    "exceptions": [
+      "christen",
+      "christian",
+      "christie",
+      "christy"
+    ]
+  },
+  {
+    "term": "crap",
+    "severity": 1,
+    "variants": [
+      "craaaap",
+      "craaap",
+      "craap"
+    ],
+    "tags": [
+      "general"
+    ],
+    "exceptions": [
+      "crape",
+      "craping",
+      "crapshoot",
+      "crapulent",
+      "crapulous",
+      "scrap"
+    ]
+  },
+  {
+    "term": "damn",
+    "severity": 1,
+    "variants": [
+      "daaaamn",
+      "daaamn",
+      "daamn"
+    ],
+    "tags": [
+      "religious"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "dingleberry",
+    "severity": 1,
+    "variants": [
+      "dingleberries"
+    ],
+    "tags": [
+      "general"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "genitals",
+    "severity": 1,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "hell",
+    "severity": 1,
+    "variants": [],
+    "tags": [
+      "religious"
+    ],
+    "exceptions": [
+      "echelle",
+      "hellcat",
+      "helled",
+      "hellen",
+      "heller",
+      "hellfire",
+      "hellion",
+      "hellish",
+      "hellkite",
+      "hello",
+      "phell",
+      "shell"
+    ]
+  },
+  {
+    "term": "jap",
+    "severity": 1,
+    "variants": [],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": [
+      "cajaput",
+      "cajaputs",
+      "japan",
+      "japanize",
+      "japanized",
+      "japanizes",
+      "japanizing",
+      "japanned",
+      "japanner",
+      "japanners",
+      "japanning",
+      "japans",
+      "jape",
+      "japed",
+      "japer",
+      "japeries",
+      "japers",
+      "japery",
+      "japes",
+      "japing",
+      "japingly",
+      "japonaiserie",
+      "japonaiseries",
+      "japonica",
+      "japonicas",
+      "jipijapa",
+      "jipijapas"
+    ]
+  },
+  {
+    "term": "jesus",
+    "severity": 1,
+    "variants": [
+      "jeeeesus",
+      "jeeeesuus",
+      "jeeeesuuus",
+      "jeeeesuuuus",
+      "jeeesus",
+      "jeeesuus",
+      "jeeesuuus",
+      "jeeesuuuus",
+      "jeesus",
+      "jeesuus",
+      "jeesuuus",
+      "jeesuuuus",
+      "jesuus",
+      "jesuuus",
+      "jesuuuus"
+    ],
+    "tags": [
+      "religious"
+    ],
+    "exceptions": [
+      "bejesus"
+    ]
+  },
+  {
+    "term": "kraut",
+    "severity": 1,
+    "variants": [
+      "krauts"
+    ],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": [
+      "sauerkraut",
+      "sauerkrauts"
+    ]
+  },
+  {
+    "term": "mayonnaisemonkey",
+    "severity": 1,
+    "variants": [
+      "mayonnaisemonkies"
+    ],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "nipples",
+    "severity": 1,
+    "variants": [
+      "nipple"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "penis",
+    "severity": 1,
+    "variants": [
+      "peeeeniiiis",
+      "peeeeniiis",
+      "peeeeniis",
+      "peeeenis",
+      "peeeniiiis",
+      "peeeniiis",
+      "peeeniis",
+      "peeenis",
+      "peeniiiis",
+      "peeniiis",
+      "peeniis",
+      "peenis",
+      "peniiiis",
+      "peniiis",
+      "peniis"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": [
+      "toppenish"
+    ]
+  },
+  {
+    "term": "pubes",
+    "severity": 1,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "rectum",
+    "severity": 1,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "semen",
+    "severity": 1,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": [
+      "abasement",
+      "abasements",
+      "advertisement",
+      "advertisements",
+      "advisement",
+      "advisements",
+      "amusement",
+      "amusements",
+      "appeasement",
+      "appeasements",
+      "appraisement",
+      "appraisements",
+      "arrondissement",
+      "arrondissements",
+      "basemen",
+      "basement",
+      "basementless",
+      "basements",
+      "bemusement",
+      "bemusements",
+      "bouleversement",
+      "bouleversements",
+      "casement",
+      "casements",
+      "chastisement",
+      "chastisements",
+      "debasement",
+      "debasements",
+      "defensemen",
+      "despisement",
+      "despisements",
+      "disbursement",
+      "disbursements",
+      "disguisement",
+      "disguisements",
+      "divertissement",
+      "divertissements",
+      "easement",
+      "easements",
+      "eclaircissement",
+      "empressement",
+      "empressements",
+      "encasement",
+      "encasements",
+      "endorsement",
+      "endorsements",
+      "enfranchisement",
+      "excisemen",
+      "horsemen",
+      "housemen",
+      "indorsement",
+      "indorsements",
+      "passementerie",
+      "passementeries",
+      "reimbursement",
+      "reimbursements",
+      "rousement",
+      "rousements",
+      "subbasement",
+      "subbasements",
+      "versemen",
+      "warehousemen"
+    ]
+  },
+  {
+    "term": "snatch",
+    "severity": 1,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "sodding",
+    "severity": 1,
+    "variants": [],
+    "tags": [
+      "general"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "sodoff",
+    "severity": 1,
+    "variants": [],
+    "tags": [
+      "general"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "vagina",
+    "severity": 1,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "venusmound",
+    "severity": 1,
+    "variants": [
+      "moundofvenus"
+    ],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "wog",
+    "severity": 1,
+    "variants": [
+      "wogs"
+    ],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": [
+      "hornswoggle",
+      "hornswoggled",
+      "hornswoggles",
+      "hornswoggling",
+      "polliwog",
+      "polliwogs",
+      "pollywog",
+      "pollywogs"
+    ]
+  }
+]
