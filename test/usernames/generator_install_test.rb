@@ -128,7 +128,7 @@ class GeneratorInstallTest < Rails::Generators::TestCase
     assert_equal %(import "controllers"\nimport "usernames"\n), application_js
   end
 
-  # The four forms that export a binding under the name `application`.
+  # Every form that exports a binding under the name `application`.
   def test_every_named_export_of_application
     ["const application = Application.start()\nexport { application }\n",
      "export const application = Application.start()\n",
@@ -138,7 +138,16 @@ class GeneratorInstallTest < Rails::Generators::TestCase
      "const app = Application.start()\nexport { app as application }\n",
      "const application = Application.start()\nexport { other, application }\n",
      "const application = Application.start()\nexport {\n  application,\n  other\n}\n",
-     "export { application } from \"./stimulus\"\n"].each do |stimulus|
+     "export { application } from \"./stimulus\"\n",
+     "export { app as application } from \"./stimulus\"\n",
+     "const application = {}; export { /* kept */ application }\n",
+     "const application = {}; export { // kept\n application }\n",
+     # Comments and strings read as such, not as code:
+     "export/* comment */const application = {}\n",
+     "const application = {}; const url = \"https://example.test\"; export { application }\n",
+     "const url = 'https://example.test/*'; export const application = {}\n",
+     "const a = \"say \\\"hi\\\" // not a comment\"; export { a as application }\n",
+     "const t = `line one\n// still the template ${\"x\"}`; export { t as application }\n"].each do |stimulus|
       prepare_destination
       importmap_app(stimulus: stimulus)
       run_generator %w[--model=Account]
@@ -158,7 +167,12 @@ class GeneratorInstallTest < Rails::Generators::TestCase
      "const application = {}\n/*\nexport const application = 1\n*/\n",
      "export const applicationName = \"x\"\nexport { applications }\n",
      "export function application() {}\n",
-     "window.Stimulus = Application.start()\n"].each do |stimulus|
+     "window.Stimulus = Application.start()\n",
+     # Export text inside a string or template literal exports nothing:
+     "const example = \"export { application }\"; export default {}\n",
+     "const example = 'export const application = 1'; export default {}\n",
+     "const example = `export { application }`; export default {}\n",
+     "const example = `\nexport { application }\n`; export default {}\n"].each do |stimulus|
       prepare_destination
       importmap_app(stimulus: stimulus)
       output = run_generator %w[--model=Account]

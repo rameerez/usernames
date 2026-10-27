@@ -24,6 +24,8 @@ module Usernames
       # or `other as application` — whatever is exported under that name.
       EXPORTED_AS_APPLICATION = /\A(?:application|[\w$]+\s+as\s+application)\z/
 
+      QUOTES = %w[' " `].freeze
+
       private
 
       # :ready, :imported, or what is missing for the line to work. Read
@@ -32,7 +34,7 @@ module Usernames
         @javascript_setup ||=
           if !File.exist?(destination("config/importmap.rb")) then :no_importmap
           elsif !File.exist?(destination(APPLICATION_JS)) then :no_entrypoint
-          elsif code(APPLICATION_JS).match?(IMPORTED) then :imported
+          elsif code(APPLICATION_JS, strings: true).match?(IMPORTED) then :imported
           elsif !File.exist?(destination(STIMULUS_APPLICATION)) then :no_stimulus
           elsif !exports_application?(code(STIMULUS_APPLICATION)) then :no_application_export
           else :ready
@@ -45,10 +47,55 @@ module Usernames
         end
       end
 
-      # A file's code without its comments: a commented-out export or import
-      # is not one.
-      def code(path)
-        File.read(destination(path)).gsub(%r{/\*.*?\*/}m, "").gsub(%r{//[^\n]*}, "")
+      # A file read as code, in one pass: each comment becomes one space
+      # (so `export/* c */const` still reads as two words), each string or
+      # template literal `""` (so `"export { application }"` exports
+      # nothing, and the `//` in `"https://…"` starts no comment).
+      # `strings: true` keeps '…' and "…" strings as written, to read an
+      # import's specifier. Regular-expression literals are read as code:
+      # nothing in a Stimulus setup file needs them told apart.
+      def code(path, strings: false)
+        source = File.read(destination(path), encoding: "UTF-8")
+        code = +""
+        index = 0
+        while index < source.length
+          finish = token_end(source, index)
+          code << (finish ? token(source, index, finish, strings) : source[index])
+          index = finish || (index + 1)
+        end
+        code
+      end
+
+      # Where the comment or literal starting at `index` ends, or nil for
+      # any other character.
+      def token_end(source, index)
+        case source[index, 2]
+        when "//" then source.index("\n", index) || source.length
+        when "/*" then (finish = source.index("*/", index + 2)) ? finish + 2 : source.length
+        else literal_end(source, index) if QUOTES.include?(source[index])
+        end
+      end
+
+      def token(source, start, finish, strings)
+        return " " if source[start] == "/"
+        return source[start...finish] if strings && source[start] != "`"
+
+        '""'
+      end
+
+      # Just past the literal opening at `start`: its closing quote, with
+      # backslash escapes skipped. A '…' or "…" string ends at a line break
+      # at the latest; a template's `${…}` is read as part of it.
+      def literal_end(source, start)
+        quote = source[start]
+        index = start + 1
+        while index < source.length
+          return index + 1 if source[index] == quote
+          return index if source[index] == "\n" && quote != "`"
+
+          index += source[index] == "\\" ? 2 : 1
+        end
+        source.length
       end
 
       def destination(path) = File.join(destination_root, path)
