@@ -70,10 +70,10 @@ module Usernames
       end
 
       # Rule b: a strong (or, from `minimum` 1, any) spelling that IS one of
-      # the name's segments.
+      # the name's segments, or a run of the words its capitals split.
       def strong?(name, minimum, allowed)
         table = equal_from(minimum)
-        name.units.any? do |unit|
+        (name.units + name.joins).any? do |unit|
           term = table[unit]
           term && !exempt?(unit, term, allowed)
         end

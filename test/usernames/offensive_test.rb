@@ -320,6 +320,39 @@ class OffensiveTest < UsernamesTestCase
     assert_equal :username_not_allowed, Usernames.check("FuCk", case: :preserve).reason
   end
 
+  # A run of capitals gives its last one to the next word, and the strong
+  # terms are compared with every run of adjacent words, so a capital in
+  # the middle of a word does not hide it.
+  def test_capitals_inside_and_between_words_in_preserve_mode
+    %w[SHITHEADBob ShitHeadBob BobShitHead XxShitHead SHITHead].each do |name|
+      assert_equal :username_not_allowed, Usernames.check(name, case: :preserve).reason, name
+    end
+    %w[ScunthorpeUnited SpicyFlash GrapeJuice MacBookPro HTMLParser].each do |name|
+      assert_predicate Usernames.check(name, case: :preserve), :ok?, name
+    end
+  end
+
+  # A word a capital does not end (`Headx`) makes no join that is a word:
+  # a documented limit, like glued lowercase words.
+  def test_a_word_no_capital_ends_is_a_known_limit
+    assert_predicate Usernames.check("XxShitHeadxX", case: :preserve), :ok?
+  end
+
+  def test_case_split_words_join_up_to_the_cap
+    name = Usernames::Offensive::Name.new("shitheadbob", "SHITHEADBob")
+
+    assert_equal %w[shitheadbob shithead bob], name.segments
+    assert_empty name.joins, "two words: the only join is the segment itself"
+    assert_equal %w[shithead headbob], Usernames::Offensive::Name.new("shitheadbob", "ShitHeadBob").joins
+
+    twelve = "AbCdEfGhIjKlMnOpQrStUyWz" # twelve two-letter words
+    joins = Usernames::Offensive::Name.new(twelve.downcase, twelve).joins
+
+    assert_equal 16, joins.map(&:length).max, "a join spans at most eight words"
+    assert_equal :username_not_allowed, Usernames.check("AaBbCcDdEeFfGgHhShitHead", case: :preserve).reason,
+                 "the cap bounds each join, not which words take part"
+  end
+
   # Lowercase mode stores no case, so there is no boundary to read: the
   # same names are one glued segment each.
   def test_lowercase_mode_reads_the_same_names_as_one_segment

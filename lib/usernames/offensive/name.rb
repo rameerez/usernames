@@ -11,22 +11,36 @@ module Usernames
     #                digit in it (`2g1c`) is read against; segments never hold a
     #                digit, so without these such a spelling could never match
     #   wholes       each form with its separators removed (see Whole)
+    #   joins        runs of adjacent words a case boundary split (see below)
     #
     # A name stored with its typed case (`case: :preserve`) also splits where
-    # a lowercase letter meets a capital: `ShitheadBob` is the segments
-    # shitheadbob, shithead and bob, and `ScunthorpeUnited` is
-    # scunthorpeunited, scunthorpe and united. The capital is the only word
-    # boundary such a name has, and the person typed it. The glued segment
-    # stays a segment, and the whole is unchanged.
+    # a lowercase letter meets a capital, and before the last capital of a
+    # run that a lowercase letter follows: `ShitheadBob` is the segments
+    # shitheadbob, shithead and bob, `SHITHEADBob` the same, and
+    # `ScunthorpeUnited` is scunthorpeunited, scunthorpe and united. The
+    # capital is the only word boundary such a name has, and the person
+    # typed it. The glued segment stays a segment, and the whole is
+    # unchanged.
+    #
+    # Capitals also cut inside a word as often as between words
+    # (`ShitHeadBob`), so the strong terms, matched by equality, are also
+    # compared with every run of adjacent words of one segment: shithead,
+    # headbob. A run spans at most JOIN_WORDS words. A word a capital does
+    # not end (`XxShitHeadxX` reads Xx, Shit, Headx, X) makes no join that
+    # is a word: a known limit.
     #
     # Segments come from BOTH forms: `adm1n` is the segments adm, n as typed
     # and admin folded, and `shithead1` keeps shithead as typed where folded it
     # reads shitheadi.
     class Name
-      attr_reader :key, :forms, :wholes, :segments, :digit_parts
+      attr_reader :key, :forms, :wholes, :segments, :digit_parts, :joins
 
-      # Where a lowercase letter meets a capital.
-      CASE_BOUNDARY = /(?<=[a-z])(?=[A-Z])/
+      # Where a lowercase letter meets a capital (`tB`), and where a run of
+      # capitals gives its last one to the word it starts (`DBo`).
+      CASE_BOUNDARY = /(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])/
+
+      # The most words one join of case-split words spans.
+      JOIN_WORDS = 8
 
       # `key` is the comparison key; `canonical`, the name as stored, which
       # differs from it only in case.
@@ -42,6 +56,7 @@ module Usernames
         end
         @segments = @wholes.flat_map(&:segments).uniq
         @digit_parts = @wholes.flat_map(&:parts).grep(/\d/).uniq
+        @joins = (@wholes.flat_map(&:joins) - @segments).uniq
       end
 
       # What a whole-segment rule compares against: every segment, and every
@@ -89,7 +104,7 @@ module Usernames
       # What sits between separators.
       PART = /[^_.-]+/
 
-      attr_reader :text, :parts, :segments
+      attr_reader :text, :parts, :segments, :joins
 
       def initialize(form, folded: false, boundaries: [])
         @folded = folded
@@ -97,6 +112,7 @@ module Usernames
         @text = +""
         @parts = []
         @segments = []
+        @joins = []
         @origins = [] # [first part, last part, segment, word] per character of @text
         form.scan(PART) { add(Regexp.last_match[0], Regexp.last_match.begin(0)) }
         rewrite_text if folded
@@ -159,6 +175,17 @@ module Usernames
             @segments << folded(word)
             index = @segments.size - 1
             word.length.times { @origins << [part_index, part_index, segment, index] }
+          end
+          add_joins(words)
+        end
+      end
+
+      # Every run of two or more adjacent words short of the whole segment,
+      # each folded as one text: a rewrite can span the boundary (`PHuck`).
+      def add_joins(words)
+        (0...words.size).each do |from|
+          ((from + 2)..[words.size, from + Name::JOIN_WORDS].min).each do |to|
+            @joins << folded(words[from...to].join) unless from.zero? && to == words.size
           end
         end
       end
