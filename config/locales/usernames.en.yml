@@ -48,9 +48,13 @@ en:
         one: "is too long (maximum is 1 character)"
         other: "is too long (maximum is %{count} characters)"
   usernames:
-    # What the generated availability check says, in its live region, when
-    # a name is free to take.
+    # What the availability check says, in its live region, when a name is
+    # free to take…
     available: "is available"
+    availability:
+      # …and when it could not ask (offline, rate limited, switched off).
+      # The form still submits; the model decides.
+      error: "couldn't be checked just now"
     # The pieces the phrases above are built from.
     letters:
       lowercase: "lowercase letters"

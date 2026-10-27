@@ -41,6 +41,15 @@ class PackagingTest < UsernamesTestCase
     assert_empty tracked("data") - contents, "every tracked data file ships"
   end
 
+  # The engine's endpoint, its JavaScript and its importmap pins.
+  def test_ships_the_app_directory_and_the_importmap
+    assert_includes contents, "app/controllers/usernames/availability_controller.rb"
+    assert_includes contents, "app/assets/javascripts/usernames/index.js"
+    assert_includes contents, "app/assets/javascripts/usernames/username_check_controller.js"
+    assert_includes contents, "config/importmap.rb"
+    assert_empty tracked("app") - contents, "every tracked file under app/ ships"
+  end
+
   def test_ships_the_locales_and_the_library
     assert_includes contents, "config/locales/usernames.en.yml"
     assert_includes contents, "lib/usernames.rb"
@@ -56,7 +65,7 @@ class PackagingTest < UsernamesTestCase
   # could never follow.
   def test_shipped_code_never_points_into_unpublished_documents
     pointers = /PRD|§|\bD-\d+\b|\bR\d-\d+\b|NOTE\(p|research \d+/
-    found = contents.grep(%r{\A(lib|config|sig)/}).flat_map do |file|
+    found = contents.grep(%r{\A(app|lib|config|sig)/}).flat_map do |file|
       File.readlines(File.join(ROOT, file)).each_with_index.filter_map do |line, index|
         "#{file}:#{index + 1}" if line.match?(pointers)
       end
@@ -81,7 +90,8 @@ class PackagingTest < UsernamesTestCase
     assert_includes files, "lib/usernames.rb"
     assert_includes files, "data/NOTICE"
     assert_includes files, "README.md"
-    assert_empty contents.grep(%r{\A(lib|config|data|sig)/}) - files, "the fallback list misses shipped files"
+    assert_includes files, "app/assets/javascripts/usernames/index.js"
+    assert_empty contents.grep(%r{\A(app|lib|config|data|sig)/}) - files, "the fallback list misses shipped files"
     assert_empty files.grep(%r{\A(test|docs|script)/})
     refute_includes files, "usernames.gemspec"
   end

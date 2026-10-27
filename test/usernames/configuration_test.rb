@@ -491,11 +491,68 @@ class ConfigurationTest < UsernamesTestCase
     assert_match(%r{data/offensive/en\.json has no entries\..*\(Usernames::DataError\)}, output)
   end
 
+  # --- config.availability -------------------------------------------------------------------------
+
+  def test_availability_defaults
+    availability = Usernames.configuration.availability
+
+    assert_equal "/usernames/availability", availability.path
+    assert_empty availability.targets, "nothing is published until the app says so"
+    assert_nil availability.parent_controller
+    assert_equal({ to: 30, within: 1.minute }, availability.rate_limit)
+    assert_nil availability.rate_limit_store, "Rails.cache"
+  end
+
+  def test_availability_accepts
+    [nil, false, "/handles/check", "/zq-check/availability"].each { |path| assert configure(path: path) }
+    [{}, { "user" => "User#handle" }, { "admin-user" => "Admin::User#username", "p2" => "Player#handle" }].each do |targets|
+      assert configure(targets: targets)
+    end
+    assert configure(parent_controller: "ActionController::API", rate_limit: { to: 5, within: 10 },
+                     rate_limit_store: ActiveSupport::Cache::MemoryStore.new)
+  end
+
+  def test_availability_refuses_by_name
+    { path: ["usernames/availability", "/", "//x", "", :check, true],
+      targets: [nil, [], { user: "User#handle" }, { "User" => "User#handle" }, { "" => "User#handle" },
+                { "user" => "User" }, { "user" => "User.handle" }, { "user" => "user#handle" }, { "user" => User }],
+      parent_controller: ["", ActionController::Base],
+      rate_limit: [nil, {}, { to: 30 }, { to: 0, within: 60 }, { to: 1.5, within: 60 }, { to: 30, within: 0 },
+                   { to: 30, within: "1m" }, { to: 30, within: 60, by: -> {} }] }.each do |option, values|
+      values.each do |value|
+        reset_configuration!
+        error = assert_raises(Usernames::ConfigurationError, "#{option} = #{value.inspect}") { configure(option => value) }
+
+        assert_match(/\Aconfig\.availability\.#{option} must be .* \(got #{Regexp.escape(value.inspect)}\)\z/, error.message)
+      end
+    end
+  end
+
+  # nil means the app's ApplicationController when it has one.
+  def test_the_parent_controller
+    availability = Usernames.configuration.availability
+    [ActionController::Base, ActionController::API] # loaded before const_defined? is stubbed
+
+    Object.stub(:const_defined?, ->(name, *) { name != :ApplicationController }) do
+      assert_equal ActionController::Base, availability.parent_class
+    end
+    Object.const_set(:ApplicationController, Class.new(ActionController::Base)) unless defined?(::ApplicationController)
+
+    assert_equal ::ApplicationController, availability.parent_class
+    availability.parent_controller = "ActionController::API"
+
+    assert_equal ActionController::API, availability.parent_class
+  end
+
   def test_the_bundled_data_loads
     assert_same Usernames::Data, Usernames::Data.load!
   end
 
   private
+
+  def configure(**settings)
+    Usernames.configure { |config| settings.each { |name, value| config.availability.public_send(:"#{name}=", value) } }
+  end
 
   # Copies lib/, config/ and data/ to a temporary root, replaces `file` under
   # data/ with `content` (or deletes it), and requires the gem from there.

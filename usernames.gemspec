@@ -44,7 +44,7 @@ Gem::Specification.new do |spec|
     []
   end
   if tracked.empty?
-    tracked = Dir.glob("{lib,config,data,sig}/**/*", base: __dir__) + %w[LICENSE.txt README.md CHANGELOG.md SECURITY.md]
+    tracked = Dir.glob("{app,lib,config,data,sig}/**/*", base: __dir__) + %w[LICENSE.txt README.md CHANGELOG.md SECURITY.md]
   end
   spec.files = tracked.select { |f| File.file?(File.join(__dir__, f)) }.reject do |f|
     (f == gemspec) || development_files.include?(f) ||
@@ -55,7 +55,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   # Runtime dependencies: only what a host app needs. `normalizes` (Active Record) and the
-  # controller `rate_limit` used by the generated availability check arrived in Rails 7.1 / 7.2.
+  # controller `rate_limit` behind the availability endpoint arrived in Rails 7.1 / 7.2.
   spec.add_dependency "activemodel", ">= 7.2.0", "< 9.0"
   spec.add_dependency "activerecord", ">= 7.2.0", "< 9.0"
   spec.add_dependency "activesupport", ">= 7.2.0", "< 9.0"

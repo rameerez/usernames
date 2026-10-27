@@ -32,6 +32,8 @@ pt:
         other: "é muito longo (máximo: %{count} caracteres)"
   usernames:
     available: "está disponível"
+    availability:
+      error: "não foi possível verificar agora"
     letters:
       lowercase: "letras minúsculas"
       any_case: "letras"

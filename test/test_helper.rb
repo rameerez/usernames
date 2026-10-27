@@ -17,8 +17,9 @@ require "logger"
 require "rails"
 require "active_record"
 # Action Dispatch for the route tests, and for the Mime registry the
-# file-extension rule reads.
-require "action_controller"
+# file-extension rule reads. The railtie, as a real app loads it, so
+# controllers and their views get the app's route helpers and `main_app`.
+require "action_controller/railtie"
 
 # Loaded BEFORE the application initializes, as Bundler.require does in a
 # real app, so the engine's initializers (locales, Active Record hook,
@@ -33,6 +34,8 @@ class TestApp < Rails::Application
   config.root = File.expand_path("..", __dir__)
   config.active_support.deprecation = :stderr
   config.secret_key_base = "a" * 64
+  # What load_defaults sets in every app since Rails 5.2.
+  config.action_view.form_with_generates_ids = true
 
   # The app's own locale files. Not config/locales: with the gem's root as the
   # app's root, that would be the engine's files a second time, and the engine
