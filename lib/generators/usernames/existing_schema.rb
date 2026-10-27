@@ -12,10 +12,11 @@ module Usernames
     class ExistingSchema
       attr_reader :column, :indexes, :matching_index
 
-      # `mode` is the case mode the index is for: the first index that
+      # `owner` is the model (or ActiveRecord::Base) whose database holds the
+      # table; `mode` is the case mode the index is for: the first index that
       # enforces its comparison contract is the matching one.
-      def self.read(table, column, mode)
-        ActiveRecord::Base.with_connection do |connection|
+      def self.read(owner, table, column, mode)
+        owner.with_connection do |connection|
           next new(reachable: true) unless connection.table_exists?(table)
 
           existing = connection.columns(table).find { |each| each.name == column.to_s }
@@ -38,7 +39,7 @@ module Usernames
         options << "unique: true" if index.unique
         options << "where: #{index.where.inspect}" if index.where.present?
         options << "name: #{index.name.inspect}"
-        "remove_index :#{table}, #{options.join(', ')}"
+        "remove_index #{Usernames::Comparison.ruby_name(table)}, #{options.join(', ')}"
       end
 
       def self.rows?(connection, table, column)

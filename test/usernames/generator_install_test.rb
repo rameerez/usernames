@@ -5,6 +5,17 @@ require "rails/generators"
 require "rails/generators/test_case"
 require "generators/usernames/install_generator"
 
+# A model whose users table lives on a database of its own (see on_a_second_database).
+class SecondDatabaseUser < ActiveRecord::Base
+  self.table_name = "users"
+end
+
+# A model whose table is named with its schema, as PostgreSQL apps with
+# several schemas name theirs.
+class QualifiedPerson < ActiveRecord::Base
+  self.table_name = "public.qualified_people"
+end
+
 class GeneratorInstallTest < Rails::Generators::TestCase
   tests Usernames::Generators::InstallGenerator
   destination File.expand_path("../../tmp/generator_install_test", __dir__)
@@ -20,6 +31,16 @@ class GeneratorInstallTest < Rails::Generators::TestCase
 
   def output_of(*args)
     run_generator(args)
+  end
+
+  # SecondDatabaseUser on an in-memory SQLite database of its own, whose
+  # users table has a username column and no index on it.
+  def on_a_second_database(**config)
+    SecondDatabaseUser.establish_connection(adapter: "sqlite3", database: ":memory:", **config)
+    SecondDatabaseUser.lease_connection.create_table(:users) { |t| t.string :username }
+    yield
+  ensure
+    SecondDatabaseUser.remove_connection
   end
 
   def run_migration(source, direction)
@@ -167,6 +188,23 @@ class GeneratorInstallTest < Rails::Generators::TestCase
     assert_migration "db/migrate/add_unique_username_index_to_members.rb"
   end
 
+  # An index already in place compares what is stored: a raw JAVI and a new
+  # javi are two names to it. So a populated column always gets the audit.
+  def test_a_populated_column_with_its_index_in_place_still_gets_the_adoption_workflow
+    User.lease_connection.execute("INSERT INTO users (username, email) VALUES ('JAVI', 'j@example.com')")
+
+    output = output_of("--model=User")
+
+    assert_match(/users.username already holds usernames/, output)
+    assert_match(/index_users_on_username can't vouch for them yet/, output)
+    assert_match(/rails usernames:audit\[User,username\]'/, output)
+    assert_match(/3\. Re-run the audit until it comes back clean, and reopen the form/, output)
+    refute_match(/Usernames are unique from the moment/, output)
+    refute_match(/rails db:migrate/, output, "there is nothing to migrate")
+  ensure
+    User.delete_all
+  end
+
   # The audit runs before has_username is declared, so it is told the mode.
   def test_the_adoption_workflow_passes_a_preserve_mode_to_the_audit
     Member.lease_connection.execute("INSERT INTO members (handle) VALUES ('Javi')")
@@ -276,6 +314,59 @@ class GeneratorInstallTest < Rails::Generators::TestCase
                      /add_index :members, :username, unique: true, name: "index_members_on_username"/
   ensure
     connection.remove_index :members, name: "members_partial", if_exists: true
+  end
+
+  # --- a schema-qualified table -----------------------------------------------------------------------
+
+  # The constant is built from the name, the table stays a string literal:
+  # `:public.users` is not Ruby. On PostgreSQL the migration runs both ways.
+  def test_a_schema_qualified_table_gets_a_migration_that_parses_and_runs
+    connection = ActiveRecord::Base.lease_connection
+    connection.create_table(:qualified_people, force: true) if POSTGRESQL
+    run_generator %w[--model=QualifiedPerson]
+
+    assert_migration "db/migrate/add_username_to_public_qualified_people.rb" do |content|
+      assert_match(/^class AddUsernameToPublicQualifiedPeople < ActiveRecord::Migration\[/, content)
+      assert_match(/add_column "public.qualified_people", :username, :string(, collation: "C")?\n/, content)
+      assert_includes content, %(add_index "public.qualified_people", :username, unique: true, ) +
+                               %(name: "index_qualified_people_on_username")
+      assert RubyVM::InstructionSequence.compile(content)
+      next unless POSTGRESQL
+
+      run_migration(content, :up)
+
+      assert connection.column_exists?(:qualified_people, :username)
+      run_migration(content, :down)
+
+      refute connection.column_exists?(:qualified_people, :username)
+    end
+  ensure
+    connection.drop_table(:qualified_people, if_exists: true)
+  end
+
+  # --- a model on another database -------------------------------------------------------------------
+
+  # Its own database, read through its own connection: the primary one's
+  # users.username index says nothing about this table.
+  def test_a_model_on_another_database_is_read_and_migrated_there
+    on_a_second_database(migrations_paths: "db/second_migrate") do
+      output = output_of("--model=SecondDatabaseUser", "--case=preserve")
+
+      assert_migration "db/second_migrate/add_unique_username_index_to_users.rb" do |content|
+        assert_includes content, %(add_index :users, "lower(username)", unique: true), "SQLite's expression"
+      end
+      assert_no_migration "db/migrate/add_unique_username_index_to_users.rb"
+      refute_match(/already in place/, output)
+    end
+  end
+
+  def test_a_model_on_another_database_without_migrations_paths_is_refused
+    on_a_second_database do
+      error = capture(:stderr) { run_generator %w[--model=SecondDatabaseUser] }
+
+      assert_match(/SecondDatabaseUser lives on the "primary" database, which sets no migrations_paths/, error)
+      assert_no_migration "db/migrate/add_unique_username_index_to_users.rb"
+    end
   end
 
   def test_a_unique_index_is_removed_with_its_uniqueness_and_condition

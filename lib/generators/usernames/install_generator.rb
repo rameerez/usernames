@@ -3,6 +3,7 @@
 require "rails/generators/base"
 require "rails/generators/active_record"
 require_relative "existing_schema"
+require_relative "install_messages"
 
 module Usernames
   module Generators
@@ -21,6 +22,7 @@ module Usernames
     # until `rails usernames:audit` comes back clean.
     class InstallGenerator < Rails::Generators::Base
       include ActiveRecord::Generators::Migration
+      include InstallMessages
 
       source_root File.expand_path("templates", __dir__)
 
@@ -55,61 +57,26 @@ module Usernames
       def display_post_install_message
         say "\n\tThe `usernames` gem has been successfully installed!", :green
         warn_about_the_database unless database.reachable?
-        populated? && add_index? ? adoption_message : setup_message
+        populated? ? adoption_message : setup_message
         say "\nEnjoy your new usernames!", :green
       end
 
       private
 
-      def setup_message
-        say "\nTo complete the setup:"
-        say "  1. Run 'rails db:migrate'#{migration_summary}."
-        say "  2. Add `#{macro_line}` to your #{model_name} model."
-        say "  3. Optionally, run 'rails generate usernames:availability' for a live \"is this name free?\" " \
-            "check on your sign-up form."
-        say "\nUsernames are unique from the moment the index exists: the database decides, " \
-            "with the same comparison the gem uses everywhere."
-      end
-
-      # PRD §11.5: on a populated column the unique index is a promise only
-      # the audit can make.
-      def adoption_message
-        say "\n#{table}.#{column} already holds usernames, and `normalizes` never rewrites rows already stored, " \
-            "so the unique index isn't trustworthy yet (it may not even be addable):", :yellow
-        say "  1. Run 'rails usernames:audit[#{audit_arguments}]'. It's read-only: it lists values that differ " \
-            "from their normalised form, names that would collide, and the column's collation and indexes."
-        say "  2. If it finds anything, fix it in a migration you own, under a short freeze of the username form: " \
-            "rewrite noncanonical values with your own callbacks and policy, and resolve collisions by contacting " \
-            "the people or appending a suffix. The gem renames nobody."
-        say "  3. Run 'rails db:migrate'#{migration_summary}, re-run the audit, and reopen the form."
-        say "  4. Add `#{macro_line}` to your #{model_name} model. Existing names that break today's rules " \
-            "keep working; only a change is validated."
-        say "  See \"Adopting an existing column\" in the README."
-      end
-
-      def warn_about_the_database
-        say "\nCouldn't reach the database to look at #{table}.#{column}, so the migration assumes the column " \
-            "doesn't exist yet. If it does, delete the add_column line before migrating.", :yellow
-      end
-
-      def migration_summary
-        return "" if nothing_to_migrate?
-
-        steps = []
-        steps << "to add #{table}.#{column}" if add_column?
-        steps << (collation ? "to set its collation to #{collation.inspect}" : "to make it a string column") if
-          change_collation?
-        steps << "#{steps.empty? ? 'to add' : 'and add'} its unique index, #{index[:name]}" if add_index?
-        " (#{steps.join(' ')})"
-      end
-
       # --- what the migration does -----------------------------------------------------------------
 
+      # A file name and a constant, whatever the table is called:
+      # `public.users` makes add_username_to_public_users, AddUsernameToPublicUsers.
       def migration_name
-        add_column? ? "add_#{column}_to_#{table}" : "add_unique_#{column}_index_to_#{table}"
+        table_part = table.gsub(/\W+/, "_")
+        column_part = column.gsub(/\W+/, "_")
+        add_column? ? "add_#{column_part}_to_#{table_part}" : "add_unique_#{column_part}_index_to_#{table_part}"
       end
 
       def migration_class_name = migration_name.camelize
+
+      # A table or column as the migration's argument (`:users`, `"public.users"`).
+      def ruby_name(name) = Usernames::Comparison.ruby_name(name)
 
       def nothing_to_migrate?
         !add_column? && !change_collation? && !add_index?
@@ -213,17 +180,40 @@ module Usernames
         Usernames.configuration.case
       end
 
-      # From the app's database configuration, which needs no connection.
-      # NOTE(p3): when even that is unknown, the migration is written for
-      # SQLite (Rails' default) and the message says so.
+      # The model's own database when the model exists — an app with several
+      # databases keeps its users on any of them — else the primary one.
+      def connection_owner
+        model_class.is_a?(Class) && model_class < ActiveRecord::Base ? model_class : ActiveRecord::Base
+      end
+
+      # From the model's database configuration, which needs no connection.
+      # When even that is unknown, the migration is written for SQLite
+      # (Rails' default).
       def adapter
-        @adapter ||= Usernames::Comparison.adapter(ActiveRecord::Base.connection_db_config&.adapter.to_s)
+        @adapter ||= Usernames::Comparison.adapter(connection_owner.connection_db_config&.adapter.to_s)
       rescue StandardError
         @adapter = :sqlite
       end
 
       def database
-        @database ||= ExistingSchema.read(table, column, mode)
+        @database ||= ExistingSchema.read(connection_owner, table, column, mode)
+      end
+
+      # A model on the primary database migrates where Rails always does. A
+      # model on another one migrates where that database's migrations live
+      # (its migrations_paths); without them there is nowhere the migration
+      # would run against the right database, so the generator says so.
+      def db_migrate_path
+        own, primary = [connection_owner, ActiveRecord::Base].map(&:connection_db_config)
+        return super if own.equal?(primary) || own.configuration_hash == primary.configuration_hash
+
+        Array(own.migrations_paths).first || raise(Thor::Error, <<~MESSAGE.squish)
+          #{model_name} lives on the #{own.name.inspect} database, which sets no migrations_paths, so a migration
+          written here would run against the primary database. Add migrations_paths for it in config/database.yml
+          and run the generator again.
+        MESSAGE
+      rescue ActiveRecord::ActiveRecordError # no database configuration to read: Rails' default
+        super
       end
 
       def populated?
