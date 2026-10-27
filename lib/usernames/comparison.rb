@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative "comparison/index_contract"
+
 module Usernames
   # How the database compares two usernames (PRD §11.1).
   #
@@ -61,21 +63,6 @@ module Usernames
         end
       end
 
-      # Whether an index read back from the database (`connection.indexes`)
-      # is the one index_definition describes: unique, and on the bare column
-      # or on the same expression. The database spells an expression its own
-      # way — PostgreSQL reads `lower(username COLLATE "C")` back as
-      # `lower(((username)::text COLLATE "C"))` — so both are reduced to their
-      # letters first.
-      def index_matches?(index, definition)
-        return false unless index.unique
-
-        wanted = definition[:column]
-        return index.columns == [wanted.to_s] if wanted.is_a?(Symbol)
-
-        index.columns.is_a?(String) && squeeze(index.columns) == squeeze(wanted)
-      end
-
       # The collation the column itself needs for `mode`: "C" on PostgreSQL,
       # "utf8mb4_bin" on MySQL, nil on SQLite (whose default BINARY is the
       # contract). nil for PostgreSQL in preserve mode: the comparison
@@ -87,6 +74,14 @@ module Usernames
         return nil if mode == :preserve && adapter == :postgresql
 
         COLLATIONS[adapter]
+      end
+
+      # A table or column name as a migration argument: `:users` when it is
+      # a plain identifier, else a string literal — `"public.users"`, never
+      # the `:public.users` that does not parse.
+      def ruby_name(name)
+        name = name.to_s
+        name.match?(/\A[A-Za-z_][A-Za-z0-9_]*\z/) ? ":#{name}" : name.inspect
       end
 
       # :postgresql, :mysql or :sqlite, from a connection or an adapter name
@@ -110,10 +105,6 @@ module Usernames
       end
 
       private
-
-      def squeeze(expression)
-        expression.downcase.gsub(/::(text|character varying)/, "").gsub(/[\s"`()]/, "")
-      end
 
       def expression(adapter, quoted, mode)
         return quoted unless mode == :preserve

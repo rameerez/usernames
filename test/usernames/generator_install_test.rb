@@ -264,6 +264,20 @@ class GeneratorInstallTest < Rails::Generators::TestCase
     Member.lease_connection.remove_index :members, name: "index_members_on_lower_username", if_exists: true
   end
 
+  # A partial unique index lets two inactive accounts share a name, so it is
+  # not the index the gem needs: the migration still adds that one.
+  def test_a_partial_unique_index_does_not_count_as_in_place
+    connection = Member.lease_connection
+    connection.add_index :members, :username, unique: true, where: "email IS NOT NULL", name: "members_partial"
+
+    run_generator %w[--model=Member]
+
+    assert_migration "db/migrate/add_unique_username_index_to_members.rb",
+                     /add_index :members, :username, unique: true, name: "index_members_on_username"/
+  ensure
+    connection.remove_index :members, name: "members_partial", if_exists: true
+  end
+
   def test_a_unique_index_is_removed_with_its_uniqueness_and_condition
     index = ActiveRecord::ConnectionAdapters::IndexDefinition.new(
       "members", "index_members_on_username", true, %w[username], where: "username IS NOT NULL"

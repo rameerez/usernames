@@ -152,11 +152,12 @@ module Usernames
 
     # --- indexes --------------------------------------------------------------------------------------
 
+    # Every index that involves the column, each with why it does not
+    # enforce the comparison contract (Comparison::IndexContract) — a
+    # partial, composite or NOCASE unique index is not uniqueness.
     def index_section
       section "Index"
-      indexes = column_indexes
-      indexes.each { |index| line "  · #{index.name} (#{describe(index)})" }
-      matching = indexes.find { |index| Comparison.index_matches?(index, expected_index) }
+      matching = listed_indexes.find { |_index, reason| reason.nil? }&.first
       return ok("#{matching.name} matches the #{mode} mode") if matching
 
       problem("no unique index matches the #{mode} mode, so the database does not enforce uniqueness yet: " \
@@ -164,23 +165,26 @@ module Usernames
     end
 
     def add_index_line
-      "add_index :#{model.table_name}, #{expected_index[:column].inspect}, unique: true, " \
-        "name: #{expected_index[:name].inspect}"
+      expected = contract.definition
+      "add_index #{Comparison.ruby_name(model.table_name)}, #{expected[:column].inspect}, unique: true, " \
+        "name: #{expected[:name].inspect}"
     end
 
-    def column_indexes
-      connection.indexes(model.table_name).select { |index| UniqueViolation.covers?(index, column) }
+    def contract
+      @contract ||= Comparison::IndexContract.new(connection, table: model.table_name, column: column, mode: mode)
     end
 
-    def expected_index
-      @expected_index ||= Comparison.index_definition(adapter: adapter, table: model.table_name, column: column,
-                                                      mode: mode)
+    # [[index, reason], …] for every index that involves the column, each
+    # printed with why it falls short (reason nil: it enforces the contract).
+    def listed_indexes
+      verdicts = connection.indexes(model.table_name).select { |index| contract.mentions?(index) }
+        .map { |index| [index, contract.violation(index)] }
+      verdicts.each { |index, reason| line "  · #{describe(index)}#{" — #{reason}" if reason}" }
     end
 
     def describe(index)
-      "#{index.unique ? 'unique' : 'not unique'} on #{Array(index.columns).join(', ')}"
+      "#{index.name} (#{index.unique ? 'unique' : 'not unique'} on #{Array(index.columns).join(', ')})"
     end
-
     # --- stored values ----------------------------------------------------------------------------------
 
     def values_section

@@ -87,6 +87,24 @@ class RakeTasksTest < UsernamesTestCase
     refute_match(/differ from their normalised form:/, output, "preserve mode needs no case rewrite")
   end
 
+  # A unique index is not uniqueness when it covers only some rows, or
+  # compares under a collation of its own: the audit says so, index by index.
+  def test_audit_refuses_indexes_that_do_not_enforce_the_contract
+    connection = Member.lease_connection
+    connection.add_index :members, :username, unique: true, where: "email IS NOT NULL", name: "members_partial"
+    connection.add_index :members, "username COLLATE #{POSTGRESQL ? '"und-x-icu"' : 'NOCASE'}", unique: true,
+                                                                                                name: "members_nocase"
+
+    output = run_task("usernames:audit", "Member", "username")
+
+    assert_match(/· members_partial \(unique on username\) — only covers rows WHERE \(?email IS NOT NULL\)?/, output)
+    assert_match(/· members_nocase \(unique on username\) — compares under collation "(NOCASE|und-x-icu)"/, output)
+    assert_match(/✗ no unique index matches the lowercase mode/, output)
+    refute_match(/Nothing to fix/, output)
+  ensure
+    %w[members_partial members_nocase].each { |name| connection.remove_index :members, name: name, if_exists: true }
+  end
+
   # The adoption workflow audits before has_username is declared: the model
   # cannot say its mode then, so the task takes it, and says what it assumed.
   def test_audit_of_an_undeclared_column_takes_the_case_mode

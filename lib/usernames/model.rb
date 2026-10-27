@@ -284,7 +284,7 @@ module Usernames
               rescue ActiveRecord::RecordNotUnique => error
                 column = self.class._usernames.fetch(:#{column})
                 raise unless Usernames::UniqueViolation.of?(error, table: self.class.table_name, column: :#{column},
-                                                                   index: column.rules.unique_index,
+                                                                   rules: column.rules,
                                                                    connection: self.class.lease_connection)
 
                 if redraw && (attempts += 1) <= 3

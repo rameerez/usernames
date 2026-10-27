@@ -3,6 +3,7 @@
 require "test_helper"
 require "rails/generators"
 require "rails/generators/test_case"
+require "nokogiri"
 require "generators/usernames/availability_generator"
 
 class GeneratorAvailabilityTest < Rails::Generators::TestCase

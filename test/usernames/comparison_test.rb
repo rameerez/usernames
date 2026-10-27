@@ -57,17 +57,13 @@ class ComparisonTest < UsernamesTestCase
                                              mode: :lowercase)[:name]
   end
 
-  # An index as the database reads it back, against the one the gem writes.
-  def test_index_expressions_match_however_the_database_spells_them
-    index = Struct.new(:unique, :columns)
-    collated = { column: 'lower(handle COLLATE "C")' }
-
-    assert Comparison.index_matches?(index.new(true, %(lower(((handle)::text COLLATE "C")))), collated)
-    assert Comparison.index_matches?(index.new(true, "lower(handle)"), { column: "lower(handle)" })
-    refute Comparison.index_matches?(index.new(true, "lower(handle)"), collated)
-    refute Comparison.index_matches?(index.new(false, "lower(handle)"), { column: "lower(handle)" })
-    assert Comparison.index_matches?(index.new(true, ["handle"]), { column: :handle })
-    refute Comparison.index_matches?(index.new(true, %w[handle tenant_id]), { column: :handle })
+  # What the audit prints: a plain table as a symbol, a schema-qualified one
+  # as the string literal Ruby can parse.
+  def test_names_as_migration_arguments
+    assert_equal ":users", Comparison.ruby_name("users")
+    assert_equal ":username", Comparison.ruby_name(:username)
+    assert_equal %("public.users"), Comparison.ruby_name("public.users")
+    assert_equal %("my-table"), Comparison.ruby_name("my-table")
   end
 
   def test_column_collations

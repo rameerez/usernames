@@ -139,12 +139,10 @@ module Usernames
       # An index of the same name that is not the one the mode needs (a plain
       # non-unique index_users_on_username, say) has to go first.
       def conflicting_index
-        database.indexes.find { |existing| existing.name == index[:name] && !Usernames::Comparison.index_matches?(existing, index) }
+        database.indexes.find { |existing| existing.name == index[:name] && !existing.equal?(matching_index) }
       end
 
-      def matching_index
-        database.indexes.find { |existing| Usernames::Comparison.index_matches?(existing, index) }
-      end
+      def matching_index = database.matching_index
 
       # Whether the migration touches the column before its indexes.
       def column_step? = add_column? || change_collation? || mysql_collation_note?
@@ -225,7 +223,7 @@ module Usernames
       end
 
       def database
-        @database ||= ExistingSchema.read(table, column)
+        @database ||= ExistingSchema.read(table, column, mode)
       end
 
       def populated?
