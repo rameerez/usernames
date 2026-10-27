@@ -101,7 +101,7 @@ module Usernames
       string = readable(value)
       return failure(:username_characters) unless string
 
-      format_failure(string) || content_failure(comparison_key(string))
+      format_failure(string) || content_failure(string)
     end
 
     def format_failure(string)
@@ -140,10 +140,12 @@ module Usernames
       nil
     end
 
-    def content_failure(key)
-      if (rule = Reserved.verdict(key, self))
+    # Reserved words are matched on the comparison key alone; the offensive
+    # matcher also reads the case the name was typed in (Offensive.verdict).
+    def content_failure(string)
+      if (rule = Reserved.verdict(comparison_key(string), self))
         Failure.new(reason: :username_reserved, rule: rule)
-      elsif (rule = Offensive.verdict(key, self))
+      elsif (rule = Offensive.verdict(string, self))
         Failure.new(reason: :username_not_allowed, rule: rule)
       end
     end

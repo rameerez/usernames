@@ -469,6 +469,19 @@ class ModelTest < UsernamesTestCase
     assert_predicate Player.new(handle: "Jo-Ann"), :valid?
   end
 
+  # The stored case reaches the offensive matcher: a capital separates words.
+  # Lowercase mode stores none, so the same names are one glued word there.
+  def test_preserve_mode_reads_a_capital_as_a_word_boundary
+    refute_predicate Player.new(handle: "ShitheadBob"), :valid?
+    assert_predicate Player.new(handle: "ScunthorpeUnited"), :valid?
+    assert_predicate Player.new(handle: "SpicyFlash"), :valid?
+    assert_predicate Player.new(handle: "shitheadbob"), :valid?
+
+    assert_predicate User.new(username: "ShitheadBob", email: "a@example.com"), :valid?
+    refute_predicate User.new(username: "ScunthorpeUnited", email: "b@example.com"), :valid?
+    assert_predicate User.new(username: "SpicyFlash", email: "c@example.com"), :valid?
+  end
+
   def test_preserve_mode_suggestions_and_generation
     Player.create!(handle: "Javi")
     suggestions = Player.suggest_handles("javi", count: 3)

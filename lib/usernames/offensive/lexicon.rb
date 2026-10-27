@@ -119,8 +119,9 @@ module Usernames
       # of `rape` reads as evasion, so `gr_ape` is refused — a documented
       # trade-off: a real name split exactly there is rarer than the evasion.
       #
-      # a-1 otherwise: refused unless the unit it sits in — its segment, or
-      # for a spelling with a digit its part — is exempt. Whole-segment
+      # a-1 otherwise: refused unless the unit it sits in — its segment (or
+      # the word of it, between case boundaries), or for a spelling with a
+      # digit its part — is exempt. Whole-segment
       # spellings are #whole_severe?'s, not matched as substrings.
       # Spellings under four letters are left out of a-2 as of
       # a-1 (none ships today); across separators they would refuse innocent
@@ -129,7 +130,7 @@ module Usernames
         return true if whole.straddles?(spelling.text, position)
         return false if spelling.whole
 
-        unit = spelling.digits ? whole.part_at(position) : whole.segment_at(position)
+        unit = spelling.digits ? whole.part_at(position) : whole.segment_at(position, spelling.text.length)
         !exempt?(unit, spelling.term, allowed)
       end
 

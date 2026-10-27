@@ -12,18 +12,32 @@ module Usernames
     #                digit, so without these such a spelling could never match
     #   wholes       each form with its separators removed (see Whole)
     #
+    # A name stored with its typed case (`case: :preserve`) also splits where
+    # a lowercase letter meets a capital: `ShitheadBob` is the segments
+    # shitheadbob, shithead and bob, and `ScunthorpeUnited` is
+    # scunthorpeunited, scunthorpe and united. The capital is the only word
+    # boundary such a name has, and the person typed it. The glued segment
+    # stays a segment, and the whole is unchanged.
+    #
     # Segments come from BOTH forms: `adm1n` is the segments adm, n as typed
     # and admin folded, and `shithead1` keeps shithead as typed where folded it
     # reads shitheadi.
     class Name
-      PART_BOUNDARY = /[_.-]+/
-
       attr_reader :key, :forms, :wholes, :segments, :digit_parts
 
-      def initialize(key)
+      # Where a lowercase letter meets a capital.
+      CASE_BOUNDARY = /(?<=[a-z])(?=[A-Z])/
+
+      # `key` is the comparison key; `canonical`, the name as stored, which
+      # differs from it only in case.
+      def initialize(key, canonical = key)
         @key = key
         @forms = [key, Offensive.fold(key)].uniq
-        @wholes = [Whole.new(key), Whole.new(Reserved.leet(key), folded: true)].uniq do |whole|
+        boundaries = case_boundaries(canonical)
+        @wholes = [
+          Whole.new(key, boundaries: boundaries),
+          Whole.new(Reserved.leet(key), folded: true, boundaries: boundaries)
+        ].uniq do |whole|
           [whole.text, whole.segments]
         end
         @segments = @wholes.flat_map(&:segments).uniq
@@ -34,6 +48,20 @@ module Usernames
       # part a digit keeps from being one.
       def units
         segments + digit_parts
+      end
+
+      private
+
+      # The positions of the key where `canonical` changes from a lowercase
+      # letter to a capital. Positions carry over: the key is `canonical`
+      # with its ASCII letters lowercased, and the digit fold maps one
+      # character to one.
+      def case_boundaries(canonical)
+        return [].freeze if canonical == key
+
+        positions = []
+        canonical.scan(CASE_BOUNDARY) { positions << Regexp.last_match.begin(0) }
+        positions.freeze
       end
     end
 
@@ -51,16 +79,26 @@ module Usernames
     # (`p_huck`, `f_vck`, `fuuu_uuck`) still folds. A character a rewrite
     # makes from two parts (the `f` of `p_huck`) remembers both, so whatever
     # covers it straddles them, and an exemption never applies there.
+    #
+    # Case boundaries (see Name) cut a segment into words without making
+    # them parts: an occurrence across one (`ScunThorpe`) is still inside
+    # one segment, the glued one, and is judged by it. One that lies inside
+    # a single word is judged by that word, so `ScunthorpeUnited` is exempt
+    # where `scunthorpeunited` is not.
     class Whole
+      # What sits between separators.
+      PART = /[^_.-]+/
+
       attr_reader :text, :parts, :segments
 
-      def initialize(form, folded: false)
+      def initialize(form, folded: false, boundaries: [])
         @folded = folded
+        @boundaries = boundaries
         @text = +""
         @parts = []
         @segments = []
-        @origins = [] # [first part, last part, segment] per character of @text
-        form.split(Name::PART_BOUNDARY).each { |part| add(part) unless part.empty? }
+        @origins = [] # [first part, last part, segment, word] per character of @text
+        form.scan(PART) { add(Regexp.last_match[0], Regexp.last_match.begin(0)) }
         rewrite_text if folded
         @text.freeze
       end
@@ -81,24 +119,60 @@ module Usernames
         @parts[@origins[position][0]]
       end
 
-      # The segment at `position`, or nil on a digit.
-      def segment_at(position)
-        index = @origins[position][2]
-        @segments[index] if index
+      # The segment that `length` characters from `position` lie in: the word
+      # between case boundaries when they fit in one, the segment otherwise,
+      # or nil on a digit.
+      def segment_at(position, length = 1)
+        _first, _last, segment, word = @origins[position]
+        return @segments[word] if word && word == @origins[position + length - 1][3]
+
+        @segments[segment] if segment
       end
 
       private
 
-      def add(part)
+      # `offset`: where the part starts in the form, to place case boundaries.
+      def add(part, offset)
         part_index = @parts.size
-        @parts << (@folded ? Offensive.rewrite(part) : part)
+        @parts << folded(part)
         part.scan(/\d+|\D+/) do |run|
-          digits = run.getbyte(0).between?(48, 57)
-          segment = digits ? nil : @segments.size
-          @segments << (@folded ? Offensive.rewrite(run) : run) unless digits
-          run.length.times { @origins << [part_index, part_index, segment] }
+          start = offset + Regexp.last_match.begin(0)
+          if run.getbyte(0).between?(48, 57)
+            run.length.times { @origins << [part_index, part_index, nil, nil] }
+          else
+            add_segment(run, start, part_index)
+          end
           @text << run
         end
+      end
+
+      # A run of letters: one segment, and one more for each word in it when
+      # case boundaries cut it.
+      def add_segment(run, start, part_index)
+        segment = @segments.size
+        @segments << folded(run)
+        words = words_in(run, start)
+        if words.one?
+          run.length.times { @origins << [part_index, part_index, segment, nil] }
+        else
+          words.each do |word|
+            @segments << folded(word)
+            index = @segments.size - 1
+            word.length.times { @origins << [part_index, part_index, segment, index] }
+          end
+        end
+      end
+
+      # `run` (which starts at `start` in the form) cut at the case boundaries inside it.
+      def words_in(run, start)
+        return [run] if @boundaries.empty?
+
+        cuts = @boundaries.filter_map { |at| at - start if at > start && at < start + run.length }
+        [0, *cuts].zip([*cuts, run.length]).map { |from, to| run[from...to] }
+      end
+
+      def folded(text)
+        @folded ? Offensive.rewrite(text) : text
       end
 
       # Offensive.rewrite over the joined text, carrying every character's origins along.
@@ -141,8 +215,12 @@ module Usernames
         end
       end
 
+      # A character made from several keeps the first one's segment, and a
+      # word only when they all came from the same one.
       def merged(origins)
-        [origins.map(&:first).min, origins.map { |origin| origin[1] }.max, origins.first[2]]
+        words = origins.map(&:last).uniq
+        [origins.map(&:first).min, origins.map { |origin| origin[1] }.max, origins.first[2],
+         words.size == 1 ? words.first : nil]
       end
     end
   end

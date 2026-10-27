@@ -35,23 +35,25 @@ module Usernames
 
     class << self
       # The kind of match — :severe, :strong, :hate_number or :adapter — or nil
-      # when the name is fine. `key` is Usernames.comparison_key of a name that
-      # passed every format rule and is not reserved; `rules` is the
+      # when the name is fine. `canonical` is a name as stored that passed
+      # every format rule and is not reserved: the words are matched on its
+      # comparison key, split also where its case changes (see Name), and
+      # adapters get it as it is; `rules` is the
       # Usernames::Rules in force (rules.offensive carries severity, languages,
       # allowed and adapters; rules.on_adapter_failure what a raising adapter means).
       #
       # `:off` turns off everything the gem bundles, hate rules included;
       # adapters run in every mode, because an app that configured one asked
       # for it explicitly.
-      def verdict(key, rules)
+      def verdict(canonical, rules)
         severity = rules.offensive.severity
         unless severity == :off
-          name = Name.new(key)
+          name = Name.new(rules.comparison_key(canonical), canonical)
           rule = lexical(name, rules, severity) || Hate.verdict(name, rules)
           return rule if rule
         end
 
-        adapter_verdict(key, rules)
+        adapter_verdict(canonical, rules)
       end
 
       # A name's folded form (R1): the digit folds (`sh1t` → `shit`), then
@@ -105,19 +107,19 @@ module Usernames
         end
       end
 
-      def adapter_verdict(key, rules)
-        :adapter if rules.offensive.adapters.any? { |adapter| flagged?(adapter, key, rules) }
+      def adapter_verdict(canonical, rules)
+        :adapter if rules.offensive.adapters.any? { |adapter| flagged?(adapter, canonical, rules) }
       end
 
       # A raising adapter (a network blip, a bug) follows on_adapter_failure:
       # :allow (the default: an optional adapter fails open) skips
       # it, :reject refuses the name. Either way it is logged, so a broken
       # adapter is not silently a no-op forever.
-      # Adapters receive the comparison key (the name lowercased), as every
-      # content verdict does.
-      def flagged?(adapter, key, rules)
+      # Adapters receive the name as stored, typed case and all: a capital is
+      # a word boundary a text classifier can use (see Adapters::Moderate).
+      def flagged?(adapter, canonical, rules)
         callable = adapter == :moderate ? Adapters::Moderate : adapter
-        callable.call(key) ? true : false
+        callable.call(canonical) ? true : false
       rescue StandardError => e
         reject = rules.on_adapter_failure == :reject
         log("[usernames] offensive adapter #{adapter.inspect} raised #{e.class}: #{e.message} " \

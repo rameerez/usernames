@@ -56,13 +56,20 @@ class CheckTest < UsernamesTestCase
     end
   end
 
-  def test_content_rules_get_the_comparison_key_and_the_rules_in_force
+  # Reserved words are matched on the comparison key; the offensive matcher
+  # gets the name as stored, so it can read the case it was typed in.
+  def test_content_rules_get_the_name_and_the_rules_in_force
     seen = nil
-    Usernames::Offensive.stub(:verdict, ->(key, rules) { (seen = [key, rules]) && nil }) do
-      Usernames.check("JaVi", case: :preserve, offensive: { severity: :severe })
+    reserved = nil
+    verdict = Usernames::Reserved.method(:verdict)
+    Usernames::Reserved.stub(:verdict, ->(key, rules) { (reserved = key) && verdict.call(key, rules) }) do
+      Usernames::Offensive.stub(:verdict, ->(name, rules) { (seen = [name, rules]) && nil }) do
+        Usernames.check("JaVi", case: :preserve, offensive: { severity: :severe })
+      end
     end
 
-    assert_equal "javi", seen.first
+    assert_equal "javi", reserved
+    assert_equal "JaVi", seen.first
     assert_equal :severe, seen.last.offensive.severity
   end
 

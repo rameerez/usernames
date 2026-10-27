@@ -137,7 +137,7 @@ Your own official account, under a name the gem reserves? Lift exactly that name
 A username has no spaces, so `xxfuckxx`, `f_u_c_k` and `sh1thead` have to be caught — but `assassin`, `scunthorpe`, `therapist`, `cockburn` and `grape` must not be. The gem uses **severity tiers**, per language:
 
 - **Severe** terms (slurs, the worst sexual and violent terms) are matched anywhere inside a name, after folding leetspeak digits and separators — but only terms of four letters or more (`gc` and `mj` are on some lists; matching them anywhere would refuse `gcastro` and `mjordan`).
-- **Strong** terms are matched only as a whole name or a whole segment between separators and digits: `shithead_bob` is refused, `scunthorpe` is not, and a real surname like `Chujew` stays legal.
+- **Strong** terms are matched only as a whole name or a whole segment between separators and digits: `shithead_bob` is refused, `scunthorpe` is not, and a real surname like `Chujew` stays legal. With `case: :preserve`, a capital after a lowercase letter separates words too: `ShitheadBob` is refused, `ScunthorpeUnited` is fine. Words glued in lowercase (`shitheadbob`) have nothing to split them by, so at `:strong` they pass — a known limit.
 - **Mild** words (`hell`, `damn`) are off by default.
 - **Hate numbers** are rules, not list entries: `1488` is refused as a whole number or `14_88`; bare `88` never is (birth years, NASCAR, a lucky number in Chinese); `kkk` is refused in English — and, when a Portuguese word list ships, it will not be there, where `kkkk` is laughter (Portuguese messages ship today; Portuguese screening does not).
 - An **allowlist** of ~800 real words and names that happen to contain a bad substring (`scunthorpe`, `sussex`, `cockburn`, `fukuda`, `dikshit`…) exempts a whole name or a whole segment: `scunthorpe_united` is fine. Joining segments never manufactures an exemption, so `scunt_horpe` and `f.u.c.k` are still refused.
@@ -150,7 +150,7 @@ Usernames.configure do |config|
 end
 ```
 
-If you already use [`moderate`](https://github.com/rameerez/moderate), its word list is consulted too — automatically, no configuration, and never required. Any `->(name) { … }` can be an adapter.
+If you already use [`moderate`](https://github.com/rameerez/moderate), its word list is consulted too — automatically, no configuration, and never required. Any `->(name) { … }` can be an adapter; it receives the name as stored (typed case and all, in preserve mode).
 
 One deliberate choice worth stating: `negro` is the Spanish word for black and a common surname, and it is not blocked in any language. The slur is a different word.
 

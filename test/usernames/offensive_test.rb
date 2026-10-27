@@ -21,7 +21,7 @@ class OffensiveTest < UsernamesTestCase
   def offensive(name, **)
     options = { separators: %w[_ . -], ** }
     rules = rules(**options)
-    Usernames::Offensive.verdict(rules.comparison_key(rules.normalize(name)), rules)
+    Usernames::Offensive.verdict(rules.normalize(name), rules)
   end
 
   def rejected?(name, **)
@@ -204,7 +204,7 @@ class OffensiveTest < UsernamesTestCase
 
     assert_equal :adapter, offensive("very_bad", offensive: { adapters: [adapter] })
     assert_nil offensive("Very_Good", offensive: { adapters: [adapter] }, case: :preserve)
-    assert_equal %w[very_bad very_good], seen
+    assert_equal %w[very_bad Very_Good], seen, "adapters get the name as stored"
   end
 
   def test_adapters_run_only_after_the_bundled_checks_pass
@@ -249,7 +249,7 @@ class OffensiveTest < UsernamesTestCase
     wordlist = Class.new do
       define_singleton_method(:classify) do |text|
         asked << text
-        Struct.new(:flagged?).new(text.include?("wolf"))
+        Struct.new(:flagged?).new(text.downcase.include?("wolf"))
       end
     end
     Object.const_set(:Moderate, Module.new)
@@ -258,7 +258,8 @@ class OffensiveTest < UsernamesTestCase
 
     assert_equal :adapter, offensive("big_bad_wolf", offensive: { adapters: [:moderate] })
     assert_nil offensive("javi", offensive: { adapters: [:moderate] })
-    assert_equal ["big bad wolf", "javi"], asked
+    assert_equal :adapter, offensive("BigBadWolf", offensive: { adapters: [:moderate] }, case: :preserve)
+    assert_equal ["big bad wolf", "javi", "Big Bad Wolf"], asked
     assert_equal "Big Bad Wolf x HTML Parser", Usernames::Adapters::Moderate.text_for("BigBadWolf_x.HTMLParser")
   ensure
     Object.send(:remove_const, :Moderate) if defined?(::Moderate)
@@ -304,6 +305,50 @@ class OffensiveTest < UsernamesTestCase
     assert_predicate Usernames.check("savvy_vivian"), :ok?
     refute_predicate Usernames.check("sus_sex"), :ok?
     refute_predicate Usernames.check("sussex_fvck"), :ok?
+  end
+
+  # --- case boundaries, in preserve mode -----------------------------------------------------------
+
+  # A capital is a word boundary the person typed: in preserve mode it cuts
+  # a segment into words, for the strong terms and for the exemptions alike.
+  def test_a_capital_separates_words_in_preserve_mode
+    assert_equal :username_not_allowed, Usernames.check("ShitheadBob", case: :preserve).reason
+    assert_predicate Usernames.check("ScunthorpeUnited", case: :preserve), :ok?
+    assert_predicate Usernames.check("SpicyFlash", case: :preserve), :ok?
+    assert_predicate Usernames.check("GrapeJuice", case: :preserve), :ok?
+    assert_equal :username_not_allowed, Usernames.check("ScunthorpeFuck", case: :preserve).reason
+    assert_equal :username_not_allowed, Usernames.check("FuCk", case: :preserve).reason
+  end
+
+  # Lowercase mode stores no case, so there is no boundary to read: the
+  # same names are one glued segment each.
+  def test_lowercase_mode_reads_the_same_names_as_one_segment
+    assert_predicate Usernames.check("ShitheadBob"), :ok?
+    assert_equal :username_not_allowed, Usernames.check("ScunthorpeUnited").reason
+    assert_predicate Usernames.check("SpicyFlash"), :ok?
+  end
+
+  # Glued lowercase words are a documented limit: with no capital and no
+  # separator there is nothing to split them by, in either mode.
+  def test_glued_lowercase_words_pass_at_strong
+    assert_predicate Usernames.check("shitheadbob"), :ok?
+    assert_predicate Usernames.check("shitheadbob", case: :preserve), :ok?
+    assert_equal :username_not_allowed, Usernames.check("shithead_bob").reason
+  end
+
+  # The glued segment stays, and each word is added, in both forms; an
+  # occurrence across a boundary is judged by the glued segment.
+  def test_case_boundaries_add_words_to_the_segments
+    name = Usernames::Offensive::Name.new("sh1theadbob_x", "Sh1theadBob_x")
+
+    assert_equal %w[sh theadbob thead bob x shitheadbob shithead ks], name.segments
+    assert_equal %w[sh1theadbobx shitheadbobks], name.wholes.map(&:text), "the wholes are unchanged"
+
+    whole = Usernames::Offensive::Name.new("scunthorpe", "ScunThorpe").wholes.first
+
+    assert_equal "scun", whole.segment_at(0, 4)
+    assert_equal "scunthorpe", whole.segment_at(1, 4), "across a boundary: the glued segment"
+    assert_predicate Usernames.check("ScunThorpe", case: :preserve), :ok?
   end
 
   def test_name_forms
