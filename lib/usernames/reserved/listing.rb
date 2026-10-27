@@ -6,7 +6,7 @@ module Usernames
     # comes from, for the day somebody asks why `x` is taken by nobody.
     #
     #   admin        impersonation · big-username-blocklist (MIT) — …
-    #   festival     config.reserved
+    #   recipe       config.reserved
     #   pricing      route /pricing
     #
     # A word on several lists is shown with the one that decides how it is

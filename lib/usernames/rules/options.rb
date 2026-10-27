@@ -109,10 +109,10 @@ module Usernames
       # A list of words, naming the one entry that is not a word rather than
       # printing a list that may hold a thousand of them.
       def valid_words(name, value)
-        invalid!(name, value, "a list of words, like %w[festival]") unless value.is_a?(Array)
+        invalid!(name, value, "a list of words, like %w[recipe]") unless value.is_a?(Array)
         # An index, not the entry itself: the bad entry may be nil.
         bad = value.index { |word| !word.is_a?(String) || word.strip.empty? }
-        raise ConfigurationError, "#{name} must be a list of words, like %w[festival] (got #{value[bad].inspect} in it)" if bad
+        raise ConfigurationError, "#{name} must be a list of words, like %w[recipe] (got #{value[bad].inspect} in it)" if bad
 
         value.dup.freeze
       end

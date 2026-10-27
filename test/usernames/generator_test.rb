@@ -128,7 +128,7 @@ class GeneratorTest < UsernamesTestCase
       "Stra\u{DF}e" => "strasse",
       "info@acme.com" => "acme",
       "Javi+news@example.com" => "javi",
-      "Hello@Festival-Planner.io" => "festival_planner",
+      "Hello@Recipe-Box.io" => "recipe_box",
       "maria.lopez@example.com" => "maria_lopez"
     }.each do |seed, expected|
       assert_equal expected, Usernames::Generator.clean(seed, Usernames.configuration.rules_for), seed

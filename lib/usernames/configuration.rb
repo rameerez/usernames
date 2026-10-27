@@ -7,8 +7,8 @@ module Usernames
   # Word lists START FROM the bundled data, so `+=` adds to it and `=`
   # replaces it:
   #
-  #   config.reserved += %w[festival festivals]   # the bundled words, and these
-  #   config.reserved  = %w[festival festivals]   # only these
+  #   config.reserved += %w[recipe recipes]   # the bundled words, and these
+  #   config.reserved  = %w[recipe recipes]   # only these
   #
   # Lists are handed out frozen. The rules compiled from them are cached, and
   # a list changed behind the cache's back (`config.reserved << "x"`) would
@@ -89,7 +89,7 @@ module Usernames
     end
 
     # Per-call word lists ADD to the configured ones: a model that passes
-    # `reserved: %w[festival]` keeps every bundled reservation. Every other
+    # `reserved: %w[recipe]` keeps every bundled reservation. Every other
     # per-call option replaces the configured value. Adding is the choice
     # that can never silently un-reserve a name: a per-model list fails closed.
     LISTS = %i[reserved forbidden allowed].freeze

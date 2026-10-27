@@ -109,13 +109,13 @@ Nobody can register these, out of the box:
 - **System words** (~90): `null`, `nil`, `undefined`, `true`, `false`, `deleted`, `ghost` (GitHub's placeholder for deleted users), `anonymous`, `everyone`, `here`, `channel`, `me`, `you`, `constructor`, `__proto__`, Windows device names (`con`, `nul`, `com1`…), Unix accounts (`root`, `daemon`, `www-data`…).
 - **Mailboxes** (~70): the RFC 2142 role addresses (`postmaster`, `hostmaster`, `abuse`, `noc`, `security`…), the addresses certificate authorities accept for domain validation (`ssladmin`, `webmaster`…), `noreply`, `mailer-daemon`, and hostnames that hijack autoconfiguration if a username ever becomes a subdomain (`autoconfig`, `autodiscover`, `wpad`, `isatap`, `localhost`).
 - **Web paths** (~1,100): `login`, `logout`, `signup`, `settings`, `account`, `api`, `dashboard`, `assets`, `cable`, `up`, `rails`, `sidekiq`, `admin`, `search`, `about`, `help`, `terms`, `privacy`, `pricing`, `blog`, `sitemap`, `robots`, `favicon`… — the union of the Big Username Blocklist, shouldbee, GitHub's, GitLab's and Gitea's own reserved paths, django-registration and the IANA `.well-known` registry, minus company names, minus common first names (so Nick, Page and Mac can sign up), minus words people go by (`alpha`, `beta`, `flash`, `free`, `master`, `recent`) — if your app has such a page, your routes reserve it.
-- **Your routes**: every static top-level path in `config/routes.rb` (`/pricing`, `/festivals`, `/play`…) is reserved automatically, and refreshed when routes reload in development. So a GitHub-style `/:username` can never be shadowed by a page you add next month.
+- **Your routes**: every static top-level path in `config/routes.rb` (`/pricing`, `/recipes`, `/play`…) is reserved automatically, and refreshed when routes reload in development. So a GitHub-style `/:username` can never be shadowed by a page you add next month.
 
 Add your own:
 
 ```ruby
 Usernames.configure do |config|
-  config.reserved  += %w[festival festivals]   # exact: nobody can be exactly this
+  config.reserved  += %w[recipe recipes]       # exact: nobody can be exactly this
   config.forbidden += %w[yourapp yourap]       # impersonation matching, like admin — add your misspellings
   config.allowed   += %w[nick page]            # lift a bundled word you disagree with
 end

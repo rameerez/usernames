@@ -78,23 +78,23 @@ class ConfigurationTest < UsernamesTestCase
 
   def test_plus_equals_adds_to_the_bundled_lists
     Usernames.configure do |c|
-      c.reserved += %w[festival festivals]
+      c.reserved += %w[recipe recipes]
       c.forbidden += %w[yourapp yourap]
       c.allowed += %w[nick page]
       c.offensive.allowed += %w[sussex]
     end
 
-    assert_equal Usernames::Data.reserved + %w[festival festivals], config.reserved
+    assert_equal Usernames::Data.reserved + %w[recipe recipes], config.reserved
     assert_equal Usernames::Data.impersonation + %w[yourapp yourap], config.forbidden
     assert_equal %w[nick page], config.allowed
     assert_equal %w[sussex], config.offensive.allowed
   end
 
   def test_equals_replaces_them
-    config.reserved = %w[festival]
+    config.reserved = %w[recipe]
     config.forbidden = []
 
-    assert_equal %w[festival], config.reserved
+    assert_equal %w[recipe], config.reserved
     assert_empty config.forbidden
   end
 
@@ -106,11 +106,11 @@ class ConfigurationTest < UsernamesTestCase
   end
 
   def test_assigning_a_list_does_not_freeze_the_callers_array
-    mine = %w[festival]
+    mine = %w[recipe]
     config.reserved = mine
     mine << "other"
 
-    assert_equal %w[festival], config.reserved
+    assert_equal %w[recipe], config.reserved
   end
 
   # ---- The generator --------------------------------------------------------------------
@@ -188,7 +188,7 @@ class ConfigurationTest < UsernamesTestCase
       reset_configuration!
       config.public_send(:"#{name}=", ["fine", 42])
 
-      assert_invalid(/#{name} must be a list of words, like %w\[festival\] \(got 42 in it\)/) { config.validate! }
+      assert_invalid(/#{name} must be a list of words, like %w\[recipe\] \(got 42 in it\)/) { config.validate! }
     end
 
     config.allowed = ["fine", "  "]
@@ -197,9 +197,9 @@ class ConfigurationTest < UsernamesTestCase
   end
 
   def test_a_word_list_that_is_not_a_list
-    config.reserved = "festival"
+    config.reserved = "recipe"
 
-    assert_invalid(/reserved must be a list of words, like %w\[festival\] \(got "festival"\)/) { config.validate! }
+    assert_invalid(/reserved must be a list of words, like %w\[recipe\] \(got "recipe"\)/) { config.validate! }
   end
 
   def test_bad_offensive_settings
@@ -312,9 +312,9 @@ class ConfigurationTest < UsernamesTestCase
 
   def test_list_options_add_to_the_configured_lists
     config.allowed = %w[nick]
-    rules = config.rules_for(reserved: %w[festival], forbidden: %w[yourapp], allowed: %w[page])
+    rules = config.rules_for(reserved: %w[recipe], forbidden: %w[yourapp], allowed: %w[page])
 
-    assert_equal Usernames::Data.reserved + %w[festival], rules.reserved
+    assert_equal Usernames::Data.reserved + %w[recipe], rules.reserved
     assert_equal Usernames::Data.impersonation + %w[yourapp], rules.forbidden
     assert_equal %w[nick page], rules.allowed
   end
@@ -340,7 +340,7 @@ class ConfigurationTest < UsernamesTestCase
   def test_bad_per_call_options
     assert_invalid(/unknown option :lenght \(known: length, separators/) { config.rules_for(lenght: 2..15) }
     assert_invalid(/length must be a Range/) { config.rules_for(length: 2) }
-    assert_invalid(/reserved must be a list of words, like %w\[festival\] \(got "x"\)/) do
+    assert_invalid(/reserved must be a list of words, like %w\[recipe\] \(got "x"\)/) do
       config.rules_for(reserved: "x")
     end
     assert_invalid(/offensive must be a Hash of severity, languages, allowed, adapters \(got :off\)/) do
@@ -354,7 +354,7 @@ class ConfigurationTest < UsernamesTestCase
   end
 
   def test_per_call_options_leave_the_configuration_alone
-    config.rules_for(length: 2..15, reserved: %w[festival])
+    config.rules_for(length: 2..15, reserved: %w[recipe])
 
     assert_equal 3..30, config.length
     assert_equal Usernames::Data.reserved, config.reserved

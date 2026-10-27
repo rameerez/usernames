@@ -4,7 +4,7 @@ require "test_helper"
 
 class ReservedRoutesController < ActionController::Base; end
 
-module FestivalPlanner
+module RecipeBox
   # Stands in for a Rails application: the app name comes from the module
   # its Application class is defined in.
   class Application
@@ -87,11 +87,11 @@ class ReservedTest < UsernamesTestCase
   end
 
   def test_config_reserved_words_are_custom_and_replacing_drops_the_bundled_ones
-    assert_equal :custom, rule("festival", reserved: %w[festival])
-    assert_equal :custom, rule("Festival", reserved: %w[FESTIVAL], case: :preserve)
+    assert_equal :custom, rule("recipe", reserved: %w[recipe])
+    assert_equal :custom, rule("Recipe", reserved: %w[RECIPE], case: :preserve)
 
-    with_config(reserved: %w[festival]) do
-      assert_equal :custom, rule("festival")
+    with_config(reserved: %w[recipe]) do
+      assert_equal :custom, rule("recipe")
       assert Usernames.allowed?("dashboard")
     end
   end
@@ -116,20 +116,20 @@ class ReservedTest < UsernamesTestCase
   end
 
   def test_app_name_from_config
-    with_config(app_name: "FestivalPlanner") do
-      %w[festival_planner festivalplanner festivalplanners festivalplanner_bob f3stivalplanner].each do |name|
+    with_config(app_name: "RecipeBox") do
+      %w[recipe_box recipebox recipeboxs recipebox_bob r3cipebox].each do |name|
         assert_equal :impersonation, rule(name), name
       end
-      assert Usernames.allowed?("festival")
+      assert Usernames.allowed?("recipe")
     end
     assert_equal %w[my_app myapp], Usernames::Reserved.app_names(Usernames.configuration.rules_for(app_name: "My App!"))
   end
 
   def test_app_name_detected_from_the_rails_application
-    Rails.stub(:application, FestivalPlanner::Application.new) do
-      assert_equal :impersonation, rule("festival_planner")
-      assert_equal :impersonation, rule("festivalplanner_official")
-      assert Usernames.allowed?("festival_planner", app_name: false)
+    Rails.stub(:application, RecipeBox::Application.new) do
+      assert_equal :impersonation, rule("recipe_box")
+      assert_equal :impersonation, rule("recipebox_official")
+      assert Usernames.allowed?("recipe_box", app_name: false)
       assert Usernames.allowed?("javi")
     end
   end
@@ -175,7 +175,7 @@ class ReservedTest < UsernamesTestCase
 
   def test_the_rails_routes_are_memoised_until_reset
     Usernames::Reserved.reset_routes!
-    Rails.stub(:application, FestivalPlanner::Application.new) do
+    Rails.stub(:application, RecipeBox::Application.new) do
       first = Usernames::Reserved.routes
 
       assert_equal Set["lineup"], first

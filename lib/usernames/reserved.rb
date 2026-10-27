@@ -101,8 +101,8 @@ module Usernames
 
       # The app's own name as it would be typed: `config.app_name`
       # when it is a String, else the module of the Rails application —
-      # `FestivalPlanner::Application` reserves `festival_planner` and
-      # `festivalplanner`. None when opted out (`false`) or when there is no
+      # `RecipeBox::Application` reserves `recipe_box` and
+      # `recipebox`. None when opted out (`false`) or when there is no
       # named application.
       def app_names(rules)
         name = rules.app_name

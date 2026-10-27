@@ -204,7 +204,7 @@ class RakeTasksTest < UsernamesTestCase
   end
 
   def test_reserved_lists_every_word_with_its_source
-    lists = { reserved: Usernames::Data.reserved + %w[festival], forbidden: Usernames::Data.impersonation + %w[yourapp],
+    lists = { reserved: Usernames::Data.reserved + %w[recipe], forbidden: Usernames::Data.impersonation + %w[yourapp],
               allowed: %w[help] }
     output = with_config(**lists) do
       run_task("usernames:reserved")
@@ -212,7 +212,7 @@ class RakeTasksTest < UsernamesTestCase
 
     assert_match(/\A\d+ reserved names/, output)
     assert_match(/^  admin +impersonation · /, output)
-    assert_match(/^  festival +config\.reserved$/, output)
+    assert_match(/^  recipe +config\.reserved$/, output)
     assert_match(/^  yourapp +config\.forbidden$/, output)
     assert_match(/^  login +\w+ · \S+ \(/, output)
     refute_match(/^  help /, output)
@@ -220,8 +220,8 @@ class RakeTasksTest < UsernamesTestCase
   end
 
   def test_reserved_marks_routes
-    Usernames::Reserved.stub(:routes, Set["festivals"]) do
-      assert_match(%r{^  festivals +route /festivals$}, run_task("usernames:reserved"))
+    Usernames::Reserved.stub(:routes, Set["recipes"]) do
+      assert_match(%r{^  recipes +route /recipes$}, run_task("usernames:reserved"))
     end
   end
 
