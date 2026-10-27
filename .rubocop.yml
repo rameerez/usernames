@@ -94,6 +94,10 @@ Metrics/CyclomaticComplexity:
 Metrics/PerceivedComplexity:
   Max: 10
 
+# A macro's options are keywords, which name themselves at every call site.
+Metrics/ParameterLists:
+  CountKeywordArgs: false
+
 # Naming
 Naming/PredicatePrefix:
   ForbiddenPrefixes:

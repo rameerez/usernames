@@ -25,7 +25,7 @@ module Usernames
       base.class_attribute :_usernames, instance_accessor: false, default: {}.freeze
     end
 
-    # has_username(column = :username, required: false, generate: nil, **rules)
+    # has_username(column = :username, required: false, generate: nil, seed: nil, clearable: true, **rules)
     #
     # Installs, for that column:
     #
@@ -35,17 +35,30 @@ module Usernames
     #    attributes;
     # 3. with `required:`, presence — on create, and on an update that
     #    changes it (a legacy blank still saves unrelated changes);
-    # 4. uniqueness, compared the way the unique index compares (Comparison);
-    # 5. a generated name on create when none was given — by default, unless
-    #    a name is required for that record;
-    # 6. a race wrapper, so two sign-ups racing for one name end in a redraw
+    # 4. with `clearable: false`, no clearing: a saved name cannot be saved
+    #    blank again, required or not — other people link to it;
+    # 5. uniqueness, compared the way the unique index compares (Comparison);
+    # 6. a generated name for a new record that has none — by default,
+    #    unless a name is required for it in the context it is validated in —
+    #    drawn from `seed:` when that has a value;
+    # 7. a race wrapper, so two sign-ups racing for one name end in a redraw
     #    (a generated name) or in "has already been taken" (a typed one) —
     #    never a RecordNotUnique 500.
     #
     # `required:` and `generate:` take true, false, a method name or a proc,
     # evaluated on the record the way Rails' `if:` is: a sign-up flow that
     # asks for a name (`required: :handle_required`) gets presence, and every
-    # other record a generated name.
+    # other record a generated name. `required: { on: :profile }` asks for
+    # one only in that validation context (`save(context: :profile)`), on
+    # every save there.
+    #
+    # `seed:` is a method name or a proc (evaluated the same way) whose value
+    # a generated name starts from: `seed: :first_name` makes `ana` (or
+    # `ana_42` when that is taken) rather than `quiet_otter_42`. It is read
+    # once per save, and a redraw after a lost race reuses it. A blank seed
+    # draws the default shape. Whatever it returns becomes part of a public
+    # name: an email is used only if the seed returns one, and then as
+    # Usernames.generate reads it (the local part, or the domain for info@).
     #
     # And the class helpers, named after the column: `username_available?`,
     # `suggest_usernames`, `generate_username`, `find_by_username` (and `!`),
@@ -56,8 +69,9 @@ module Usernames
     # mode, so the model keeps comparing in it even if the configuration
     # changes later. Every other rule is read from the configuration on each
     # check.
-    def has_username(column = :username, required: false, generate: nil, **rules)
-      column = Column.new(self, column, required: required, generate: generate, rules: rules)
+    def has_username(column = :username, required: false, generate: nil, seed: nil, clearable: true, **rules)
+      column = Column.new(self, column, required: required, generate: generate, seed: seed, clearable: clearable,
+                                        rules: rules)
       if _usernames.key?(column.name)
         raise ConfigurationError, "has_username :#{column.name} is already declared on #{name || self}"
       end
@@ -73,36 +87,62 @@ module Usernames
       result =
         case condition
         when true, false then condition
-        when Symbol then record.send(condition)
-        else condition.arity.zero? ? record.instance_exec(&condition) : condition.call(record)
+        else value_of(condition, record)
         end
       result ? true : false
+    end
+
+    # What a method name or a proc gives for `record`, evaluated as
+    # applies? evaluates a condition. :nodoc:
+    def self.value_of(source, record)
+      return record.send(source) if source.is_a?(Symbol)
+
+      source.arity.zero? ? record.instance_exec(&source) : source.call(record)
     end
 
     # One has_username declaration, and everything that column needs: the
     # rules in force, the comparison expression, and the queries behind the
     # class helpers. :nodoc:
     class Column
-      attr_reader :model, :name, :required, :generate, :options
+      attr_reader :model, :name, :required, :generate, :seed, :options
 
-      def initialize(model, name, required:, generate:, rules:)
+      def initialize(model, name, required:, generate:, rules:, seed: nil, clearable: true)
         @model = model
         @name = name.to_sym
-        @required = condition(:required, required)
+        @required = required.is_a?(Hash) ? contexts(required) : condition(:required, required)
         # By default a name is generated exactly where none is required: where
         # one is, the person chooses.
         @generate = generate.nil? ? nil : condition(:generate, generate)
+        @seed = seed.nil? ? nil : source(:seed, seed)
+        @clearable = switch(:clearable, clearable)
         # Resolving them now raises ConfigurationError for a bad option when
         # the model is defined, and pins the case mode (see has_username).
         @options = rules.merge(case: Usernames.configuration.rules_for(**rules).case).freeze
       end
 
-      # Whether `record` must have a name.
+      # Whether `record` must have a name. With `required: { on: … }`, while
+      # it is being validated in one of those contexts.
       def required?(record)
-        Model.applies?(required, record)
+        return Model.applies?(required, record) unless required.is_a?(Hash)
+
+        Array(record.validation_context).intersect?(required.fetch(:on))
       end
 
-      # Whether `record` gets a generated name on create when it has none.
+      # Whether a saved name may be saved blank again (`clearable: false` says no).
+      def clearable?
+        @clearable
+      end
+
+      # What a generated name for `record` starts from: the seed's value, or
+      # nil (the default shape) when there is no seed or it is blank.
+      def seed_for(record)
+        return if seed.nil?
+
+        value = Model.value_of(seed, record)
+        value.to_s unless value.blank?
+      end
+
+      # Whether `record`, while new and without a name, gets a generated one.
       def generate?(record)
         generate.nil? ? !required?(record) : Model.applies?(generate, record)
       end
@@ -174,28 +214,60 @@ module Usernames
 
       def install_normalization_and_rules
         column = name
-        definition = self
         changed = :"will_save_change_to_#{column}?"
         model.normalizes column, with: Usernames.normalizer(**options)
         model.validates column, username: options, if: changed
-        return if required == false
+        install_presence
+        install_no_clearing
+      end
 
-        # On create, and when an update touches it: a pre-existing blank
-        # saves unrelated changes; clearing a name is :blank. Not when
-        # generation already said why the name is blank
-        # (:username_unavailable): one error per name.
+      # On create, and when an update touches it: a pre-existing blank
+      # saves unrelated changes; clearing a name is :blank. Not when
+      # generation already said why the name is blank
+      # (:username_unavailable): one error per name. In a named context
+      # (`required: { on: :profile }`), on every save in it: that form is
+      # where the person types one.
+      def install_presence
+        return if required == false
+        return install_presence_in_context if required.is_a?(Hash)
+
+        column = name
+        definition = self
         model.validates column, presence: true, if: lambda {
           (new_record? || will_save_change_to_attribute?(column)) && definition.required?(self) &&
             !errors.of_kind?(column, :username_unavailable)
         }
       end
 
+      def install_presence_in_context
+        column = name
+        model.validates column, presence: true, on: required.fetch(:on),
+                                if: -> { !errors.of_kind?(column, :username_unavailable) }
+      end
+
+      # `clearable: false`: a saved name other people link to stays.
+      # Saving it blank is :blank, required or not (once, if presence already
+      # said so). A stored blank (nil, "", "  ") was never a name, so saving
+      # it blank again is not clearing; a new record has nothing saved to
+      # clear. It is a validation: update_column and update_all skip it.
+      def install_no_clearing
+        return if clearable?
+
+        column = name
+        model.validate(if: lambda {
+          persisted? && will_save_change_to_attribute?(column) && public_send(column).blank? &&
+            attribute_in_database(column).present? && !errors.of_kind?(column, :blank)
+        }) { errors.add(column, :blank) }
+      end
+
       # Left out altogether when no record can ever get a generated name.
+      # Gated on new_record?, not `on: :create`: a new record validated in a
+      # context of its own (`save(context: :import)`) is still new.
       def install_generation
         return if generate == false || (generate.nil? && required == true)
 
         definition = self
-        model.before_validation(:"assign_#{name}", on: :create, if: -> { definition.generate?(self) })
+        model.before_validation(:"assign_#{name}", if: -> { new_record? && definition.generate?(self) })
       end
 
       # Lowercase mode stores the canonical value, so Rails' own exact
@@ -219,8 +291,33 @@ module Usernames
       def condition(option, value)
         return value if [true, false].include?(value) || value.is_a?(Symbol) || value.is_a?(Proc)
 
-        raise ConfigurationError, "has_username #{option}: must be true, false, a method name or a proc " \
-                                  "(got #{value.inspect})"
+        expected = if option == :required
+                     "true, false, a method name, a proc or { on: :context }"
+                   else
+                     "true, false, a method name or a proc"
+                   end
+        raise ConfigurationError, "has_username #{option}: must be #{expected} (got #{value.inspect})"
+      end
+
+      # `{ on: :profile }` or `{ on: %i[profile settings] }`, as Rails' own `on:`.
+      def contexts(value)
+        on = Array(value[:on])
+        return { on: on.freeze }.freeze if value.keys == [:on] && on.any? && on.all?(Symbol)
+
+        raise ConfigurationError, "has_username required: takes { on: :context } (one or more validation " \
+                                  "contexts) as a Hash (got #{value.inspect})"
+      end
+
+      def source(option, value)
+        return value if value.is_a?(Symbol) || value.is_a?(Proc)
+
+        raise ConfigurationError, "has_username #{option}: must be a method name or a proc (got #{value.inspect})"
+      end
+
+      def switch(option, value)
+        return value if [true, false].include?(value)
+
+        raise ConfigurationError, "has_username #{option}: must be true or false (got #{value.inspect})"
       end
     end
 
@@ -327,12 +424,26 @@ module Usernames
           drawn = instance_variable_get(generated)
           !drawn.nil? && drawn == public_send(column)
         end
+        define_drawing(methods, column, generated)
+      end
+
+      # Assigning a name to a blank new record reads the seed once (it is the
+      # app's code: whatever it raises is the app's error); a redraw after a
+      # lost race reuses it.
+      def self.define_drawing(methods, column, generated)
+        seed = :"@#{column}_seed"
         methods.define_method(:"draw_#{column}") do
-          public_send(:"#{column}=", instance_variable_set(generated, self.class.public_send(:"generate_#{column}")))
+          drawn = self.class.public_send(:"generate_#{column}", from: instance_variable_get(seed))
+          public_send(:"#{column}=", instance_variable_set(generated, drawn))
         rescue NoFreeNameError
           errors.add(column, :username_unavailable)
         end
-        methods.define_method(:"assign_#{column}") { send(:"draw_#{column}") if public_send(column).blank? }
+        methods.define_method(:"assign_#{column}") do
+          return unless public_send(column).blank?
+
+          instance_variable_set(seed, self.class._usernames.fetch(column).seed_for(self))
+          send(:"draw_#{column}")
+        end
         methods.send(:private, :"draw_#{column}", :"assign_#{column}")
       end
 
