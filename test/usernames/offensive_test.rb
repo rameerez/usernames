@@ -172,9 +172,13 @@ class OffensiveTest < UsernamesTestCase
     assert_equal :adapter, offensive("javi", offensive: { severity: :off, adapters: [->(_name) { true }] })
   end
 
-  def test_a_language_without_data_refuses_nothing
-    assert_nil offensive("cunt", offensive: { languages: %i[pt] })
-    assert_equal :hate_number, offensive("hh88", offensive: { languages: %i[pt] })
+  # A language that ships no words would refuse nothing, so naming one is a
+  # configuration error rather than a silently weaker check.
+  def test_a_language_without_data_is_refused
+    assert_equal %i[en es], Usernames::Data.available_locales
+    error = assert_raises(Usernames::ConfigurationError) { offensive("cunt", offensive: { languages: %i[pt] }) }
+
+    assert_match(/no word list for :pt \(available: :en, :es\)/, error.message)
   end
 
   # --- adapters (§10.4) ---------------------------------------------------------------------------

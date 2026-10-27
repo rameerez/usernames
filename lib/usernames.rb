@@ -17,6 +17,8 @@ require_relative "usernames/candidates"
 require_relative "usernames/rules"
 require_relative "usernames/configuration"
 require_relative "usernames/validator"
+require_relative "usernames/comparison"
+require_relative "usernames/unique_violation"
 require_relative "usernames/model"
 require_relative "usernames/engine" if defined?(Rails::Engine)
 

@@ -217,7 +217,12 @@ class ConfigurationTest < UsernamesTestCase
     reset_configuration!
     config.offensive.languages = %i[english]
 
-    assert_invalid(/offensive.languages/) { config.validate! }
+    assert_invalid(/offensive.languages has no word list for :english \(available: :en, :es\)/) { config.validate! }
+
+    reset_configuration!
+    config.offensive.languages = %i[en sp]
+
+    assert_invalid(/no word list for :sp/) { config.validate! }
 
     reset_configuration!
     config.offensive.allowed = [nil]
@@ -239,7 +244,7 @@ class ConfigurationTest < UsernamesTestCase
       assert config.validate!
     end
     config.offensive.adapters = [:moderate, ->(_name) { false }]
-    config.offensive.languages = %i[en es pt-BR]
+    config.offensive.languages = %i[es en]
 
     assert config.validate!
   end
@@ -316,10 +321,10 @@ class ConfigurationTest < UsernamesTestCase
 
   def test_offensive_options_merge_with_allowed_added
     config.offensive.allowed = %w[sussex]
-    rules = config.rules_for(offensive: { severity: :severe, languages: %i[pt], allowed: %w[cockburn] })
+    rules = config.rules_for(offensive: { severity: :severe, languages: %i[es], allowed: %w[cockburn] })
 
     assert_equal :severe, rules.offensive.severity
-    assert_equal %i[pt], rules.offensive.languages
+    assert_equal %i[es], rules.offensive.languages
     assert_equal %w[sussex cockburn], rules.offensive.allowed
     assert_equal [:moderate], rules.offensive.adapters
   end

@@ -39,12 +39,55 @@ class EngineTest < UsernamesTestCase
     assert_respond_to Member, :has_username
   end
 
-  def test_has_username_is_not_available_yet
-    error = assert_raises(NotImplementedError) do
-      Class.new(ApplicationRecord) { has_username }
-    end
+  def test_has_username_is_on_every_model
+    assert_kind_of Usernames::Model, ApplicationRecord
+    assert_respond_to User, :username_available?
+    assert_empty Member._usernames, "a model without has_username declares nothing"
+  end
 
-    assert_match(/validates :username, username: true/, error.message)
+  # PRD §9.3: routes are collected lazily and forgotten whenever they reload,
+  # so a page added to config/routes.rb is reserved from the next check on.
+  def test_reloading_the_routes_resets_the_reserved_routes
+    Usernames::Reserved.routes
+    Usernames::Reserved.instance_variable_set(:@routes, Set["stale"].freeze)
+
+    ActiveSupport.run_load_hooks(:after_routes_loaded, Rails.application)
+
+    refute_includes Usernames::Reserved.routes, "stale"
+  end
+
+  def test_loads_its_rake_tasks
+    require "rake"
+    Rake.application = Rake::Application.new
+    Rails.application.load_tasks
+
+    assert Rake::Task.task_defined?("usernames:audit")
+    assert Rake::Task.task_defined?("usernames:reserved")
+  ensure
+    Rake.application = Rake::Application.new
+  end
+
+  # Active Record without Rails: `require "usernames/model"` is all it takes.
+  def test_has_username_without_rails
+    script = <<~RUBY
+      require "bundler/setup"
+      require "active_record"
+      require "usernames/model"
+      abort "Rails got loaded" if defined?(Rails::Engine)
+      ActiveRecord::Base.establish_connection(adapter: "sqlite3", database: ":memory:")
+      ActiveRecord::Schema.verbose = false
+      ActiveRecord::Schema.define { create_table(:people) { |t| t.string :username } }
+      class Person < ActiveRecord::Base
+        has_username
+      end
+      puts Person.create!.username_generated?
+      puts Person.create(username: "admin").errors.full_messages
+      puts Person.find_by_username("@" + Person.create!(username: "Javi").username).username
+    RUBY
+    output, error, status = Open3.capture3(RbConfig.ruby, "-I", File.expand_path("../../lib", __dir__), "-e", script)
+
+    assert_predicate status, :success?, error
+    assert_equal ["true", "Username is reserved", "javi"], output.lines(chomp: true)
   end
 
   def test_validates_the_configuration_after_the_app_boots

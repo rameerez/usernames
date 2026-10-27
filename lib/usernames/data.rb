@@ -61,6 +61,13 @@ module Usernames
         @nouns ||= list("words/animals.txt")
       end
 
+      # The languages whose offensive words ship (data/offensive/<locale>.json),
+      # as symbols: what config.offensive.languages may name.
+      def available_locales
+        @available_locales ||= Dir[File.join(ROOT, "offensive", "*.json")]
+          .map { |path| File.basename(path, ".json").to_sym }.sort.freeze
+      end
+
       # The parsed entries of data/offensive/<locale>.json, or [] for a
       # language that ships no data.
       def offensive(locale)

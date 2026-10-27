@@ -30,7 +30,7 @@ Every new account gets a free, pronounceable name from the moment it exists (`qu
 
 ```ruby
 User.create!(email: "ana@example.com").username   # => "quiet_otter_42"
-User.suggest_usernames("Javi R")                  # => ["javi_r", "javir", "javi_42", "javi_r_17", "amber_lynx_8"]
+User.suggest_usernames("Javi R")                  # => ["javi_r", "javir", "javi_r_42", "javi_r_817", "amber_lynx_8"]
 User.username_available?("javi")                  # => false  (taken — or reserved, or not allowed)
 ```
 
@@ -166,7 +166,7 @@ Want to keep the case people type (`CoolCat` shows as `CoolCat`, but nobody else
 has_username case: :preserve
 ```
 
-The generator then writes a functional unique index on `lower(username COLLATE "C")` and every query the gem makes — uniqueness, lookup, availability, suggestions — uses that same expression.
+Declare it on the model first (or pass `--case=preserve` to the install generator) and the generator writes a functional unique index on `lower(username COLLATE "C")` instead; every query the gem makes — uniqueness, lookup, availability, suggestions — uses that same expression.
 
 Two names that differ only in punctuation are **different** names: `john.doe` and `johndoe` are two people. (npm and PyPI decided otherwise for package names; for people, literal is less surprising.)
 
@@ -197,7 +197,7 @@ Adjective + animal + two random digits, from a vocabulary curated for this purpo
 From a real name:
 
 ```ruby
-User.generate_username(from: "Pedro Gonzales Armillon")   # => "pedro_gonzales", or "pedro_gonzales_73" if taken
+User.generate_username(from: "Pedro Gonzales Armillon")   # => "pedro_gonzales_armillon", or "pedro_gonzales_armillon_73" if taken
 User.generate_username(from: "José García")               # => "jose_garcia"
 User.generate_username(from: "Иван Петров")               # => "ivan_petrov"  with the any_ascii gem; "quiet_otter_42" without
 ```
@@ -207,7 +207,7 @@ Names are cut at word boundaries, never mid-word. The gem never derives a userna
 When a chosen name is taken:
 
 ```ruby
-User.suggest_usernames("javi", count: 5)   # => ["javi_r", "javir", "javi_42", "javi_17", "javi_903"]
+User.suggest_usernames("javi", count: 5)   # => ["javi_42", "javi_17", "javi_903", "javi_5218", "amber_lynx_8"]
 ```
 
 Candidates are built in memory, filtered through every rule, checked for availability in **one** query, and returned in order. You may get fewer than you asked for; you never get a loop or an exception for running out.
@@ -302,7 +302,7 @@ es:
 
 ## Configuration reference
 
-The initializer the generator writes:
+The initializer the generator writes (every line commented out — these are the defaults):
 
 ```ruby
 Usernames.configure do |config|

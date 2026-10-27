@@ -1,0 +1,68 @@
+# The public surface of the usernames gem: the module functions, the result
+# of a check, the errors, and the has_username macro.
+module Usernames
+  VERSION: String
+  ROUTE: Regexp
+
+  class Error < StandardError
+  end
+
+  class ConfigurationError < Error
+  end
+
+  class NoFreeNameError < Error
+  end
+
+  type rule = :impersonation | :exact | :route | :custom | :severe | :strong | :hate_number | :adapter
+
+  # Usernames.check("Ad_min") # => #<data Usernames::Result ok?=false, reason=:username_reserved, …>
+  class Result
+    def ok?: () -> bool
+    def reason: () -> Symbol?
+    def rule: () -> rule?
+    def canonical: () -> String
+    def message: () -> String?
+  end
+
+  def self.configuration: () -> Configuration
+  def self.configuration=: (Configuration) -> Configuration
+  def self.configure: () { (Configuration) -> void } -> Configuration
+
+  def self.check: (untyped value, **untyped options) -> Result
+  def self.allowed?: (untyped value, **untyped options) -> bool
+  def self.normalize: (untyped value, **untyped options) -> String
+  def self.comparison_key: (untyped value, **untyped options) -> String
+  def self.normalizer: (**untyped options) -> ^(untyped) -> String?
+  def self.route: () -> Regexp
+  def self.rules_for_browser: (**untyped options) -> Array[{ rule: Symbol, pattern: String, message: String }]
+  def self.generate: (?from: String?, **untyped options) -> String
+  def self.candidates_for: (String? seed, count: Integer, **untyped options) -> Array[String]
+
+  class Configuration
+    attr_accessor length: Range[Integer]
+    attr_accessor separators: Array[String]
+    attr_accessor edge_separators: bool
+    attr_accessor case: :lowercase | :preserve
+    attr_accessor first_character: :alphanumeric | :letter
+    attr_accessor reserve_routes: bool
+    attr_accessor app_name: String | false | nil
+    attr_accessor reserved: Array[String]
+    attr_accessor forbidden: Array[String]
+    attr_accessor allowed: Array[String]
+    attr_accessor on_adapter_failure: :allow | :reject
+    attr_accessor unique_index: (String | Symbol)?
+    def offensive: () -> untyped
+    def generator: () -> untyped
+    def generator=: (untyped callable) -> untyped
+    def validate!: () -> self
+  end
+
+  # has_username(column = :username, required: false, generate: true, **rules)
+  #
+  # Also defines, named after the column: <column>_available?, suggest_<column>s,
+  # generate_<column>, find_by_<column>, <column>_options, and <column>_generated?
+  # on instances.
+  module Model
+    def has_username: (?(Symbol | String) column, ?required: bool, ?generate: bool, **untyped rules) -> void
+  end
+end

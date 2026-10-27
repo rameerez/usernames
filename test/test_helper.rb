@@ -61,12 +61,34 @@ class ApplicationRecord < ActiveRecord::Base
   self.abstract_class = true
 end
 
+# The schema the install generator writes, per adapter (PRD §11.2): a
+# byte-compared column ("C" on PostgreSQL; SQLite's default BINARY), a plain
+# unique index in lowercase mode and a unique lower() expression in preserve
+# mode. The unique email index is the "unrelated constraint" the race wrapper
+# must let through.
+POSTGRESQL = ActiveRecord::Base.lease_connection.adapter_name.match?(/postg/i)
+COLLATION = POSTGRESQL ? { collation: "C" } : {}
+
 ActiveRecord::Schema.define(version: 1) do
   create_table :members, force: true do |t|
     t.string :username
     t.string :handle
     t.string :email
   end
+
+  create_table :users, force: true do |t|
+    t.string :username, **COLLATION
+    t.string :email
+    t.string :name
+  end
+  add_index :users, :username, unique: true, name: "index_users_on_username"
+  add_index :users, :email, unique: true
+
+  create_table :players, force: true do |t|
+    t.string :handle, **COLLATION
+  end
+  add_index :players, POSTGRESQL ? 'lower(handle COLLATE "C")' : "lower(handle)",
+            unique: true, name: "index_players_on_lower_handle"
 end
 
 # The bare validator, on the attribute as supplied.
@@ -74,16 +96,21 @@ class Member < ApplicationRecord
   validates :username, username: true
 end
 
-# Phase 3 (has_username):
-#
-#   class User < ApplicationRecord
-#     has_username
-#   end
-#
-#   class Player < ApplicationRecord
-#     self.table_name = "members"
-#     has_username :handle, length: 2..24, case: :preserve, separators: %w[_ . -]
-#   end
+# The README's one line.
+class User < ApplicationRecord
+  has_username
+end
+
+# The README's other column: kept case, dots and dashes, a shorter range.
+class Player < ApplicationRecord
+  has_username :handle, length: 2..24, case: :preserve, separators: %w[_ . -]
+end
+
+# People choose their own name: no generation, presence on create and on change.
+class StrictUser < ApplicationRecord
+  self.table_name = "users"
+  has_username required: true
+end
 
 module UsernamesTestHelper
   FIXTURES = File.expand_path("fixtures", __dir__)

@@ -21,13 +21,6 @@ module Usernames
       SEVERITIES = %i[severe strong mild off].freeze
       ADAPTER_FAILURE_MODES = %i[allow reject].freeze
 
-      # A locale code such as :en, :es or :"pt-BR".
-      # NOTE(p2): still checked for shape only, not against the languages
-      # data/offensive/ ships: a language without data refuses nothing
-      # (hate rules and adapters still apply), so an app can list :pt today
-      # and get its words when they ship. A typo (`:sp`) is silent as a result.
-      LANGUAGE = /\A[a-z]{2,3}(?:-[A-Za-z0-9]+)*\z/
-
       OffensiveSettings = ::Data.define(*OFFENSIVE_NAMES)
       GeneratorSettings = ::Data.define(*GENERATOR_NAMES)
 
@@ -124,9 +117,17 @@ module Usernames
         value.dup.freeze
       end
 
+      # Only languages whose words ship: a language without data would refuse
+      # nothing, so a typo (`:sp`) or a language not tiered yet would switch
+      # the word check off without a word of warning.
       def valid_languages(value)
-        unless value.is_a?(Array) && value.all? { |language| language.is_a?(Symbol) && LANGUAGE.match?(language) }
+        unless value.is_a?(Array) && value.all?(Symbol)
           invalid!(:"offensive.languages", value, "a list of locale symbols, like %i[en es]")
+        end
+        unknown = value - Data.available_locales
+        if unknown.any?
+          raise ConfigurationError, "offensive.languages has no word list for #{unknown.first.inspect} " \
+                                    "(available: #{Data.available_locales.map(&:inspect).join(', ')})"
         end
 
         value.uniq.freeze
