@@ -27,6 +27,7 @@ class RakeTasksTest < UsernamesTestCase
   def run_task(name, *)
     output = StringIO.new
     $stdout = output
+    @rake[name].reenable
     @rake[name].invoke(*)
     output.string
   ensure
@@ -84,6 +85,34 @@ class RakeTasksTest < UsernamesTestCase
     assert_match(/name: "index_members_on_lower_username"/, output)
     assert_match(/"javi": #\d+ "Javi", #\d+ "javi"/, output, "Javi and javi collide in preserve mode")
     refute_match(/differ from their normalised form:/, output, "preserve mode needs no case rewrite")
+  end
+
+  # The adoption workflow audits before has_username is declared: the model
+  # cannot say its mode then, so the task takes it, and says what it assumed.
+  def test_audit_of_an_undeclared_column_takes_the_case_mode
+    seed(Member, %w[Javi javi])
+
+    assumed = run_task("usernames:audit", "Member", "username")
+    told = run_task("usernames:audit", "Member", "username", "preserve")
+
+    assert_match(/lowercase mode/, assumed)
+    assert_match(/Member doesn't declare has_username :username yet: checked against the configured rules/, assumed)
+    assert_match(/in lowercase mode \(the configured one; for preserve: usernames:audit\[Member,username,preserve\]\)/,
+                 assumed)
+    assert_match(/"Javi" → "javi"/, assumed)
+    assert_match(/preserve mode/, told)
+    assert_match(/in preserve mode\n/, told)
+    assert_match(/no unique index matches the preserve mode/, told)
+    refute_match(/differ from their normalised form:/, told)
+  end
+
+  def test_audit_of_a_declared_column_says_nothing_about_declaring
+    refute_match(/doesn't declare/, run_task("usernames:audit"))
+  end
+
+  def test_audit_refuses_an_unknown_case_mode
+    assert_raises(SystemExit) { capture_io { run_task("usernames:audit", "Member", "username", "upper") } }
+    assert_raises(ArgumentError) { Usernames::Audit.new(Member, :username, mode: :upper) }
   end
 
   def test_audit_of_a_missing_column

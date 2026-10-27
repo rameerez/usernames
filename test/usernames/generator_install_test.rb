@@ -160,11 +160,20 @@ class GeneratorInstallTest < Rails::Generators::TestCase
     output = output_of("--model=Member")
 
     assert_match(/members.username already holds usernames/, output)
-    assert_match(/rails usernames:audit\[Member,username\]/, output)
+    assert_match(/rails usernames:audit\[Member,username\]'/, output)
     assert_match(/under a short freeze of the username form/, output)
     assert_match(/The gem renames nobody/, output)
     refute_match(/Usernames are unique from the moment/, output)
     assert_migration "db/migrate/add_unique_username_index_to_members.rb"
+  end
+
+  # The audit runs before has_username is declared, so it is told the mode.
+  def test_the_adoption_workflow_passes_a_preserve_mode_to_the_audit
+    Member.lease_connection.execute("INSERT INTO members (handle) VALUES ('Javi')")
+
+    output = output_of("--model=Member", "--column=handle", "--case=preserve")
+
+    assert_match(/rails usernames:audit\[Member,handle,preserve\]'/, output)
   end
 
   def test_a_finished_install_writes_no_migration

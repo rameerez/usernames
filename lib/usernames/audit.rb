@@ -28,15 +28,22 @@ module Usernames
 
     # The types the comparison contract covers (PRD §11.1); citext is excluded (D-17).
     POSTGRESQL_TYPES = /\A(text|character varying(\(\d+\))?)\z/
+    MODES = %i[lowercase preserve].freeze
 
     attr_reader :model, :column, :rules, :mode
 
-    def initialize(model, column = :username)
+    # `mode` audits as that case mode: the README's adoption workflow runs the
+    # audit BEFORE has_username is declared, when the model cannot say which
+    # mode its index will be built for.
+    def initialize(model, column = :username, mode: nil)
       @model = model.is_a?(String) ? model.constantize : model
       @column = column.to_sym
-      definition = @model._usernames[@column] if @model.respond_to?(:_usernames)
-      @rules = definition ? definition.rules : Usernames.configuration.rules_for
-      @mode = Comparison.mode_for(@model, @column)
+      @definition = @model._usernames[@column] if @model.respond_to?(:_usernames)
+      @mode_given = !mode.to_s.empty?
+      @mode = @mode_given ? mode.to_sym : Comparison.mode_for(@model, @column)
+      raise ArgumentError, "mode must be lowercase or preserve (got #{mode.inspect})" unless MODES.include?(@mode)
+
+      @rules = @definition ? @definition.rules : Usernames.configuration.rules_for(case: @mode)
       @problems = 0
     end
 
@@ -46,6 +53,7 @@ module Usernames
       @io = io
       line "usernames:audit #{model.name}##{column} (#{model.table_name}.#{column}, #{mode} mode, " \
            "#{connection.adapter_name}) — read-only"
+      undeclared_note
       return finish unless column_section
 
       index_section
@@ -61,6 +69,17 @@ module Usernames
 
     def adapter
       Comparison.adapter(connection)
+    end
+
+    # Without the declaration the audit cannot know the column's own rules
+    # (length, separators…) or, unless told, its case mode.
+    def undeclared_note
+      return if @definition
+
+      other = (MODES - [mode]).first
+      mode_hint = @mode_given ? "" : " (the configured one; for #{other}: usernames:audit[#{model.name},#{column},#{other}])"
+      line "  · #{model.name} doesn't declare has_username :#{column} yet: checked against the configured rules, " \
+           "in #{mode} mode#{mode_hint}"
     end
 
     # --- the column (PRD §11.1 criteria per adapter) ------------------------------------------------

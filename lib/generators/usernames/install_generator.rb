@@ -76,7 +76,7 @@ module Usernames
       def adoption_message
         say "\n#{table}.#{column} already holds usernames, and `normalizes` never rewrites rows already stored, " \
             "so the unique index isn't trustworthy yet (it may not even be addable):", :yellow
-        say "  1. Run 'rails usernames:audit[#{model_name},#{column}]'. It's read-only: it lists values that differ " \
+        say "  1. Run 'rails usernames:audit[#{audit_arguments}]'. It's read-only: it lists values that differ " \
             "from their normalised form, names that would collide, and the column's collation and indexes."
         say "  2. If it finds anything, fix it in a migration you own, under a short freeze of the username form: " \
             "rewrite noncanonical values with your own callbacks and policy, and resolve collisions by contacting " \
@@ -164,6 +164,10 @@ module Usernames
       end
 
       def column_options = collation ? ", collation: #{collation.inspect}" : ""
+
+      # The audit runs before has_username is declared, so it is told a mode
+      # the configuration does not already say.
+      def audit_arguments = [model_name, column, (mode if mode != configured_mode)].compact.join(",")
 
       def macro_line
         options = []

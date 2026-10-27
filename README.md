@@ -175,10 +175,10 @@ When two sign-ups race for the same generated name, the unique index refuses the
 ## Adopting an existing column
 
 ```bash
-rails usernames:audit            # or: rails usernames:audit[Member,handle]
+rails usernames:audit            # or: rails usernames:audit[Member,handle] · usernames:audit[Member,handle,preserve]
 ```
 
-Read-only. It prints: stored values that differ from their normalised form (`JAVI`, ` javi`, `@javi`); groups of rows that would collide once normalised (`Javi` and `javi`); whether your existing index and column collation match the chosen case mode; and values that fail today's rules (those keep working — only a *change* is validated).
+Read-only. It prints: stored values that differ from their normalised form (`JAVI`, ` javi`, `@javi`); groups of rows that would collide once normalised (`Javi` and `javi`); whether your existing index and column collation match the chosen case mode; and values that fail today's rules (those keep working — only a *change* is validated). Run before `has_username` is declared, it checks the configured rules and case mode; the third argument names the mode you're adopting.
 
 If the audit finds anything, fix it with a migration you own, under a short freeze of the username form: rewrite the noncanonical values with your own callbacks and policy, resolve collisions by contacting the people or appending a suffix, set the collation, add the index, reopen the form. The gem deliberately ships **no automatic rewriting task** — renaming people silently is not a thing a gem should do for you.
 
