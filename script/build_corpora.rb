@@ -6,7 +6,8 @@
 #   first_names.txt   /usr/share/dict/propernames, lowercased
 #   surnames.txt      US Census Bureau 2010 surnames, top 1,000 by rank (public domain)
 #   words_en_50k.txt  every Nth word of /usr/share/dict/web2 (a–z, ≥ 3 letters), exactly 50,000
-#   legitimate.txt    names and words the offensive matcher must accept (PRD §10.6)
+#   legitimate.txt    names and words the offensive matcher must accept (lexical safety, PRD §10.6)
+#   eligible.txt      whole usernames Usernames.check must accept at the defaults (every rule)
 #   offensive.txt     evasions the offensive matcher must reject (PRD §10.6)
 #
 #   ruby script/build_corpora.rb [path/to/Names_2010Census.csv]
@@ -77,6 +78,8 @@ real = CSV.read(tsv, col_sep: "\t", headers: true, quote_char: "\u0000")
 probes = %w[scunthorpe penistone clitheroe sussex cockburn assassin therapist grape shiitake classic
             analysis bass hello mike88 josh1979 gcastro mjordan chujew montenegro computadora negro
             scunthorpe_united]
+# Names and identity words the en tiers once refused, reviewed out of them (data/offensive/README.md).
+reviewed = %w[enby cishet pansy cissy hermie santorum finocchio shota]
 
 # Real names that ARE a blocked term (severity >= 3) in a launch locale cannot pass by design;
 # they are listed here, not silently dropped (the policy decision is recorded in data/offensive/README.md).
@@ -92,7 +95,7 @@ blocked = Set.new
   end
 end
 conflicts = real.select { |w| w.split("_").any? { blocked.include?(_1) } }
-legit = (real - conflicts + probes).uniq.sort
+legit = (real - conflicts + probes + reviewed).uniq.sort
 write("legitimate.txt",
       ["Names, places and words the offensive matcher must ACCEPT at :strong (PRD §10.6 gate: 0 rejections).",
        "Sources: research 17 §4 Wikipedia-verified names/places (facts; non-ASCII transliterated, spaces as _),",
@@ -100,10 +103,21 @@ write("legitimate.txt",
        "Left out because the name IS a blocked term (deliberate): #{conflicts.sort.join(' ')}"],
       legit)
 
+# --- eligible --------------------------------------------------------------------------------------
+# Whole usernames a person could register: every rule passes, not just the offensive matcher.
+# legitimate.txt is a lexical-safety fixture (`ho`, `butt` and the like are words to exempt, not
+# usernames anyone needs to register); this one is run through Usernames.check at the defaults.
+write("eligible.txt",
+      ["Usernames that must pass Usernames.check at the defaults (every rule: format, reserved, offensive).",
+       "The probes and reviewed names of legitimate.txt that are whole usernames."],
+      (probes + reviewed).uniq.sort)
+
 # --- offensive / evasion -------------------------------------------------------------------------
 offensive = %w[xxfuckxx f.u.c.k fu_ck sh1thead shithead1 shithead2 shithead_bob sh1thead_bob BigCunt
                n1gger 1488 14_88 hh88 heil_hitler scunt_horpe scunthorpe_fuck scunthorpeunited sus.sex
-               cunt s.cunt.horpe gr_ape ther_apist kkk]
+               cunt s.cunt.horpe gr_ape ther_apist kkk
+               chingchong ching_chong neonazi neo_nazi xneonazix jap jap_99 wog wogs
+               p_huck fvck fuuuuuck f_vck fuuuu_ck]
 write("offensive.txt",
       ["Evasions the offensive matcher must REJECT at :strong (PRD §10.6 gate: 100 % rejected).",
        "Case is kept on purpose (BigCunt): the corpus is run through normalisation first."],

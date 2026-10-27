@@ -44,6 +44,18 @@ class OffensiveTest < UsernamesTestCase
     assert_empty by_check
   end
 
+  # legitimate.txt is lexical safety (the offensive matcher only: `ho` is too
+  # short to register, and that is not this gate's business); eligible.txt is
+  # whole usernames, which must pass every rule.
+  def test_gate_eligible_usernames_pass_every_rule
+    refused = corpus("eligible.txt").filter_map do |name|
+      result = Usernames.check(name)
+      "#{name} (#{result.reason})" unless result.ok?
+    end
+
+    assert_empty refused
+  end
+
   def test_gate_every_evasion_is_refused
     names = corpus("offensive.txt")
     passed_matcher = names.reject { |name| offensive(name) }
@@ -259,6 +271,39 @@ class OffensiveTest < UsernamesTestCase
     assert_equal "fuck", Usernames::Offensive.fold("phuck")
     assert_equal "wanker", Usernames::Offensive.fold("vvanker")
     assert_equal "seks_2", Usernames::Offensive.fold("sex_2")
+    assert_equal "fuck", Usernames::Offensive.fold("fvck"), "v → u, after vv → w"
+    assert_equal "fuuck", Usernames::Offensive.fold("fuuuuuck"), "a stretch is cut to two"
+    assert_equal "fuuck", Usernames::Offensive.fold("fuuck"), "a double is left alone"
+    assert_equal "book_assess", Usernames::Offensive.fold("book_assess")
+  end
+
+  # The evasions that split a rewrite, or stretch a letter, past the old fold.
+  def test_rewrites_across_separators_and_stretches
+    %w[p_huck fvck f_vck fuuuuuck fuuuu_ck fuu_uuck p.h.u.c.k].each do |name|
+      result = Usernames.check(name, **DOTS)
+
+      assert_equal :username_not_allowed, result.reason, name
+    end
+  end
+
+  # A character a rewrite makes out of two parts belongs to both: an
+  # occurrence over it straddles them (rule a-2), whatever the segments say.
+  def test_a_rewrite_across_a_separator_straddles_it
+    whole = Usernames::Offensive::Name.new("p_huck").wholes.last
+
+    assert_equal "fuck", whole.text
+    assert whole.straddles?("fuck", 0)
+    assert_equal %w[p huck], whole.segments, "each segment is folded on its own"
+    refute Usernames::Offensive::Name.new("phuck").wholes.last.straddles?("fuck", 0)
+  end
+
+  # Exemptions are still whole segments: a rewrite inside an exempt word
+  # keeps it exempt, and one across a separator never manufactures one.
+  def test_exemption_boundaries_survive_the_rewrites
+    assert_predicate Usernames.check("sussex_bob"), :ok?
+    assert_predicate Usernames.check("savvy_vivian"), :ok?
+    refute_predicate Usernames.check("sus_sex"), :ok?
+    refute_predicate Usernames.check("sussex_fvck"), :ok?
   end
 
   def test_name_forms

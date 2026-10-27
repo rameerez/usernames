@@ -10,7 +10,7 @@ class <%= migration_class_name %> < ActiveRecord::Migration<%= migration_version
     # with Ruby about what "the same name" means: no locale lowercasing I to
     # ı, no collation that thinks jose and josé are one name.
 <% end -%>
-    add_column :<%= table %>, :<%= column %>, :string<%= column_options %>
+    add_column <%= ruby_name(table) %>, <%= ruby_name(column) %>, :string<%= column_options %>
 <% elsif change_collation? -%>
 <% if collation -%>
     # Compared byte by byte ("C"), so the database agrees with Ruby about what
@@ -22,12 +22,12 @@ class <%= migration_class_name %> < ActiveRecord::Migration<%= migration_version
     # `rails usernames:audit` first.
 <% end -%>
     reversible do |direction|
-      direction.up { change_column :<%= table %>, :<%= column %>, :string<%= column_options %> }
+      direction.up { change_column <%= ruby_name(table) %>, <%= ruby_name(column) %>, :string<%= column_options %> }
     end
 <% elsif mysql_collation_note? -%>
     # The comparison contract wants a byte-wise collation. MySQL's change_column
     # restates the whole column, so restate its null/default here too:
-    # change_column :<%= table %>, :<%= column %>, :string, collation: <%= collation.inspect %>
+    # change_column <%= ruby_name(table) %>, <%= ruby_name(column) %>, :string, collation: <%= collation.inspect %>
 <% end -%>
 <% if (existing = conflicting_index) -%>
 <% if column_step? -%>
@@ -47,7 +47,7 @@ class <%= migration_class_name %> < ActiveRecord::Migration<%= migration_version
     # Usernames are stored lowercase, so a plain unique index is the whole
     # contract: uniqueness is `<%= column %> = ?`, and this index serves it.
 <% end -%>
-    add_index :<%= table %>, <%= index_column %>, unique: true, name: <%= index[:name].inspect %>
+    add_index <%= ruby_name(table) %>, <%= index_column %>, unique: true, name: <%= index[:name].inspect %>
 <% end -%>
   end
 end

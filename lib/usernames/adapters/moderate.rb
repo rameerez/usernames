@@ -4,7 +4,7 @@ module Usernames
   module Adapters
     # `config.offensive.adapters = [:moderate]` (the default): ask the
     # moderate gem's offline wordlist too, when the app has that gem. Without
-    # it this is a no-op, not an error (D-7) — the default must never make an
+    # it this is a no-op, not an error — the default must never make an
     # app add a dependency.
     #
     # Moderate reads text, not handles, so the name is handed over the way a

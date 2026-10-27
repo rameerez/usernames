@@ -6,13 +6,13 @@ require_relative "offensive/hate"
 require_relative "adapters/moderate"
 
 module Usernames
-  # Offensive words (PRD §10): bundled terms in severity tiers per language,
+  # Offensive words: bundled terms in severity tiers per language,
   # hate-number rules and optional adapters (`moderate`, any callable).
   #
   # The whole design is a fight between two failure modes. Match too
   # little and `f.u.c.k` or `sh1thead_bob` gets through; match substrings
   # naively and Scunthorpe, Penistone, `grape` and `therapist` cannot sign
-  # up. So each tier is matched as narrowly as its words allow (PRD §10.2):
+  # up. So each tier is matched as narrowly as its words allow:
   #
   #   a-1  severe (tier 4): inside any segment that is not exempt; short
   #        terms and `segment_only` ones must BE the segment (grape, Shōta)
@@ -29,6 +29,9 @@ module Usernames
   module Offensive
     # Which tiers rule b looks at, per severity mode (nil: rule b is off).
     EQUAL_FROM = { severe: nil, strong: 3, mild: 1 }.freeze
+
+    # A letter repeated three times or more: a stretched spelling (`fuuuuuck`).
+    STRETCH = /([a-z])\1{2,}/
 
     class << self
       # The kind of match — :severe, :strong, :hate_number or :adapter — or nil
@@ -51,13 +54,26 @@ module Usernames
         adapter_verdict(key, rules)
       end
 
-      # R1 of PRD §10.2: the digit folds (`sh1t` → `shit`), then `vv`→`w`,
-      # `ph`→`f`, `x`→`ks`, in that order. Terms are folded the same way when
-      # they are loaded, so `phuck` in the data and `fuck` typed meet.
+      # A name's folded form (R1): the digit folds (`sh1t` → `shit`), then
+      # #rewrite. Terms are folded the same way when they are loaded, so
+      # `phuck` in the data and `fuck` typed meet.
       def fold(string)
-        rewrites.reduce(Reserved.leet(string)) do |folded, (from, to)|
-          folded.include?(from) ? folded.gsub(from, to) : folded
+        rewrite(Reserved.leet(string))
+      end
+
+      # The rewrites of data/offensive/leet.yml in order — `vv`→`w`, `v`→`u`,
+      # `ph`→`f`, `x`→`ks` — then every run of three or more of one letter cut
+      # to two (`fuuuuuck` → `fuuck`). Not doubles: `ass` and `book` stay.
+      def rewrite(string)
+        rewritten = rewrites.reduce(string) do |text, (from, to)|
+          text.include?(from) ? text.gsub(from, to) : text
         end
+        rewritten.gsub(STRETCH, '\1\1')
+      end
+
+      # [[from, to], …]: the offensive-only rewrites of data/offensive/leet.yml, in order.
+      def rewrites
+        @rewrites ||= Data.leet.fetch("offensive_only").to_a.freeze
       end
 
       private
@@ -66,10 +82,9 @@ module Usernames
       # rejects, and a severe verdict outranks a strong one.
       def lexical(name, rules, severity)
         allowed = allowed_for(rules)
-        # A name the app allowed in so many words is exempt as a whole.
-        # NOTE(p2): PRD §6.6 calls offensive.allowed a "whole-name/whole-segment"
-        # exemption; the whole name is matched exactly, so joining segments
-        # still cannot manufacture one.
+        # A name the app allowed in so many words is exempt as a whole. The
+        # whole name is matched exactly, so joining segments still cannot
+        # manufacture an exemption.
         return if allowed.include?(name.key)
 
         lexicons = rules.offensive.languages.map { |locale| Lexicon.for(locale) }
@@ -95,11 +110,11 @@ module Usernames
       end
 
       # A raising adapter (a network blip, a bug) follows on_adapter_failure:
-      # :allow (the default — PRD §4.5, optional adapters fail open) skips
+      # :allow (the default: an optional adapter fails open) skips
       # it, :reject refuses the name. Either way it is logged, so a broken
       # adapter is not silently a no-op forever.
-      # NOTE(p2): adapters receive the comparison key (the name lowercased),
-      # since content verdicts are given only the key.
+      # Adapters receive the comparison key (the name lowercased), as every
+      # content verdict does.
       def flagged?(adapter, key, rules)
         callable = adapter == :moderate ? Adapters::Moderate : adapter
         callable.call(key) ? true : false
@@ -113,10 +128,6 @@ module Usernames
       def log(message)
         logger = ::Rails.logger if defined?(::Rails) && ::Rails.respond_to?(:logger)
         logger ? logger.warn(message) : warn(message)
-      end
-
-      def rewrites
-        @rewrites ||= Data.leet.fetch("offensive_only", {}).to_a.freeze
       end
     end
   end

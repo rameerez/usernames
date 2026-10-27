@@ -9,8 +9,6 @@ module Usernames
   #              :exact, :route, :custom, :severe, :strong, :hate_number, :adapter.
   #              nil when the name is fine or failed a format rule (the reason
   #              already names a format rule exactly).
-  #              NOTE(p1a): the PRD lists rule values only for content verdicts;
-  #              for a format failure it is nil.
   #   canonical  the normalised name the rules were applied to
   #   message    the error message in the current locale, or nil when ok.
   #              Never contains what was typed — and never which word matched.

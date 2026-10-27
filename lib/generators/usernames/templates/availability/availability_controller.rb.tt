@@ -33,12 +33,15 @@ module Usernames
       username_consecutive username_first_character username_digits_only username_extension
     ].freeze
 
+    # Before everything else, the limiter included: an answer about who
+    # exists is never cached, and neither is a 429 or a 503.
+    prepend_before_action :no_store
+
     rate_limit to: 30, within: 1.minute, store: RATE_LIMIT_STORE, with: -> { head :too_many_requests }
 
     before_action :require_a_working_rate_limit_store
 
     def show
-      response.headers["Cache-Control"] = "no-store"
       render json: answer_for(params[:<%= column %>].to_s)
     end
 
@@ -52,11 +55,11 @@ module Usernames
       if result.canonical.empty?
         { state: "invalid", message: message(:blank) }
       elsif own?(result.canonical)
-        { state: "free", message: nil }
+        { state: "free", message: available }
       elsif FORMAT_FAILURES.include?(result.reason)
         { state: "invalid", message: result.message }
       elsif result.ok? && <%= model_name %>.<%= column %>_available?(result.canonical)
-        { state: "free", message: nil }
+        { state: "free", message: available }
       else
         { state: "taken", message: message(:taken) }
       end
@@ -64,6 +67,12 @@ module Usernames
 
     def message(type)
       <%= model_name %>.new.errors.generate_message(:<%= column %>, type)
+    end
+
+    # Said out loud too: the status is a live region, so a screen reader
+    # hears that the name is free, not just silence.
+    def available
+      I18n.t(:available, scope: :usernames)
     end
 
     def rules

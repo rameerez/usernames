@@ -8,19 +8,19 @@ module Usernames
   #
   # Every list is a plain text file, one entry per line; blank lines and
   # `#` comments (which carry each block's source and reason, see
-  # data/NOTICE) are skipped. A file that is not there reads as an empty
-  # list, so the gem still loads from a checkout whose data has not been
-  # built yet — the configuration then simply starts from nothing.
+  # data/NOTICE) are skipped. Every file is mandatory: one that is missing,
+  # empty or malformed raises Usernames::DataError when the gem loads, since
+  # the alternative — rules that silently check nothing — fails open.
   #
   # Note the name: inside `module Usernames`, `Data` is this module. Ruby's
   # own value-object class is `::Data`, and the gem always spells it so.
   module Data
     ROOT = File.expand_path("../../data", __dir__)
 
-    # Matched exactly (PRD §9.1): system words, mailboxes, web paths.
+    # Matched exactly: system words, mailboxes, web paths.
     EXACT_FILES = %w[reserved/system.txt reserved/mailboxes.txt reserved/web.txt].freeze
 
-    # Matched the way impersonators type them (PRD §9.2).
+    # Matched the way impersonators type them.
     IMPERSONATION_FILES = %w[reserved/impersonation.txt].freeze
 
     # `# source: gitlab (MIT) — GitLab top-level and project wildcard routes`
@@ -51,7 +51,7 @@ module Usernames
         end.freeze
       end
 
-      # The generator's vocabulary (PRD §12.1).
+      # The generator's vocabulary.
       def adjectives
         @adjectives ||= list("words/adjectives.txt")
       end
@@ -64,16 +64,23 @@ module Usernames
       # The languages whose offensive words ship (data/offensive/<locale>.json),
       # as symbols: what config.offensive.languages may name.
       def available_locales
-        @available_locales ||= Dir[File.join(ROOT, "offensive", "*.json")]
-          .map { |path| File.basename(path, ".json").to_sym }.sort.freeze
+        @available_locales ||= begin
+          locales = Dir[File.join(ROOT, "offensive", "*.json")].map { |path| File.basename(path, ".json").to_sym }
+          broken!(File.join(ROOT, "offensive"), "holds no <locale>.json word list") if locales.empty?
+          locales.sort.freeze
+        end
       end
 
-      # The parsed entries of data/offensive/<locale>.json, or [] for a
-      # language that ships no data.
+      # The parsed entries of data/offensive/<locale>.json: each a Hash with
+      # a "term" and a "severity" from 1 to 4.
       def offensive(locale)
-        (@offensive ||= {})[locale.to_sym] ||= begin
-          path = File.expand_path("offensive/#{locale}.json", ROOT)
-          File.file?(path) ? deep_freeze(JSON.parse(File.read(path))) : [].freeze
+        (@offensive ||= {})[locale.to_sym] ||= read("offensive/#{locale}.json") do |path|
+          entries = JSON.parse(File.read(path))
+          unless entries.is_a?(Array) && entries.all? { |entry| term?(entry) }
+            broken!(path, "is not a list of {\"term\", \"severity\" 1–4} entries")
+          end
+
+          deep_freeze(entries)
         end
       end
 
@@ -82,51 +89,94 @@ module Usernames
         (@allowlist ||= {})[locale.to_sym] ||= list("offensive/allowlist/#{locale}.txt")
       end
 
-      # data/offensive/hate.yml (PRD §10.3).
+      # data/offensive/hate.yml: the hate tokens and number rules.
       def hate
-        @hate ||= yaml("offensive/hate.yml")
+        @hate ||= yaml("offensive/hate.yml", "always" => Array, "digit_runs" => Array, "adjacent" => Hash,
+                                             "whole_token" => Hash)
       end
 
       # data/offensive/leet.yml: the digit folds both matchers use, and the
       # rewrites only the offensive matcher uses.
       def leet
-        @leet ||= yaml("offensive/leet.yml")
+        @leet ||= yaml("offensive/leet.yml", "digits" => Hash, "offensive_only" => Hash)
       end
 
       # The entries of one data file, relative to data/ (or an absolute path).
       def list(path)
-        path = File.expand_path(path, ROOT)
-        return [].freeze unless File.file?(path)
-
-        File.foreach(path, chomp: true).filter_map do |line|
-          entry = line.sub(/#.*/, "").strip
-          entry.freeze unless entry.empty?
-        end.freeze
+        read(path) do |file|
+          entries = File.foreach(file, chomp: true).filter_map do |line|
+            entry = line.sub(/#.*/, "").strip
+            entry.freeze unless entry.empty?
+          end
+          broken!(file, "has no entries") if entries.empty?
+          entries.freeze
+        end
       end
 
       # [[entry, { source:, licence:, reason: }], …] for one data file: each
       # entry with the `# source:` comment of the block it sits in (nils for
       # an entry before any).
       def sourced(path)
-        path = File.expand_path(path, ROOT)
-        return [] unless File.file?(path)
-
-        source = { source: nil, licence: nil, reason: nil }
-        File.foreach(path, chomp: true).filter_map do |line|
-          if (match = SOURCE_LINE.match(line.strip))
-            source = { source: match[:name], licence: match[:licence], reason: match[:reason] }
-            next
+        read(path) do |file|
+          source = { source: nil, licence: nil, reason: nil }
+          File.foreach(file, chomp: true).filter_map do |line|
+            if (match = SOURCE_LINE.match(line.strip))
+              source = { source: match[:name], licence: match[:licence], reason: match[:reason] }
+              next
+            end
+            entry = line.sub(/#.*/, "").strip
+            [entry, source] unless entry.empty?
           end
-          entry = line.sub(/#.*/, "").strip
-          [entry, source] unless entry.empty?
         end
+      end
+
+      # Reads every bundled file once, so a broken install fails when the gem
+      # loads rather than on the first sign-up that needs the missing list.
+      def load!
+        reserved
+        impersonation
+        reserved_provenance
+        adjectives
+        nouns
+        available_locales.each do |locale|
+          offensive(locale)
+          allowlist(locale)
+        end
+        hate
+        leet
+        self
       end
 
       private
 
-      def yaml(relative)
+      def read(relative)
         path = File.expand_path(relative, ROOT)
-        deep_freeze(File.file?(path) ? YAML.safe_load_file(path) || {} : {})
+        broken!(path, "is missing") unless File.file?(path)
+
+        yield path
+      rescue JSON::ParserError, Psych::Exception => e
+        broken!(path, "can't be parsed (#{e.message.lines.first.strip})")
+      end
+
+      # A YAML mapping with at least `shape`'s keys, each of its type.
+      def yaml(relative, shape)
+        read(relative) do |path|
+          data = YAML.safe_load_file(path)
+          wrong = shape.find { |key, type| !(data.is_a?(Hash) && data[key].is_a?(type)) }
+          broken!(path, "needs #{wrong[0].inspect} (a #{wrong[1].name})") if wrong
+
+          deep_freeze(data)
+        end
+      end
+
+      def term?(entry)
+        entry.is_a?(Hash) && entry["term"].is_a?(String) && !entry["term"].empty? &&
+          (1..4).cover?(entry["severity"])
+      end
+
+      def broken!(path, problem)
+        raise DataError, "usernames' bundled data is broken: #{path} #{problem}. " \
+                         "Reinstall the gem, or rebuild data/ with script/build_*.rb in a checkout."
       end
 
       def deep_freeze(value)

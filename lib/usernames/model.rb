@@ -27,12 +27,12 @@ module Usernames
 
     # has_username(column = :username, required: false, generate: true, **rules)
     #
-    # Installs, for that column (PRD §6.1):
+    # Installs, for that column:
     #
     # 1. `normalizes`, so " @Javi " is stored as "javi" and a blank as nil;
     # 2. the username rules, checked only when the value changes — a rule
     #    added later never stops an old account from saving its other
-    #    attributes (D-11);
+    #    attributes;
     # 3. with `required: true`, presence — on create, and on an update that
     #    changes it (a legacy blank still saves unrelated changes);
     # 4. uniqueness, compared the way the unique index compares (Comparison);
@@ -71,7 +71,7 @@ module Usernames
         @model = model
         @name = name.to_sym
         @required = boolean(:required, required)
-        # PRD §6.1: `required: true` turns generation off — the person chooses.
+        # `required: true` turns generation off: the person chooses.
         @generate = boolean(:generate, generate) && !@required
         # Resolving them now raises ConfigurationError for a bad option when
         # the model is defined, and pins the case mode (see has_username).
@@ -121,6 +121,12 @@ module Usernames
         scope.exists?
       end
 
+      # Whether a RecordNotUnique raised while saving a record of `on` came
+      # from this column's unique index.
+      def violated_by?(error, on)
+        UniqueViolation.of?(error, table: on.table_name, column: name, rules: rules, connection: on.lease_connection)
+      end
+
       private
 
       def install_normalization_and_rules
@@ -139,12 +145,17 @@ module Usernames
       # comparison on a byte-compared column is the contract. Preserve mode
       # needs the comparison expression, which Rails' `case_sensitive: false`
       # (a collation-dependent LOWER()) is not.
+      #
+      # Skipped when the name already failed a rule: one error per name, the
+      # first that applies — a new `admin` is reserved, whoever else is
+      # called that.
       def install_uniqueness
-        changed = :"will_save_change_to_#{name}?"
+        column = name
+        checks = { if: :"will_save_change_to_#{name}?", unless: -> { errors.include?(column) } }
         if mode == :preserve
-          model.validate :"validate_#{name}_uniqueness", if: changed
+          model.validate :"validate_#{name}_uniqueness", **checks
         else
-          model.validates name, uniqueness: { case_sensitive: true }, allow_nil: true, if: changed
+          model.validates name, uniqueness: { case_sensitive: true }, allow_nil: true, **checks
         end
       end
 
@@ -203,8 +214,8 @@ module Usernames
 
       # The rule options of this column, for Usernames.check,
       # Usernames.comparison_key and Usernames.rules_for_browser.
-      # NOTE(p3): not in PRD §6.1's list; the availability generator needs
-      # the model's own rules to tell "invalid" from "taken".
+      # The availability check needs the model's own rules to tell
+      # "invalid" from "taken".
       def self.options(helpers, column)
         helpers.define_method(:"#{column.name}_options") { column.options }
       end
@@ -230,37 +241,54 @@ module Usernames
     end
 
     # The instance side for one column: `username_generated?`, generation on
-    # create, preserve-mode uniqueness and the race wrapper (PRD §11.3).
-    #
-    # Written with module_eval rather than define_method because the race
-    # wrapper calls `super` from inside a block, which only a `def` allows.
+    # create, preserve-mode uniqueness and the race wrapper.
     module InstanceMethods
       def self.for(column)
-        Module.new.tap { |methods| methods.module_eval(source(column), __FILE__, SOURCE_LINE) }
+        Module.new.tap do |methods|
+          define_generation(methods, column)
+          define_uniqueness(methods, column)
+          methods.module_eval(source(column), __FILE__, SOURCE_LINE)
+        end
+      end
+
+      # `username_generated?`, and drawing a name on create or in a redraw.
+      # A batch with nothing free in it is a validation error, not an
+      # exception: `save` returns false, `save!` raises RecordInvalid.
+      def self.define_generation(methods, column)
+        generated = :"@#{column}_generated"
+        # Whether the gem assigned this record's current name (on create, or in a redraw).
+        methods.define_method(:"#{column}_generated?") do
+          drawn = instance_variable_get(generated)
+          !drawn.nil? && drawn == public_send(column)
+        end
+        methods.define_method(:"draw_#{column}") do
+          public_send(:"#{column}=", instance_variable_set(generated, self.class.public_send(:"generate_#{column}")))
+        rescue NoFreeNameError
+          errors.add(column, :username_unavailable)
+        end
+        methods.define_method(:"assign_#{column}") { send(:"draw_#{column}") if public_send(column).blank? }
+        methods.send(:private, :"draw_#{column}", :"assign_#{column}")
+      end
+
+      # Preserve mode's uniqueness check, against the record's own class: a
+      # model that inherits has_username from an abstract parent has the table.
+      def self.define_uniqueness(methods, column)
+        methods.define_method(:"validate_#{column}_uniqueness") do
+          value = public_send(column)
+          taken = !value.nil? && self.class._usernames.fetch(column).taken?(value, self.class, except: self)
+          errors.add(column, :taken, value: value) if taken
+        end
+        methods.send(:private, :"validate_#{column}_uniqueness")
       end
 
       # Where the heredoc below starts, so a backtrace points at the real line.
-      SOURCE_LINE = __LINE__ + 4
+      SOURCE_LINE = __LINE__ + 6
 
+      # What has to be a `def`: these call `super`, and the race wrapper's
+      # block does, which define_method cannot.
       def self.source(column)
         <<~RUBY
-          # Whether the gem assigned this record's current #{column} (on create, or in a redraw).
-          def #{column}_generated?
-            !@#{column}_generated.nil? && @#{column}_generated == #{column}
-          end
-
           private
-
-          def assign_#{column}
-            self.#{column} = @#{column}_generated = self.class.generate_#{column} if #{column}.blank?
-          end
-
-          def validate_#{column}_uniqueness
-            return if #{column}.nil?
-
-            column = self.class._usernames.fetch(:#{column})
-            errors.add(:#{column}, :taken, value: #{column}) if column.taken?(#{column}, column.model, except: self)
-          end
 
           def _create_record(...)
             with_#{column}_race_handling(redraw: #{column}_generated?) { super }
@@ -282,17 +310,14 @@ module Usernames
               begin
                 return self.class.transaction(requires_new: true) { yield }
               rescue ActiveRecord::RecordNotUnique => error
-                column = self.class._usernames.fetch(:#{column})
-                raise unless Usernames::UniqueViolation.of?(error, table: self.class.table_name, column: :#{column},
-                                                                   index: column.rules.unique_index,
-                                                                   connection: self.class.lease_connection)
+                raise unless self.class._usernames.fetch(:#{column}).violated_by?(error, self.class)
 
                 if redraw && (attempts += 1) <= 3
-                  self.#{column} = @#{column}_generated = self.class.generate_#{column}   # generated names only
+                  draw_#{column}                              # generated names only
                 else
-                  errors.add(:#{column}, :taken)                                          # typed names, or redraws exhausted
-                  raise ActiveRecord::RecordInvalid, self                                 # save → false, save! → RecordInvalid
+                  errors.add(:#{column}, :taken)              # typed names, or redraws exhausted
                 end
+                raise ActiveRecord::RecordInvalid, self if errors.include?(:#{column}) # save → false, save! → RecordInvalid
               end
             end
           end

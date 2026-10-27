@@ -13,6 +13,9 @@ module Usernames
   class NoFreeNameError < Error
   end
 
+  class DataError < Error
+  end
+
   type rule = :impersonation | :exact | :route | :custom | :severe | :strong | :hate_number | :adapter
 
   # Usernames.check("Ad_min") # => #<data Usernames::Result ok?=false, reason=:username_reserved, …>

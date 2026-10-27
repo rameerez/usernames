@@ -45,12 +45,11 @@ module Usernames
         @configuration = configuration
         @severity = :strong
         @languages = %i[en es].freeze
-        # Your own exemptions. The bundled allowlists are per language and
-        # apply only inside their own language (PRD §10.2), so they are not
-        # merged in here.
-        # NOTE(p1a): so unlike reserved/forbidden this list starts empty.
+        # Your own exemptions, so — unlike reserved and forbidden — this list
+        # starts empty: the bundled allowlists are per language and apply only
+        # inside their own language, so they are not merged in here.
         @allowed = [].freeze
-        # A no-op unless the moderate gem is loaded (D-7).
+        # A no-op unless the moderate gem is loaded.
         @adapters = [:moderate].freeze
       end
 
@@ -91,10 +90,8 @@ module Usernames
 
     # Per-call word lists ADD to the configured ones: a model that passes
     # `reserved: %w[festival]` keeps every bundled reservation. Every other
-    # per-call option replaces the configured value.
-    # NOTE(p1a): the PRD says options are "accepted per model and per
-    # validator call" without saying how lists combine; adding is the choice
-    # that can never silently un-reserve a name (fail closed, PRD §4.5).
+    # per-call option replaces the configured value. Adding is the choice
+    # that can never silently un-reserve a name: a per-model list fails closed.
     LISTS = %i[reserved forbidden allowed].freeze
 
     # Distinct per-call option sets kept compiled. They come from model and

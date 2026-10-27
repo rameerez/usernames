@@ -209,9 +209,25 @@ class ReservedTest < UsernamesTestCase
     assert_nil Usernames::Reserved.source_of("javi")
   end
 
-  def test_candidates_are_the_forms_the_prd_lists
-    assert_equal Set["adm1n_bob2", "adm1nbob2", "adm1nbob", "adm", "n", "bob", "adminbob2", "adminbob", "admin"],
-                 Usernames::Reserved.candidates("adm1n_bob2")
+  # Every spelling of adm1n_bob2 that an entry catches, and one it never is.
+  def test_the_spellings_an_impersonation_entry_catches
+    spellings = %w[adm1n_bob2 adm1nbob2 adm1nbob adm n bob adminbob2 adminbob admin]
+
+    caught = spellings.select { |entry| Usernames::Reserved.impersonation?("adm1n_bob2", Set[entry]) }
+
+    assert_equal spellings, caught
+    refute Usernames::Reserved.impersonation?("adm1n_bob2", Set["adm1n_bob", "bob2", "admi"])
+  end
+
+  # The README's recipe for the app's own official account: lift exactly
+  # its name; every other spelling of it stays reserved.
+  def test_the_official_account_recipe
+    with_config(app_name: "YourApp", allowed: %w[yourapp], separators: %w[_ .]) do
+      assert Usernames.allowed?("yourapp")
+      refute Usernames.allowed?("yourapp2")
+      refute Usernames.allowed?("your.app")
+      refute Usernames.allowed?("your_app")
+    end
   end
 
   def test_sets_are_compiled_once_per_rules

@@ -24,13 +24,32 @@ class RacingUser < ApplicationRecord
   cattr_accessor :competitor
   cattr_accessor :before_create_calls, default: 0
   cattr_accessor :after_create_calls, default: 0
+  cattr_accessor :before_save_calls, default: 0
 
+  before_save { self.class.before_save_calls += 1 }
   before_create { self.class.before_create_calls += 1 }
   after_create { self.class.after_create_calls += 1 }
   after_validation { rival&.call(self) }
   before_create { competitor&.call(self) }
   before_update { competitor&.call(self) }
 end
+
+# has_username declared once, on an abstract parent: the concrete class has the table.
+class NamedRecord < ApplicationRecord
+  self.abstract_class = true
+  has_username case: :preserve
+end
+
+class InheritedUser < NamedRecord
+  self.table_name = "users"
+end
+
+# Single-table inheritance: a staff persona and a persona share one name space.
+class Persona < ApplicationRecord
+  has_username :handle, case: :preserve
+end
+
+class StaffPersona < Persona; end
 
 class ModelTest < UsernamesTestCase
   def setup
@@ -41,6 +60,7 @@ class ModelTest < UsernamesTestCase
     RacingUser.competitor = nil
     RacingUser.before_create_calls = 0
     RacingUser.after_create_calls = 0
+    RacingUser.before_save_calls = 0
   end
 
   # Another person taking `name` from under the record's feet.
@@ -203,6 +223,7 @@ class ModelTest < UsernamesTestCase
     assert_equal 2, User.count
     assert_equal 2, RacingUser.before_create_calls, "before_create runs once per attempt"
     assert_equal 1, RacingUser.after_create_calls, "after_create runs once, for the attempt that succeeded"
+    assert_equal 1, RacingUser.before_save_calls, "before_save wraps every attempt: it runs once"
   end
 
   def test_redraws_stop_after_three_then_taken
@@ -467,5 +488,81 @@ class ModelTest < UsernamesTestCase
 
     refute player.save
     assert_equal [{ error: :taken }], player.errors.details[:handle]
+  end
+
+  # --- running out of generated names ---------------------------------------------------------------
+
+  # generate_username raises; a save that needs a generated name fails like
+  # a validation instead, and asks the person to choose.
+  def test_a_new_record_with_no_free_generated_name_is_invalid
+    take("only_candidate")
+    with_config(generator: ->(_attempt) { "only_candidate" }) do
+      user = User.new(email: "n@example.com")
+
+      refute user.save
+      assert_equal [{ error: :username_unavailable }], user.errors.details[:username]
+      assert_equal ["Username couldn't be assigned automatically, please choose one"], user.errors.full_messages
+      assert_raises(ActiveRecord::RecordInvalid) { User.create!(email: "o@example.com") }
+      assert_raises(Usernames::NoFreeNameError) { User.generate_username }
+    end
+  end
+
+  def test_running_out_while_redrawing_is_invalid_too
+    with_config(generator: ->(_attempt) { "only_candidate" }) do
+      RacingUser.rival = ->(record) { take(record.username) }
+      user = RacingUser.new(email: "r@example.com")
+
+      refute user.save
+      assert_equal [{ error: :username_unavailable }], user.errors.details[:username]
+      assert_predicate user, :new_record?
+      assert_equal 1, RacingUser.before_create_calls, "the insert was tried, then the redraw ran out"
+
+      User.where(username: "only_candidate").delete_all
+      error = assert_raises(ActiveRecord::RecordInvalid) { RacingUser.create!(email: "s@example.com") }
+
+      assert_equal [{ error: :username_unavailable }], error.record.errors.details[:username]
+    end
+  end
+
+  # --- one error per name ---------------------------------------------------------------------------
+
+  # A legacy `admin` is still in the table: a new `admin` is reserved, not
+  # also taken.
+  def test_a_name_that_breaks_a_rule_is_not_also_taken
+    take("admin")
+    Player.insert_all([{ handle: "Admin" }])
+
+    assert_equal({ username: [{ error: :username_reserved }] },
+                 User.new(username: "admin").tap(&:validate).errors.details)
+    assert_equal [{ error: :username_reserved }], Player.new(handle: "ADMIN").tap(&:validate).errors.details[:handle]
+    assert_equal [{ error: :taken, value: "javi" }],
+                 User.new(username: "javi").tap { take("javi") }.tap(&:validate).errors.details[:username]
+  end
+
+  # --- inheritance ----------------------------------------------------------------------------------
+
+  def test_has_username_inherited_from_an_abstract_parent
+    take("javi")
+
+    assert_equal [{ error: :taken, value: "Javi" }],
+                 InheritedUser.new(username: "Javi").tap(&:validate).errors.details[:username]
+    assert_predicate InheritedUser.new(username: "Ana", email: "a@example.com"), :valid?
+    assert InheritedUser.username_available?("ana")
+    refute InheritedUser.username_available?("JAVI")
+  end
+
+  def test_single_table_inheritance_shares_one_name_space
+    Persona.delete_all
+    Persona.create!(handle: "Javi")
+
+    assert_equal [{ error: :taken, value: "JAVI" }],
+                 StaffPersona.new(handle: "JAVI").tap(&:validate).errors.details[:handle]
+    staff = StaffPersona.create!(handle: "Ana")
+
+    assert_equal [{ error: :taken, value: "ana" }], Persona.new(handle: "ana").tap(&:validate).errors.details[:handle]
+    assert staff.update(handle: "ANA"), "a case-only change of one's own name"
+    refute StaffPersona.handle_available?("javi")
+  ensure
+    Persona.delete_all
   end
 end

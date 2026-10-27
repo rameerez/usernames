@@ -1,0 +1,32 @@
+# Usernames that must pass Usernames.check at the defaults (every rule: format, reserved, offensive).
+# The probes and reviewed names of legitimate.txt that are whole usernames.
+analysis
+assassin
+bass
+chujew
+cishet
+cissy
+classic
+clitheroe
+cockburn
+computadora
+enby
+finocchio
+gcastro
+grape
+hello
+hermie
+josh1979
+mike88
+mjordan
+montenegro
+negro
+pansy
+penistone
+santorum
+scunthorpe
+scunthorpe_united
+shiitake
+shota
+sussex
+therapist

@@ -10,14 +10,20 @@ module Usernames
     # fresh checkout, CI, a laptop with the server off). Then nothing is known,
     # and the column is assumed missing.
     class ExistingSchema
-      attr_reader :column, :indexes
+      attr_reader :column, :indexes, :matching_index
 
-      def self.read(table, column)
-        ActiveRecord::Base.with_connection do |connection|
+      # `owner` is the model (or ActiveRecord::Base) whose database holds the
+      # table; `mode` is the case mode the index is for: the first index that
+      # enforces its comparison contract is the matching one.
+      def self.read(owner, table, column, mode)
+        owner.with_connection do |connection|
           next new(reachable: true) unless connection.table_exists?(table)
 
           existing = connection.columns(table).find { |each| each.name == column.to_s }
-          new(reachable: true, column: existing, indexes: connection.indexes(table),
+          indexes = connection.indexes(table)
+          contract = Usernames::Comparison::IndexContract.new(connection, table: table, column: column, mode: mode)
+          new(reachable: true, column: existing, indexes: indexes,
+              matching_index: indexes.find { |index| contract.satisfied_by?(index) },
               populated: !existing.nil? && rows?(connection, table, column))
         end
       rescue StandardError
@@ -33,7 +39,7 @@ module Usernames
         options << "unique: true" if index.unique
         options << "where: #{index.where.inspect}" if index.where.present?
         options << "name: #{index.name.inspect}"
-        "remove_index :#{table}, #{options.join(', ')}"
+        "remove_index #{Usernames::Comparison.ruby_name(table)}, #{options.join(', ')}"
       end
 
       def self.rows?(connection, table, column)
@@ -42,10 +48,11 @@ module Usernames
         !connection.select_value(sql).nil?
       end
 
-      def initialize(reachable:, column: nil, indexes: [], populated: false)
+      def initialize(reachable:, column: nil, indexes: [], matching_index: nil, populated: false)
         @reachable = reachable
         @column = column
         @indexes = indexes
+        @matching_index = matching_index
         @populated = populated
       end
 

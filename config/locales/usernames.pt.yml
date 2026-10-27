@@ -21,6 +21,7 @@ pt:
       username_extension: "não pode terminar como um nome de arquivo (.json, .png…)"
       username_reserved: "está reservado"
       username_not_allowed: "não é permitido"
+      username_unavailable: "não pôde ser atribuído automaticamente, escolha um"
       blank: "não pode ficar em branco"
       taken: "já está em uso"
       too_short:
@@ -30,6 +31,7 @@ pt:
         one: "é muito longo (máximo: 1 caractere)"
         other: "é muito longo (máximo: %{count} caracteres)"
   usernames:
+    available: "está disponível"
     letters:
       lowercase: "letras minúsculas"
       any_case: "letras"

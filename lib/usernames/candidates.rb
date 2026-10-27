@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Usernames
-  # Suggestions for a sign-up form (PRD §13): `Usernames.candidates_for("Javi R", count: 5)`.
+  # Suggestions for a sign-up form: `Usernames.candidates_for("Javi R", count: 5)`.
   #
   # Up to 3 × count allowed names, best first: the seed itself, first name +
   # last initial, the seed with a few random digits, then default shapes.

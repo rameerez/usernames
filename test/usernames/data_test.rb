@@ -193,6 +193,19 @@ module Usernames
       assert_equal 3, en.fetch("spic")["severity"]
     end
 
+    # The reviewed re-tiering: racial abuse up out of the disabled tiers;
+    # identity words out entirely; real names and ordinary words down to mild.
+    def test_the_reviewed_english_tiers
+      en = by_term("en")
+
+      assert_equal({ "chingchong" => 4, "neonazi" => 4, "jap" => 3, "wog" => 3 },
+                   %w[chingchong neonazi jap wog].to_h { |term| [term, en.fetch(term)["severity"]] })
+      assert_equal [2], %w[pansy cissy hermie santorum finocchio shota].map { |term| en.fetch(term)["severity"] }.uniq
+      assert_nil en.fetch("shota")["segment_only"], "mild is whole-segment anyway"
+      refute en.key?("enby")
+      refute en.key?("cishet")
+    end
+
     def test_es_severe_is_slurs_only_and_never_a_scunthorpe_risk_substring
       severe = offensive("es").select { |entry| entry["severity"] == 4 }
       substring = spellings(severe.reject { |entry| entry["segment_only"] })
@@ -249,7 +262,8 @@ module Usernames
 
     def test_leet_table_is_the_curated_subset
       assert_equal({ "0" => "o", "1" => "i", "3" => "e", "4" => "a", "5" => "s", "7" => "t" }, leet["digits"])
-      assert_equal({ "vv" => "w", "ph" => "f", "x" => "ks" }, leet["offensive_only"])
+      assert_equal({ "vv" => "w", "v" => "u", "ph" => "f", "x" => "ks" }, leet["offensive_only"])
+      assert_equal %w[vv v ph x], leet["offensive_only"].keys, "vv before v: the order is the rule"
     end
   end
 
