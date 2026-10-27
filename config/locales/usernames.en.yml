@@ -44,8 +44,11 @@ en:
       too_long:
         one: "is too long (maximum is 1 character)"
         other: "is too long (maximum is %{count} characters)"
-  # The pieces the phrases above are built from.
   usernames:
+    # What the generated availability check says, in its live region, when
+    # a name is free to take.
+    available: "is available"
+    # The pieces the phrases above are built from.
     letters:
       lowercase: "lowercase letters"
       any_case: "letters"

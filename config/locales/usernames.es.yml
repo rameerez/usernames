@@ -30,6 +30,7 @@ es:
         one: "es demasiado largo (1 carácter máximo)"
         other: "es demasiado largo (%{count} caracteres máximo)"
   usernames:
+    available: "está disponible"
     letters:
       lowercase: "letras minúsculas"
       any_case: "letras"
