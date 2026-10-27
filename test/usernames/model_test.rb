@@ -602,6 +602,21 @@ class ModelTest < UsernamesTestCase
     end
   end
 
+  # Required and generated at once: running out explains the blank name,
+  # so it is not also reported as blank.
+  def test_running_out_when_the_name_is_also_required_is_one_error
+    take("only_candidate")
+    model = flow_model(required: :handle_required, generate: ->(record) { record.email.present? })
+    with_config(generator: ->(_attempt) { "only_candidate" }) do
+      user = model.new(email: "n@example.com", handle_required: true)
+
+      refute user.save
+      assert_equal [{ error: :username_unavailable }], user.errors.details[:username]
+    end
+    assert_equal [{ error: :blank }], model.new(handle_required: true).tap(&:validate).errors.details[:username],
+                 "a blank nobody tried to fill is still :blank"
+  end
+
   def test_running_out_while_redrawing_is_invalid_too
     with_config(generator: ->(_attempt) { "only_candidate" }) do
       RacingUser.rival = ->(record) { take(record.username) }

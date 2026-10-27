@@ -181,9 +181,12 @@ module Usernames
         return if required == false
 
         # On create, and when an update touches it: a pre-existing blank
-        # saves unrelated changes; clearing a name is :blank.
+        # saves unrelated changes; clearing a name is :blank. Not when
+        # generation already said why the name is blank
+        # (:username_unavailable): one error per name.
         model.validates column, presence: true, if: lambda {
-          (new_record? || will_save_change_to_attribute?(column)) && definition.required?(self)
+          (new_record? || will_save_change_to_attribute?(column)) && definition.required?(self) &&
+            !errors.of_kind?(column, :username_unavailable)
         }
       end
 
