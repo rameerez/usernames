@@ -2,7 +2,7 @@
 
 ## [0.1.0] - 2026-10-27
 
-First release. One line — `has_username` — gives a Rails model a username that is valid, unique, not reserved, not offensive and never empty, with no table, no network and one unique index.
+First release. One line — `has_username` — gives a Rails model a username that is valid, unique, not reserved, not offensive and there from day one, with no table, no network and one unique index.
 
 ### Added
 
