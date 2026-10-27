@@ -2,6 +2,7 @@
 
 require "test_helper"
 require "usernames/audit"
+require "generators/usernames/existing_schema"
 
 # Comparison::IndexContract against indexes the database itself reads back:
 # what the installer, the audit and UniqueViolation accept as "the index that
@@ -141,6 +142,54 @@ class IndexContractTest < UsernamesTestCase
                  audit.string)
   end
 
+  # A COLLATE inside CHECK (...) collates that expression alone: the column
+  # is still NOCASE, so the BINARY index takes javi and JAVI while the query
+  # finds both. The contract, the audit and the installer all refuse it.
+  def test_a_collation_inside_a_check_is_not_the_columns
+    skip "SQLite only" if POSTGRESQL
+    raw_table("username TEXT COLLATE NOCASE CHECK(username COLLATE BINARY <> '')")
+    connection.execute("CREATE UNIQUE INDEX binary_on_checked ON #{TABLE} (username COLLATE BINARY)")
+    index = connection.indexes(TABLE).find { |each| each.name == "binary_on_checked" }
+
+    assert_match(/\Ais on a column compared under collation "NOCASE", not byte by byte\z/, contract.violation(index))
+    report = audit_report
+
+    assert_match(/TEXT, COLLATE NOCASE: the contract is SQLite's default BINARY/, report)
+    assert_match(/binary_on_checked \(unique on username\) — is on a column compared under collation "NOCASE"/, report)
+    assert_match(/\A2 things to fix\./, report.lines.last)
+    schema = Usernames::Generators::ExistingSchema.read(ActiveRecord::Base, TABLE, :username, :lowercase)
+
+    assert_nil schema.matching_index
+    rejected = schema.rejected_indexes.map { |each, reason| [each.name, reason] }
+
+    assert_equal [["binary_on_checked", 'is on a column compared under collation "NOCASE", not byte by byte']], rejected
+    connection.execute("INSERT INTO #{TABLE} (username) VALUES ('javi'), ('JAVI')")
+
+    assert_equal 2, connection.select_value("SELECT count(*) FROM #{TABLE} WHERE username = 'javi'")
+  end
+
+  # The column's own COLLATE BINARY decides, wherever it stands next to a
+  # CHECK that collates its expression otherwise.
+  def test_a_column_collation_after_a_check_with_another
+    skip "SQLite only" if POSTGRESQL
+    raw_table("username TEXT CHECK(username COLLATE NOCASE <> '') COLLATE BINARY")
+
+    assert_nil verdict(:username)
+    assert_match(/\ANothing to fix:/, audit_report.lines.last)
+  end
+
+  # A parenthesis or a COLLATE inside a string literal is text: it neither
+  # closes the CHECK early nor names a collation.
+  def test_a_string_literal_with_a_parenthesis
+    skip "SQLite only" if POSTGRESQL
+    raw_table("username TEXT DEFAULT (')') COLLATE NOCASE CHECK(username <> ')' AND username COLLATE BINARY <> '')")
+
+    assert_match(/\Ais on a column compared under collation "NOCASE"/, verdict(:username))
+    raw_table("username VARCHAR(255) CHECK(username <> 'x) COLLATE NOCASE')")
+
+    assert_nil verdict(:username)
+  end
+
   def test_preserve_mode_on_postgresql_ignores_the_columns_collation
     skip "PostgreSQL only" unless POSTGRESQL
     create_table(collation: "und-x-icu")
@@ -203,6 +252,20 @@ class IndexContractTest < UsernamesTestCase
       POSTGRESQL ? t.boolean(:usernameisnotnull) : t.integer(:usernameisnotnull)
       t.string "user name"
     end
+  end
+
+  # The table as written by hand, with `username` defined as given.
+  def raw_table(username)
+    connection.drop_table(TABLE, if_exists: true)
+    connection.execute("CREATE TABLE #{TABLE} (id INTEGER PRIMARY KEY, #{username})")
+  end
+
+  def audit_report
+    io = StringIO.new
+    model = Class.new(ActiveRecord::Base) { self.table_name = TABLE.to_s }
+    model.define_singleton_method(:name) { "ContractUser" }
+    Usernames::Audit.new(model).report(io)
+    io.string
   end
 
   def contract(mode: :lowercase)

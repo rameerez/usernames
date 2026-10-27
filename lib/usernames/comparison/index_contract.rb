@@ -189,7 +189,23 @@ module Usernames
                                        "AND name = #{@connection.quote(table.split('.').last)}")
         definitions = column_definitions(Expression.tokens(sql))
         definition = definitions.find { |tokens| Expression.name(tokens.first)&.named?(column) }
-        collations_in(definition.to_a).last
+        collations_in(outside_parentheses(definition.to_a)).last
+      end
+
+      # A column definition without whatever its parentheses hold: only a
+      # COLLATE at its own level is the column's collation. One inside
+      # CHECK (...), DEFAULT (...) or GENERATED ALWAYS AS (...) collates that
+      # expression alone, and a type's VARCHAR(255) holds none. Quoted names
+      # and string literals are single tokens, so a parenthesis inside one
+      # does not count.
+      def outside_parentheses(tokens)
+        depth = 0
+        tokens.select do |token|
+          depth -= 1 if token == [:symbol, ")"]
+          outside = depth.zero? && !token.in?([[:symbol, "("], [:symbol, ")"]])
+          depth += 1 if token == [:symbol, "("]
+          outside
+        end
       end
 
       # The comma-separated definitions inside CREATE TABLE's parentheses,
