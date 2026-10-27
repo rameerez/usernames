@@ -30,16 +30,16 @@ class <%= migration_class_name %> < ActiveRecord::Migration<%= migration_version
     # change_column :<%= table %>, :<%= column %>, :string, collation: <%= collation.inspect %>
 <% end -%>
 <% if (existing = conflicting_index) -%>
+<% if column_step? -%>
 
-    # <%= existing.name %> isn't the unique index the gem needs; replace it.
-<% if existing.columns.is_a?(Array) -%>
-    remove_index :<%= table %>, column: <%= existing.columns.map(&:to_sym).inspect %>, name: <%= existing.name.inspect %>
-<% else -%>
-    remove_index :<%= table %>, name: <%= existing.name.inspect %> # irreversible: re-add it in `down` if you roll back
 <% end -%>
+    # <%= existing.name %> isn't the unique index the gem needs; replace it.
+    <%= Usernames::Generators::ExistingSchema.remove_index_line(table, existing) %>
 <% end -%>
 <% if add_index? -%>
+<% if column_step? || conflicting_index -%>
 
+<% end -%>
 <% if mode == :preserve -%>
     # Case is kept as typed, and compared without it: CoolCat and coolcat are
     # one name. Every query the gem makes uses this same expression.

@@ -146,6 +146,9 @@ module Usernames
         database.indexes.find { |existing| Usernames::Comparison.index_matches?(existing, index) }
       end
 
+      # Whether the migration touches the column before its indexes.
+      def column_step? = add_column? || change_collation? || mysql_collation_note?
+
       def index
         @index ||= Usernames::Comparison.index_definition(adapter: adapter, table: table, column: column, mode: mode)
       end

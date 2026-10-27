@@ -22,6 +22,13 @@ class GeneratorInstallTest < Rails::Generators::TestCase
     run_generator(args)
   end
 
+  def run_migration(source, direction)
+    migration = Class.new(ActiveRecord::Migration[ActiveRecord::Migration.current_version]) do
+      class_eval(source[/  def change.*^  end\n/m], __FILE__, __LINE__)
+    end
+    ActiveRecord::Migration.suppress_messages { migration.migrate(direction) }
+  end
+
   # --- the initializer ------------------------------------------------------------------------------
 
   def test_initializer_shows_exactly_the_ten_options_commented
@@ -222,6 +229,40 @@ class GeneratorInstallTest < Rails::Generators::TestCase
     end
   ensure
     Member.lease_connection.remove_index :members, name: "index_members_on_username", if_exists: true
+  end
+
+  # A host app's own lower() index under the gem's name: replaced by one that
+  # can be rolled back, because the remove line restates the expression.
+  def test_an_expression_index_of_the_same_name_is_replaced_reversibly
+    connection = Member.lease_connection
+    connection.add_index :members, "lower(username)", name: "index_members_on_lower_username"
+
+    run_generator %w[--model=Member --case=preserve]
+
+    assert_migration "db/migrate/add_unique_username_index_to_members.rb" do |content|
+      assert_match(/def change\n    # index_members_on_lower_username isn't/, content, "no blank line opens the method")
+      # As the database reads the expression back: PostgreSQL says lower((username)::text).
+      assert_match(/remove_index :members, "lower\(.*username.*\)", name: "index_members_on_lower_username"\n/, content)
+      assert_includes content, "lower_username\"\n\n    # Case is kept"
+      run_migration(content, :up)
+
+      assert connection.indexes(:members).find { |index| index.name == "index_members_on_lower_username" }.unique
+      run_migration(content, :down)
+
+      refute connection.indexes(:members).find { |index| index.name == "index_members_on_lower_username" }.unique
+    end
+  ensure
+    Member.lease_connection.remove_index :members, name: "index_members_on_lower_username", if_exists: true
+  end
+
+  def test_a_unique_index_is_removed_with_its_uniqueness_and_condition
+    index = ActiveRecord::ConnectionAdapters::IndexDefinition.new(
+      "members", "index_members_on_username", true, %w[username], where: "username IS NOT NULL"
+    )
+    line = Usernames::Generators::ExistingSchema.remove_index_line("members", index)
+
+    assert_equal %(remove_index :members, column: [:username], unique: true, where: "username IS NOT NULL", ) +
+                 %(name: "index_members_on_username"), line
   end
 
   # --- no database, and re-runs ---------------------------------------------------------------------

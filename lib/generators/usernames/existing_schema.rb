@@ -24,6 +24,18 @@ module Usernames
         new(reachable: false)
       end
 
+      # The migration line that drops `index` (one of `indexes`) and can be
+      # rolled back: it restates the columns or expression as the database
+      # reads them back, the uniqueness and the condition.
+      def self.remove_index_line(table, index)
+        columns = index.columns
+        options = [columns.is_a?(Array) ? "column: #{columns.map(&:to_sym).inspect}" : columns.inspect]
+        options << "unique: true" if index.unique
+        options << "where: #{index.where.inspect}" if index.where.present?
+        options << "name: #{index.name.inspect}"
+        "remove_index :#{table}, #{options.join(', ')}"
+      end
+
       def self.rows?(connection, table, column)
         sql = "SELECT 1 FROM #{connection.quote_table_name(table)} " \
               "WHERE #{connection.quote_column_name(column)} IS NOT NULL LIMIT 1"
