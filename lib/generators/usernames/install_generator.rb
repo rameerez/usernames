@@ -4,6 +4,7 @@ require "rails/generators/base"
 require "rails/generators/active_record"
 require_relative "existing_schema"
 require_relative "install_messages"
+require_relative "javascript_setup"
 
 module Usernames
   module Generators
@@ -20,9 +21,14 @@ module Usernames
     # added. A column that already holds usernames gets the adoption workflow
     # instead of a promise: the index cannot be trusted — or even added —
     # until `rails usernames:audit` comes back clean.
+    #
+    # The initializer publishes that column to the live availability check
+    # (config.availability.targets), and in an importmap + Stimulus app the
+    # generator adds `import "usernames"` to app/javascript/application.js, once.
     class InstallGenerator < Rails::Generators::Base
       include ActiveRecord::Generators::Migration
       include InstallMessages
+      include JavascriptSetup
 
       source_root File.expand_path("templates", __dir__)
 
@@ -65,6 +71,17 @@ module Usernames
         migration_template "add_username.rb.erb", File.join(db_migrate_path, "#{migration_name}.rb")
       end
 
+      # Only where the line can work: importmap (nothing else resolves it),
+      # the entrypoint, and stimulus-rails' controllers/application.js
+      # exporting the `application` it registers on. Never twice, and never
+      # removing anything.
+      def add_the_javascript_import
+        return unless javascript_setup == :ready
+
+        separator = File.read(destination(APPLICATION_JS)).end_with?("\n") ? "" : "\n"
+        append_to_file APPLICATION_JS, %(#{separator}import "usernames"\n)
+      end
+
       def display_post_install_message
         say "\n\tThe `usernames` gem has been successfully installed!", :green
         warn_about_the_database unless database.reachable?
@@ -73,6 +90,11 @@ module Usernames
       end
 
       private
+
+      # The initializer's line: config.availability.targets = { "user" => "User#handle" }.
+      def target_alias = model_name.underscore.tr("/", "_")
+
+      def target = "#{model_name}##{column}"
 
       # --- what the migration does -----------------------------------------------------------------
 

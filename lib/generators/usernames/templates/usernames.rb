@@ -1,11 +1,17 @@
 # frozen_string_literal: true
 
-# Every line below shows the default: uncomment one to change it.
+# Every commented line below shows the default: uncomment one to change it.
 # The README documents the less common options (first_character,
 # reserve_routes, app_name, offensive.adapters, on_adapter_failure, generator,
-# unique_index). Every option is also accepted per model:
+# unique_index, and the rest of config.availability). Every rule is also
+# accepted per model:
 #   has_username :handle, length: 2..24, case: :preserve
 Usernames.configure do |config|
+  # The username columns the live availability check answers for, by the
+  # alias the browser sends (`f.username_field` fills it in). Nothing else is
+  # ever looked up: a model with has_username is not public until it is here.
+  config.availability.targets = { <%= target_alias.inspect %> => <%= target.inspect %> }
+
   # How long a username may be, in characters.
   # config.length          = 3..30
 

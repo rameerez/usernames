@@ -52,7 +52,7 @@ class GeneratorInstallTest < Rails::Generators::TestCase
 
   # --- the initializer ------------------------------------------------------------------------------
 
-  def test_initializer_shows_exactly_the_ten_options_commented
+  def test_initializer_shows_exactly_the_ten_options_commented_and_publishes_the_column
     run_generator %w[--model=Account]
 
     assert_file "config/initializers/usernames.rb" do |content|
@@ -62,8 +62,108 @@ class GeneratorInstallTest < Rails::Generators::TestCase
                       config.forbidden config.allowed config.offensive.severity config.offensive.languages
                       config.offensive.allowed], options
       assert_includes content, "Usernames.configure do |config|"
-      refute_match(/^\s+config\./, content, "every option is commented: the defaults stay the gem's")
+      assert_equal [%(  config.availability.targets = { "account" => "Account#username" })],
+                   content.lines(chomp: true).grep(/^\s+config\./),
+                   "every rule is commented (the defaults stay the gem's); the one live line publishes the column"
     end
+  end
+
+  def test_the_target_names_the_model_and_column
+    run_generator %w[--model=Admin::Member --column=handle]
+
+    assert_file "config/initializers/usernames.rb",
+                /config\.availability\.targets = \{ "admin_member" => "Admin::Member#handle" \}/
+  end
+
+  # --- import "usernames" ---------------------------------------------------------------------------
+
+  # The conventional importmap + Stimulus app, as `rails new` writes it.
+  def importmap_app(application_js: %(import "@hotwired/turbo-rails"\nimport "controllers"\n),
+                    stimulus: "const application = Application.start()\nexport { application }\n")
+    write "config/importmap.rb", %(pin "application"\n)
+    write "app/javascript/application.js", application_js if application_js
+    write "app/javascript/controllers/application.js", stimulus if stimulus
+  end
+
+  def write(path, content)
+    FileUtils.mkdir_p(File.dirname(File.join(destination_root, path)))
+    File.write(File.join(destination_root, path), content)
+  end
+
+  def application_js
+    File.read(File.join(destination_root, "app/javascript/application.js"))
+  end
+
+  def test_appends_the_import_to_an_importmap_stimulus_app
+    importmap_app
+    output = run_generator %w[--model=Account]
+
+    assert_equal %(import "@hotwired/turbo-rails"\nimport "controllers"\nimport "usernames"\n), application_js
+    assert_match(%r{Added `import "usernames"` to app/javascript/application\.js}, output)
+    assert_match(/<%= f\.label :username %> <%= f\.username_field :username %> <%= f\.username_status :username %>/,
+                 output)
+    assert_match(/devise_parameter_sanitizer\.permit\(:sign_up, keys: \[:username\]\)/, output)
+  end
+
+  def test_appending_is_idempotent
+    importmap_app
+    run_generator %w[--model=Account]
+    output = run_generator %w[--model=Account]
+
+    assert_equal 1, application_js.scan(%(import "usernames")).size
+    assert_match(/already has `import "usernames"`/, output)
+  end
+
+  def test_an_import_the_app_wrote_itself_counts
+    importmap_app(application_js: %(import "controllers"\n  import 'usernames' // mine\n))
+    run_generator %w[--model=Account]
+
+    assert_equal %(import "controllers"\n  import 'usernames' // mine\n), application_js
+  end
+
+  def test_an_entrypoint_without_a_final_newline
+    importmap_app(application_js: %(import "controllers"))
+    run_generator %w[--model=Account]
+
+    assert_equal %(import "controllers"\nimport "usernames"\n), application_js
+  end
+
+  def test_other_ways_of_exporting_the_application
+    ["export const application = Application.start()\n", "export { application, other }\n"].each do |stimulus|
+      prepare_destination
+      importmap_app(stimulus: stimulus)
+      run_generator %w[--model=Account]
+
+      assert_includes application_js, %(import "usernames"), stimulus
+    end
+  end
+
+  # Where the line could not work, it is not written, and the reason is said.
+  def test_no_import_where_it_could_not_work
+    {
+      lambda {
+        write "app/javascript/application.js",
+              %(import "controllers"\n)
+      } => /No importmap here: run 'rails generate usernames:javascript'/,
+      -> { importmap_app(application_js: nil) } => %r{No app/javascript/application\.js},
+      -> { importmap_app(stimulus: nil) } => /No Stimulus application exported/,
+      -> { importmap_app(stimulus: "window.Stimulus = Application.start()\n") } => /No Stimulus application exported/
+    }.each do |setup, message|
+      prepare_destination
+      setup.call
+      before = File.exist?(File.join(destination_root, "app/javascript/application.js")) && application_js
+      output = run_generator %w[--model=Account]
+
+      assert_match message, output
+      assert_equal before, File.exist?(File.join(destination_root, "app/javascript/application.js")) && application_js
+    end
+  end
+
+  def test_the_adoption_workflow_ends_with_the_form_too
+    Member.insert_all([{ username: "javi" }])
+    output = output_of("--model=Member")
+
+    assert_match(/f\.username_field :username/, output)
   end
 
   # Uncommented, the initializer is a valid configuration of the defaults.
@@ -77,6 +177,8 @@ class GeneratorInstallTest < Rails::Generators::TestCase
 
     assert_equal 3..30, Usernames.configuration.length
     assert_equal %i[en es], Usernames.configuration.offensive.languages
+    assert_equal({ "account" => "Account#username" }, Usernames.configuration.availability.targets)
+    Usernames.configuration.validate!
   ensure
     Usernames.configuration = previous
   end
