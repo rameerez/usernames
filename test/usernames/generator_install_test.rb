@@ -317,6 +317,30 @@ class GeneratorInstallTest < Rails::Generators::TestCase
     connection.remove_index :members, name: "members_partial", if_exists: true
   end
 
+  # The migration, run against this database: afterwards the index the
+  # audit, the installer and the race wrapper look for is there, in both
+  # modes; rolled back, it is gone.
+  def test_the_migration_creates_the_index_the_contract_needs
+    connection = Member.lease_connection
+    %i[lowercase preserve].each do |mode|
+      prepare_destination
+      run_generator ["--model=Member", "--case=#{mode}"]
+      contract = Usernames::Comparison::IndexContract.new(connection, table: :members, column: :username, mode: mode)
+      enforced = -> { connection.indexes(:members).any? { |index| contract.satisfied_by?(index) } }
+
+      assert_migration "db/migrate/add_unique_username_index_to_members.rb" do |content|
+        refute enforced.call, "#{mode}: not before"
+        run_migration(content, :up)
+
+        assert enforced.call, "#{mode}: after db:migrate"
+        run_migration(content, :down)
+
+        refute enforced.call, "#{mode}: rolled back"
+      end
+      connection.change_column(:members, :username, :string) if POSTGRESQL # the collation the up step set
+    end
+  end
+
   # --- a schema-qualified table -----------------------------------------------------------------------
 
   # The constant is built from the name, the table stays a string literal:

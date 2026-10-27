@@ -54,20 +54,12 @@ module Usernames
         end
       end
 
-      # Every spelling PRD §9.2 reads a name as: whole and without trailing
-      # digits (separators removed), every segment, each of those again
-      # leet-folded, and the name exactly as typed — so a custom entry that
-      # is itself digits or separators (`web3`) still forbids itself.
-      def candidates(key)
-        folded = leet(key)
-        [key, folded].uniq.each_with_object(Set[key]) do |form, set|
-          set << form.delete(SEPARATORS) << form.sub(/\d+\z/, "").delete(SEPARATORS)
-          form.split(SEGMENT_BOUNDARY).each { |segment| set << segment unless segment.empty? }
-        end
-      end
-
-      # #candidates without building them: the first form that is an entry
-      # answers, and most names are refused or passed in a few lookups.
+      # Whether any spelling of the name is an impersonation entry: the name
+      # exactly as typed (so a custom entry that is itself digits or
+      # separators, `web3`, still forbids itself), and — as typed and
+      # leet-folded — whole and without trailing digits (separators removed),
+      # and every segment. The first spelling that is an entry answers, so
+      # most names are refused or passed in a few lookups.
       def impersonation?(key, entries)
         return true if entries.include?(key)
 
