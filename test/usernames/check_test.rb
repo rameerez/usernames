@@ -91,7 +91,12 @@ class CheckTest < UsernamesTestCase
     assert_operator Usernames::NoFreeNameError, :<, Usernames::Error
   end
 
+  # The version is the newest release in the CHANGELOG: a bump that forgets
+  # one or the other fails here.
   def test_version
-    assert_equal "0.1.0", Usernames::VERSION
+    changelog = File.read(File.expand_path("../../CHANGELOG.md", __dir__))
+    newest = changelog[/^## \[(\d+\.\d+\.\d+)\]/, 1]
+
+    assert_equal newest, Usernames::VERSION
   end
 end

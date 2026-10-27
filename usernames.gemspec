@@ -30,16 +30,24 @@ Gem::Specification.new do |spec|
   spec.metadata["rubygems_mfa_required"] = "true"
 
   # Specify which files should be added to the gem when it is released.
-  # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
-  # Bundled data (data/**, NOTICE, LICENSES/**) ships; the research record (docs/) and
-  # maintainer scripts (script/) do not.
+  # In a checkout `git ls-files -z` lists them. A copy without git — `git archive`d into
+  # an app's vendor/ and loaded with `path:`, typically inside a production image that
+  # has no git binary — falls back to the shipped directories, so loading the gemspec
+  # never fails there. Bundled data (data/**, NOTICE, LICENSES/**) ships; the research
+  # record (docs/) and maintainer scripts (script/) do not.
   gemspec = File.basename(__FILE__)
   development_files = %w[.ruby-version .simplecov .rubocop.yml AGENTS.md Appraisals CLAUDE.md Rakefile context7.json]
-  spec.files = IO.popen(%w[git ls-files -z], chdir: __dir__, err: IO::NULL) do |ls|
-    ls.readlines("\x0", chomp: true).reject do |f|
-      (f == gemspec) || development_files.include?(f) ||
-        f.start_with?(*%w[bin/ gemfiles/ test/ spec/ features/ docs/ script/ .git .github appveyor Gemfile])
-    end
+  tracked = begin
+    IO.popen(%w[git ls-files -z], chdir: __dir__, err: IO::NULL) { |ls| ls.readlines("\x0", chomp: true) }
+  rescue SystemCallError
+    []
+  end
+  if tracked.empty?
+    tracked = Dir.glob("{lib,config,data,sig}/**/*", base: __dir__) + %w[LICENSE.txt README.md CHANGELOG.md SECURITY.md]
+  end
+  spec.files = tracked.select { |f| File.file?(File.join(__dir__, f)) }.reject do |f|
+    (f == gemspec) || development_files.include?(f) ||
+      f.start_with?(*%w[bin/ gemfiles/ test/ spec/ features/ docs/ script/ .git .github appveyor Gemfile])
   end
   spec.bindir = "exe"
   spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }

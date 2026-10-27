@@ -65,6 +65,27 @@ class PackagingTest < UsernamesTestCase
     assert_empty found
   end
 
+  # A copy without git — `git archive`d into an app's vendor/ and loaded
+  # with `path:` inside an image that has no git binary — must still load
+  # the gemspec, and its file list must still cover everything the built
+  # gem ships under the code and data directories.
+  def test_gemspec_loads_where_git_is_missing
+    no_git = File.join(OUTPUT, "empty-path")
+    FileUtils.mkdir_p(no_git)
+    script = 'puts Gem::Specification.load("usernames.gemspec").files'
+    output, error, status = Open3.capture3({ "PATH" => no_git }, Gem.ruby, "-e", script, chdir: ROOT)
+
+    assert_predicate status, :success?, "the gemspec failed to load without git: #{error}"
+    files = output.split("\n")
+
+    assert_includes files, "lib/usernames.rb"
+    assert_includes files, "data/NOTICE"
+    assert_includes files, "README.md"
+    assert_empty contents.grep(%r{\A(lib|config|data|sig)/}) - files, "the fallback list misses shipped files"
+    assert_empty files.grep(%r{\A(test|docs|script)/})
+    refute_includes files, "usernames.gemspec"
+  end
+
   def test_leaves_development_files_out
     %w[docs/ test/ script/ bin/ gemfiles/ .github/].each do |prefix|
       assert_empty contents.grep(/\A#{Regexp.escape(prefix)}/), "#{prefix} is not packaged"

@@ -1,5 +1,11 @@
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-27
+
+### Fixed
+
+- **The gemspec loads where git is missing.** Its file list came from `git ls-files`, which raised `Errno::ENOENT` wherever the git binary is absent — so a copy of the gem `git archive`d into an app's `vendor/` and loaded with `path:` crashed Bundler at boot inside a production image with no git (the app never started; nothing else was touched). The gemspec now falls back to the shipped directories (`lib/ config/ data/ sig/` and the top-level documents) when git is unavailable or the directory is not a checkout. Found dogfooding the gem in a vendored deployment; a test now loads the gemspec with an empty `PATH` and checks the fallback covers everything the built gem ships.
+
 ## [0.1.0] - 2026-10-27
 
 First release. One line — `has_username` — gives a Rails model a username that is valid, unique, not reserved, not offensive and there from day one, with no table, no network and one unique index.
