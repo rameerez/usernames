@@ -916,7 +916,7 @@ webweaver.json
 wot
 xregistry
 
-# source: usernames (MIT) — Rails core, Hotwire and Rails 8 generator routes (verified from Rails source, research 12 §4)
+# source: usernames (MIT) — Rails core, Hotwire and Rails 8 generator routes (verified from Rails source)
 action_mailbox
 active_storage
 cable

@@ -14,7 +14,7 @@
 #      dictionary words each language's matcher refuses at :strong.
 #   3. words/*.txt — words that equal or contain a severity >= 3 term; adjective_animal pairs
 #      Usernames.check refuses at :strong (the generator's guarantee, also in words_test.rb).
-#   4. The PRD §10.6 gates through Usernames.check at :strong: legitimate.txt and the name corpora
+#   4. The gates through Usernames.check at :strong: legitimate.txt and the name corpora
 #      (gate: 0 refused by the offensive matcher), eligible.txt (gate: 0 refused by any rule) and
 #      offensive.txt (gate: all refused).
 
@@ -61,7 +61,7 @@ end
 LANGUAGES = %i[en es].freeze
 ALL_SEPARATORS = %w[_ . -].freeze
 
-# The offensive matcher alone, on the comparison key, as PRD §10.6 runs the corpora.
+# The offensive matcher alone, on the comparison key, as the gates run the corpora.
 def refusal(name, **offensive)
   rules = Usernames.configuration.rules_for(separators: ALL_SEPARATORS, offensive: { severity: :strong, **offensive })
   Usernames::Offensive.verdict(rules.comparison_key(rules.normalize(name)), rules)
@@ -96,7 +96,7 @@ end
 show("adjective_animal pairs Usernames.check refuses", pairs)
 
 # --- 4. the gates, through Usernames.check -------------------------------------------------------
-puts "\n4. PRD §10.6 gates at :strong (Usernames.check and the offensive matcher)"
+puts "\n4. Gates at :strong (Usernames.check and the offensive matcher)"
 offensive_refusal = lambda do |name|
   result = Usernames.check(name, separators: ALL_SEPARATORS, offensive: { severity: :strong })
   verdict = refusal(name)

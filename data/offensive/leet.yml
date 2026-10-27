@@ -1,7 +1,7 @@
 # Leetspeak folding. Applied to the input AND, at load time, to every term, so terms are stored
 # un-folded in <locale>.json.
 
-# Digit → letter. Used by BOTH the reserved impersonation check (R1) and the offensive matcher.
+# Digit → letter. Used by BOTH the reserved impersonation check (its folded spelling) and the offensive matcher.
 digits:
   "0": o
   "1": i

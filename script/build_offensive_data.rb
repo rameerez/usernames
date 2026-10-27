@@ -1,12 +1,12 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-# Builds data/offensive/{en,es}.json and data/offensive/allowlist/{en,es}.txt (PRD §10.1).
+# Builds data/offensive/{en,es}.json and data/offensive/allowlist/{en,es}.txt.
 #
 #   ruby script/build_offensive_data.rb
 #
 # Entry schema: {"term", "severity" 1–4, "variants" [], "tags" [], "exceptions" [], "segment_only"?}
-#   severity 4 = severe (substring, PRD §10.2 a-1/a-2) · 3 = strong (whole segment) · 1–2 = mild.
+#   severity 4 = severe (substring, and across separators) · 3 = strong (whole segment) · 1–2 = mild.
 #   segment_only: true — a severe term that must EQUAL a segment (rape, rapist; Scunthorpe-risk
 #     slurs such as es `puto` ⊂ computo). Terms of ≤ 3 letters are segment-only by rule, not flag.
 #   variants: compact ASCII spellings (spaces/hyphens/dots removed), including dsojevic's `*`
@@ -15,7 +15,8 @@
 #   exceptions: term-scoped exemption segments (dsojevic `exceptions` with `*` = the term, plus
 #     the dictionary words this build found that a promoted severe term would otherwise reject).
 #
-# Hard rule (D-20): `negro` is blocked in no locale; the build aborts if it appears anywhere.
+# Hard rule: `negro` is blocked in no locale; the build aborts if it appears anywhere. It is the
+# Spanish word for black and a common surname, and never blocked, by decision.
 
 require "json"
 
@@ -35,11 +36,11 @@ def expand(pattern)
 end
 
 # ================================================================================================
-# en — dsojevic/profanity-list (MIT), re-tiered per PRD §10 / research 06
+# en — dsojevic/profanity-list (MIT), re-tiered by the maintainers
 # ================================================================================================
 SEGMENT_ONLY_EN = %w[rape].freeze
 PROMOTED = words("kike faggot chink paki coon gook wetback tranny") # → severity 4 (spic stays 3)
-NEVER = %w[negro] # D-20
+NEVER = %w[negro] # the Spanish word for black and a surname: never blocked
 
 # The maintainers' review of dsojevic's tiers (2026-10-27), by dsojevic id.
 #   Not slurs at all: identity terms people use for themselves.
@@ -73,7 +74,7 @@ dsojevic.each do |row| # rubocop:disable Metrics/BlockLength
   id = row["id"]
   alts = row["match"].split("|")
   if NEVER.include?(id) || alts.any? { compact(_1.delete("*")).include?("negro") }
-    dropped << "#{id} (D-20)"
+    dropped << "#{id} (negro: never blocked)"
     next
   end
   if NOT_OFFENSIVE.include?(id)
@@ -90,9 +91,9 @@ dsojevic.each do |row| # rubocop:disable Metrics/BlockLength
   exceptions |= EXTRA_EXCEPTIONS.fetch(id, [])
   tags = row["tags"].sort
 
-  # rape/rapist: whole-segment only (PRD §10.2 a-1). dsojevic files `rapist` under `raping`;
+  # rape/rapist: whole-segment only. dsojevic files `rapist` under `raping`;
   # split it out so both carry the flag. `raping` also gets it: as a substring it rejects
-  # scraping/skyscraping (research 06, second pass).
+  # scraping/skyscraping.
   if id == "raping"
     en << { "term" => "raping", "severity" => severity, "variants" => [], "tags" => tags, "exceptions" => [],
             "segment_only" => true }
@@ -135,8 +136,8 @@ en.each do |e|
 end
 
 # ================================================================================================
-# es — wooorm/cuss es (MIT) + AllProfanity spanish (MIT), tiered by hand from the research
-# candidates (docs/research/sources/offensive2/lists/severe_candidates/es.tsv). Reviewed 2026-10-27
+# es — wooorm/cuss es (MIT) + AllProfanity spanish (MIT), tiered by hand from a reviewed list
+# of severe candidates (docs/research/sources/offensive2/lists/severe_candidates/es.tsv). Reviewed 2026-10-27
 # by a Spanish-speaking reviewer (data/offensive/README.md).
 # ================================================================================================
 # [term, variants, tags, segment_only]
@@ -224,7 +225,7 @@ ES_MILD = [
   # "eggs"; "semen" is a Ukrainian first name; "panchito" is a nickname for Francisco.
 ].freeze
 
-# Every es term must be attested in a permissive source (or the research's severe candidates).
+# Every es term must be attested in a permissive source (or the reviewed severe candidates).
 cuss_es = File.read(File.join(SRC, "offensive2/lists/raw/cuss/es.js")).scan(/^\s*["']?([^:"'\n]+?)["']?:\s*\d/).flatten
 allprof_es = File.read(File.join(SRC, "offensive2/lists/raw/allprof/spanish.ts")).scan(/^\s*"([^"]+)"/).flatten
 candidates_es = File.readlines(File.join(SRC, "offensive2/lists/severe_candidates/es.tsv"), chomp: true)
@@ -250,7 +251,7 @@ unattested = es.flat_map { [_1["term"]] + _1["variants"] }.reject { ATTESTED.inc
 # ================================================================================================
 { "en" => en, "es" => es }.each do |loc, list|
   spellings = list.flat_map { [_1["term"]] + _1["variants"] }
-  abort "#{loc}: negro present (D-20)" if spellings.any? { _1.include?("negro") }
+  abort "#{loc}: negro present (never blocked, by decision)" if spellings.any? { _1.include?("negro") }
   dups = spellings.tally.select { |_, n| n > 1 }.keys
   abort "#{loc}: duplicate spellings #{dups.inspect}" if dups.any?
   list.sort_by! { [-_1["severity"], _1["term"]] }
@@ -262,7 +263,7 @@ puts "en dropped: #{dropped.join(', ')}"
 puts "es spellings not attested verbatim in cuss/AllProfanity/candidates: #{unattested.join(' ')}"
 
 # ================================================================================================
-# Allowlists — real words/names ≥ 5 letters (PRD §10.1); fragments rejected at build time
+# Allowlists — real words/names ≥ 5 letters; fragments rejected at build time
 # ================================================================================================
 web2 = File.readlines("/usr/share/dict/web2", chomp: true).to_set(&:downcase)
 names = %w[first_names surnames].flat_map { File.readlines(File.join(ROOT, "test/corpora/#{_1}.txt"), chomp: true) }
@@ -297,14 +298,14 @@ allow_rows.each do |row|
     rejected[reason] << word
     next
   end
-  label = source == "usernames" ? "usernames (Wikipedia-verified #{type}, research 17 §4)" : source
+  label = source == "usernames" ? "usernames (Wikipedia-verified #{type})" : source
   en_allow[word] ||= label
 end
 
 en_header = <<~TXT
   # Offensive-word allowlist, en: real words and names (>= 5 letters) that contain a blocked
-  # substring. An entry exempts a whole segment only (PRD §10.2). `<word> # <source>` per line.
-  # Generated by script/build_offensive_data.rb from docs/research/sources/offensive2/lists/allowlist/.
+  # substring. An entry exempts a whole segment only. `<word> # <source>` per line.
+  # Generated by script/build_offensive_data.rb from the upstream allowlists and Wikipedia-verified names.
   # source: obscenity (MIT) — whitelisted terms of the English preset
   # source: dsojevic-profanity-list (MIT) — the `exceptions` of en.json, expanded
   # source: usernames (MIT) — Wikipedia-verified names, places and words (names as facts)
@@ -313,8 +314,8 @@ File.write(File.join(OUT, "allowlist/en.txt"), "#{en_header}#{en_allow.sort.map 
 puts "allowlist/en.txt: #{en_allow.size}"
 rejected.each { |why, list| puts "  rejected #{why} (#{list.size}): #{list.uniq.sort.join(' ')}" }
 
-# es: Spanish words that embed an es term (from the research's FrequencyWords scan, facts only),
-# plus Spanish-language names from the research's real-name set.
+# es: Spanish words that embed an es term (found by scanning the FrequencyWords
+# Spanish frequency list, facts only), plus Spanish surnames and place names that embed one.
 es_blocked = blocked_spellings(es)
 es_words = words(<<~W)
   computadora computadoras computador reputacion disputa diputado amputar caputo esputo computo
@@ -325,9 +326,9 @@ W
 es_allow = es_words.uniq.select { _1.length >= 5 && !es_blocked.include?(_1) }.sort
 es_header = <<~TXT
   # Offensive-word allowlist, es: ordinary Spanish words and names (>= 5 letters) that embed an es
-  # term (puta ⊂ computadora, culo ⊂ ridiculo, puto ⊂ caputo). Segment exemptions only (PRD §10.2).
+  # term (puta ⊂ computadora, culo ⊂ ridiculo, puto ⊂ caputo). Segment exemptions only.
   # Generated by script/build_offensive_data.rb. Reviewed with the es tiers (data/offensive/README.md).
-  # source: usernames (MIT) — words from research 17's FrequencyWords scan and real-name set (facts)
+  # source: usernames (MIT) — Spanish words found in the FrequencyWords list, and names (facts)
 TXT
 File.write(File.join(OUT, "allowlist/es.txt"), "#{es_header}#{es_allow.map { "#{_1} # usernames" }.join("\n")}\n")
 puts "allowlist/es.txt: #{es_allow.size}"

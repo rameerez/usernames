@@ -2,8 +2,8 @@
 # frozen_string_literal: true
 
 # Builds data/reserved/{impersonation,system,mailboxes,web}.txt and
-# data/reserved/ALLOWLIST_EXCEPTIONS.txt from the vendorable lists downloaded during research
-# (docs/research/sources/reserved/lists/) plus the hand-typed facts of research 12.
+# data/reserved/ALLOWLIST_EXCEPTIONS.txt from the vendorable upstream lists
+# (downloaded to docs/research/sources/reserved/lists/) plus facts retyped from public documentation.
 #
 #   ruby script/build_reserved_data.rb          # rewrites the five files, prints what it dropped
 #
@@ -15,7 +15,7 @@
 #     file (first block wins); impersonation, system and mailboxes may share a word, web.txt never
 #     repeats one of theirs.
 #
-# Exclusions (PRD §9.4, research 05): company/product names, all-digit entries (HTTP codes),
+# Exclusions: company/product names, all-digit entries (HTTP codes),
 # entries of 1–2 characters except `me is it go my up`, entries with `/`, typos, and every first
 # name / surname in test/corpora/ unless listed in ALLOWLIST_EXCEPTIONS.txt with a reason.
 
@@ -48,18 +48,18 @@ LICENCE = {
   "usernames" => "MIT"
 }.freeze
 
-# --- Short entries the PRD keeps (§9.1); `up` is the Rails 8 health-check route ------------------
+# --- Short entries kept on purpose; `up` is the Rails 8 health-check route -------------------------
 SHORT_KEEP = words("me is it go my up").to_set
 
 # --- Exclusions -----------------------------------------------------------------------------------
-# Company, product and trademark names (PRD §17: "never vendored: … trademarks").
+# Company, product and trademark names (never vendored: a company's name is not this gem's to reserve).
 BRANDS = words(<<~W).to_set
   facebook github instagram twitter msn ipad iphone android paypal linux java javascript python ruby
   perl php mysql phpmyadmin phppgadmin phpredisadmin cpanel owa tux windows mac
   copilot github-copilot codespaces why-github git-guides gist gists gitea-actions
   ashrae gs1resolver terraform.json amphtml knx
 W
-# GitHub-only pages in Mottie's list that mean nothing outside github.com (research 05).
+# GitHub-only pages in Mottie's list that mean nothing outside github.com.
 GITHUB_ONLY = words(<<~W).to_set
   hovercards save-net-neutrality dashboard-feed invalid-email-address user-attachments
   customer-stories works-with site-policy social-impact garage cla ten
@@ -70,14 +70,14 @@ TYPOS = words("iamges").to_set
 # such a page gets it reserved automatically from its router.
 PLAUSIBLE_USERNAMES = words("analysis flash free master recent alpha beta").to_set
 
-# --- Hand-typed facts (research 12): words retyped from public facts, no file copied -------------
+# --- Hand-typed facts: words retyped from public documentation, no file copied ---------------------
 IMPERSONATION = [
   ["usernames", "staff and authority roles (Mastodon, Discourse and Misskey defaults; facts only)",
    words(<<~W)],
      admin administrator administration superadmin superuser sysadmin sysop root staff moderator
      moderation mod owner operator maintainer founder cofounder ceo employee official
    W
-  ["usernames", "support, trust and safety desks a scammer would pose as (research 05 §gaps)",
+  ["usernames", "support, trust and safety desks a scammer would pose as",
    words(<<~W)],
      support helpdesk help helpcenter helpline customerservice customersupport customercare appeals
      security verified verification trust trustandsafety safety compliance billing payments
@@ -94,7 +94,7 @@ IMPERSONATION = [
 ].freeze
 
 SYSTEM = [
-  ["usernames", "code sentinels and JavaScript prototype keys (research 12 §6)",
+  ["usernames", "code sentinels and JavaScript prototype keys",
    words(<<~W)],
      null nil none undefined undef nan infinity true false void constructor hasownproperty prototype
      __proto__ then
@@ -150,7 +150,7 @@ MAILBOXES = [
 ].freeze
 
 RAILS_ROUTES = [
-  ["usernames", "Rails core, Hotwire and Rails 8 generator routes (verified from Rails source, research 12 §4)",
+  ["usernames", "Rails core, Hotwire and Rails 8 generator routes (verified from Rails source)",
    words(<<~W)],
      rails cable up assets active_storage action_mailbox conductor recede_historical_location
      resume_historical_location refresh_historical_location manifest service-worker offline
@@ -218,7 +218,7 @@ end
 
 files = {
   "impersonation.txt" => [
-    "Impersonation words: matched on the whole name, every segment, leet-folded, plural (PRD §9.2)", IMPERSONATION
+    "Impersonation words: matched on the whole name, every segment, leet-folded, plural", IMPERSONATION
   ],
   "system.txt" => ["System words: matched exactly", SYSTEM],
   "mailboxes.txt" => ["Mailbox and role names: matched exactly", MAILBOXES],

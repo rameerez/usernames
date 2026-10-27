@@ -1,13 +1,13 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-# Builds data/words/adjectives.txt and data/words/animals.txt, the default generator vocabulary
-# (PRD §12.1, research 15). Run after script/build_offensive_data.rb (it reads en.json).
+# Builds data/words/adjectives.txt and data/words/animals.txt, the default generator vocabulary.
+# Run after script/build_offensive_data.rb (it reads en.json).
 #
 #   ruby script/build_words_data.rb
 #
 # adjectives = Glitch friendly-words predicates ∩ petname small/medium adjectives,
-#              minus the research watch-list and the words reviewed out below.
+#              minus a watch-list of double meanings and the words reviewed out below.
 # animals    = imsky bird/fish/cat/dog/monkey/snake/apex-predator files ∪ petname small names ∪
 #              corpora animals/common, minus the words reviewed out below.
 # Both: lowercase a–z only, 3–10 letters, sorted, and no word containing an en term of
@@ -41,7 +41,7 @@ def clean(candidates, reviewed_out, label) # rubocop:disable Metrics/AbcSize
 end
 
 # --- adjectives ----------------------------------------------------------------------------------
-WATCH_LIST = words("holy hip whip angry bitter broken slimy grave skinny yellow apple chrome") # research 15
+WATCH_LIST = words("holy hip whip angry bitter broken slimy grave skinny yellow apple chrome") # words with a second meaning in a name
 ADJ_REVIEWED_OUT = WATCH_LIST | words(<<~W)
   hot cherry mature petite
 W
@@ -83,7 +83,7 @@ ANIMALS_REVIEWED_OUT.merge(words(<<~W))
   tomcat treefrog vulture warbler weasel westie whippet wildcat woodchuck skunk rat
   ape akita
 W
-# booby beaver cock* tit* bass turkey: double meanings (research 15, and the brief);
+# booby beaver cock* tit* bass turkey: double meanings;
 # fantasy creatures, generic class nouns and pests: not animals a person wants as a handle;
 # stud gelding mongrel mutt cougar: sexual or derogatory slang; nationality-named cat breeds and
 # ginger: read as descriptions of people; tom martin molly joey drake robin jay wren kit: first
@@ -93,8 +93,8 @@ W
 # brands, or half a breed name), weasel skunk rat vulture (used as insults), and the less familiar
 # birds, fish and breeds.
 # ape and akita: joined after an adjective they spell a severe term across the separator
-# (`super_ape` → rape, `deep_akita` → paki), which PRD §10.2 a-2 rejects; the pair check runs in
-# script/check_against_corpora.rb.
+# (`super_ape` → rape, `deep_akita` → paki), which the offensive matcher rejects; the pair check
+# runs in script/check_against_corpora.rb.
 
 animals = clean(IMSKY + list("petname-small-names") + list("corpora-animals_common"), ANIMALS_REVIEWED_OUT, "animals")
 

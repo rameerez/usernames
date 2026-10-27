@@ -6,9 +6,9 @@
 #   first_names.txt   /usr/share/dict/propernames, lowercased
 #   surnames.txt      US Census Bureau 2010 surnames, top 1,000 by rank (public domain)
 #   words_en_50k.txt  every Nth word of /usr/share/dict/web2 (a–z, ≥ 3 letters), exactly 50,000
-#   legitimate.txt    names and words the offensive matcher must accept (lexical safety, PRD §10.6)
+#   legitimate.txt    names and words the offensive matcher must accept (lexical safety)
 #   eligible.txt      whole usernames Usernames.check must accept at the defaults (every rule)
-#   offensive.txt     evasions the offensive matcher must reject (PRD §10.6)
+#   offensive.txt     evasions the offensive matcher must reject
 #
 #   ruby script/build_corpora.rb [path/to/Names_2010Census.csv]
 #
@@ -35,7 +35,7 @@ first = File.readlines("/usr/share/dict/propernames", chomp: true).map { _1.stri
   .grep(/\A[a-z]+\z/).uniq.sort
 write("first_names.txt",
       ["source: /usr/share/dict/propernames (4.4BSD/FreeBSD word list; names are facts), lowercased",
-       "Used by data_test.rb: no bundled reserved word may be a first name (PRD §9.4)."],
+       "Used by data_test.rb: no bundled reserved word may be a first name."],
       first)
 
 # --- surnames ------------------------------------------------------------------------------------
@@ -67,9 +67,9 @@ write("words_en_50k.txt",
       sample)
 
 # --- legitimate ----------------------------------------------------------------------------------
-# Research 17 §4: the Wikipedia-verified names, places and words that contain a profanity
+# The Wikipedia-verified names, places and words that contain a profanity
 # substring (allowlist.tsv rows that are not from obscenity or dsojevic), transliterated to ASCII
-# with spaces as `_`, plus the Scunthorpe probes and the handle-style probes of PRD §10.6.
+# with spaces as `_`, plus the Scunthorpe probes and handle-style probes (mike88, gcastro).
 tsv = File.join(ROOT, "docs/research/sources/offensive2/lists/allowlist/allowlist.tsv")
 real = CSV.read(tsv, col_sep: "\t", headers: true, quote_char: "\u0000")
   .reject { _1["sources"].to_s.match?(/obscenity|dsojevic/) || _1["notes"].to_s.include?("unverified") }
@@ -100,8 +100,8 @@ end
 conflicts = real.select { |w| w.split("_").any? { blocked.include?(_1) } }
 legit = (real - conflicts + probes + reviewed).uniq.sort
 write("legitimate.txt",
-      ["Names, places and words the offensive matcher must ACCEPT at :strong (PRD §10.6 gate: 0 rejections).",
-       "Sources: research 17 §4 Wikipedia-verified names/places (facts; non-ASCII transliterated, spaces as _),",
+      ["Names, places and words the offensive matcher must ACCEPT at :strong (a gate: 0 rejections).",
+       "Sources: Wikipedia-verified names/places (facts; non-ASCII transliterated, spaces as _),",
        "the Scunthorpe probes and handle-style probes (mike88, gcastro). Run on ASCII comparison keys.",
        "Left out because the name IS a blocked term (deliberate): #{conflicts.sort.join(' ')}"],
       legit)
@@ -123,6 +123,6 @@ offensive = %w[xxfuckxx f.u.c.k fu_ck sh1thead shithead1 shithead2 shithead_bob 
                chingchong ching_chong neonazi neo_nazi xneonazix jap jap_99 wog wogs
                p_huck fvck fuuuuuck f_vck fuuuu_ck]
 write("offensive.txt",
-      ["Evasions the offensive matcher must REJECT at :strong (PRD §10.6 gate: 100 % rejected).",
+      ["Evasions the offensive matcher must REJECT at :strong (a gate: 100 % rejected).",
        "Case is kept on purpose (BigCunt): the corpus is run through normalisation first."],
       offensive)

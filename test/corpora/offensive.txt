@@ -1,4 +1,4 @@
-# Evasions the offensive matcher must REJECT at :strong (PRD §10.6 gate: 100 % rejected).
+# Evasions the offensive matcher must REJECT at :strong (a gate: 100 % rejected).
 # Case is kept on purpose (BigCunt): the corpus is run through normalisation first.
 xxfuckxx
 f.u.c.k

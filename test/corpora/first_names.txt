@@ -1,5 +1,5 @@
 # source: /usr/share/dict/propernames (4.4BSD/FreeBSD word list; names are facts), lowercased
-# Used by data_test.rb: no bundled reserved word may be a first name (PRD §9.4).
+# Used by data_test.rb: no bundled reserved word may be a first name.
 aaron
 adam
 adlai

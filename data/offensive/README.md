@@ -60,7 +60,7 @@ surname. Corrections and new languages are welcome; please include a source.
 ## es — wooorm/cuss and AllProfanity, tiered by hand, reviewed
 
 97 terms: 19 severe, 35 strong, 43 mild. Every term is attested in wooorm/cuss (es), AllProfanity
-(spanish) or the research's severe-candidate list; plural and gender forms of an attested word are
+(spanish) or a hand-reviewed list of severe candidates; plural and gender forms of an attested word are
 added as variants.
 
 - **Severe (slurs only):** maricon, maricona, marikon, mariconazo, marica\*, puto\*, joto,
@@ -83,7 +83,7 @@ added as variants.
 
 ## Allowlists
 
-`allowlist/en.txt` (obscenity's whitelist, dsojevic's exceptions, the research's
+`allowlist/en.txt` (obscenity's whitelist, dsojevic's exceptions, and
 Wikipedia-verified names) and `allowlist/es.txt` keep only real words and names of 5+ letters.
 Rejected at build time: fragments (`an al`, `s hit`, `assem`, `nigg`), multi-word entries whose
 join is not a word (`scunthorpe united` would otherwise exempt `scunthorpeunited`), unverified

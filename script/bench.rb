@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-# How long one Usernames.check takes (PRD §18 targets: p50 < 30 µs, p99 < 200 µs).
+# How long one Usernames.check takes (targets: p50 < 30 µs, p99 < 200 µs).
 # A benchmark, not a test: numbers depend on the machine, so CI never asserts them.
 #
 #   bundle exec ruby script/bench.rb           # 10,000 checks
