@@ -10,9 +10,6 @@ module Usernames
     # `fuck` once and `fvck`, `phuck` meet it on the name side. Exemptions
     # are kept both as written and folded: a name's R0 segment `sussex` and
     # its R1 segment `susseks` are the same word.
-    #
-    # A language with no data file compiles to an empty lexicon that
-    # refuses nothing.
     class Lexicon
       SEVERE = 4
 

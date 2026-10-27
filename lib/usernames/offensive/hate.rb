@@ -65,11 +65,11 @@ module Usernames
         end
 
         def always
-          @always ||= rules.fetch("always", []).map { |token| Offensive.fold(token.to_s) }.uniq.freeze
+          @always ||= rules.fetch("always").map { |token| Offensive.fold(token.to_s) }.uniq.freeze
         end
 
         def digit_runs
-          @digit_runs ||= rules.fetch("digit_runs", []).map(&:to_s).freeze
+          @digit_runs ||= rules.fetch("digit_runs").map(&:to_s).freeze
         end
 
         def joined_runs
@@ -82,7 +82,7 @@ module Usernames
         end
 
         def adjacent
-          @adjacent ||= rules.fetch("adjacent", {}).to_h do |number, tokens|
+          @adjacent ||= rules.fetch("adjacent").to_h do |number, tokens|
             [number.to_s, tokens.map(&:to_s).freeze]
           end.freeze
         end
@@ -110,7 +110,7 @@ module Usernames
         end
 
         def whole_tokens
-          @whole_tokens ||= rules.fetch("whole_token", {}).to_h do |locale, tokens|
+          @whole_tokens ||= rules.fetch("whole_token").to_h do |locale, tokens|
             [locale.to_s, Array(tokens).map(&:to_s).freeze]
           end.freeze
         end

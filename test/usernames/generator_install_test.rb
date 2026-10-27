@@ -390,14 +390,22 @@ class GeneratorInstallTest < Rails::Generators::TestCase
     assert_migration "db/migrate/add_username_to_users.rb"
   end
 
-  def test_an_unknown_adapter_is_written_for_sqlite
-    ActiveRecord::Base.stub(:connection_db_config, -> { raise ActiveRecord::AdapterNotSpecified }) do
-      run_generator %w[--model=Account]
+  # The index and the collation depend on the adapter: one the gem has no
+  # comparison contract for, or none at all, writes no migration.
+  def test_an_unknown_adapter_is_refused
+    error = on("oracle_enhanced") { capture(:stderr) { run_generator %w[--model=Account] } }
+
+    assert_match(/supports PostgreSQL, MySQL and SQLite; the "oracle_enhanced" adapter/, error)
+    assert_no_migration "db/migrate/add_username_to_accounts.rb"
+  end
+
+  def test_an_unreadable_adapter_is_refused
+    error = ActiveRecord::Base.stub(:connection_db_config, -> { raise ActiveRecord::AdapterNotSpecified }) do
+      capture(:stderr) { run_generator %w[--model=Account] }
     end
 
-    assert_migration "db/migrate/add_username_to_accounts.rb" do |content|
-      assert_includes content, "add_column :accounts, :username, :string\n"
-    end
+    assert_match(/couldn't read Account's database adapter/, error)
+    assert_no_migration "db/migrate/add_username_to_accounts.rb"
   end
 
   def test_re_running_is_idempotent

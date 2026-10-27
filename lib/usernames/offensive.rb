@@ -116,7 +116,7 @@ module Usernames
       end
 
       def rewrites
-        @rewrites ||= Data.leet.fetch("offensive_only", {}).to_a.freeze
+        @rewrites ||= Data.leet.fetch("offensive_only").to_a.freeze
       end
     end
   end

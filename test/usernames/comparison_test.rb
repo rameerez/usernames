@@ -82,7 +82,9 @@ class ComparisonTest < UsernamesTestCase
     assert_equal :sqlite, Comparison.adapter(ActiveRecord::Base.lease_connection) unless POSTGRESQL
 
     assert_equal :mysql, Comparison.adapter("MariaDB")
-    assert_equal :sqlite, Comparison.adapter("oracle_enhanced")
+    error = assert_raises(Usernames::ConfigurationError) { Comparison.adapter("oracle_enhanced") }
+
+    assert_match(/supports PostgreSQL, MySQL and SQLite; the "oracle_enhanced" adapter/, error.message)
   end
 
   # The expression is a bound predicate: the name is always a bind, never

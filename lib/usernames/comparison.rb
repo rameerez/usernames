@@ -86,15 +86,18 @@ module Usernames
 
       # :postgresql, :mysql or :sqlite, from a connection or an adapter name
       # ("PostgreSQL", "postgis", "Mysql2", "Trilogy", "sqlite3").
-      # NOTE(p3): any other adapter is treated as SQLite — a plain column and
-      # a bare lower() — the most portable reading; only the three above are
-      # supported (PRD §11.4).
+      # Any other adapter raises ConfigurationError: the comparison contract
+      # is written for these three, and guessing another database's
+      # collation and lower() is how two people end up with one name.
       def adapter(connection_or_name)
         name = connection_or_name.respond_to?(:adapter_name) ? connection_or_name.adapter_name : connection_or_name
         case name.to_s
         when /postg/i then :postgresql
         when /mysql|trilogy|maria/i then :mysql
-        else :sqlite
+        when /sqlite/i then :sqlite
+        else
+          raise ConfigurationError, "usernames supports PostgreSQL, MySQL and SQLite; the #{name.to_s.inspect} adapter " \
+                                    "has no comparison contract"
         end
       end
 

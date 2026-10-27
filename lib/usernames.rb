@@ -4,8 +4,13 @@ require "active_support"
 require "active_model"
 require "i18n"
 
+require_relative "usernames/errors"
 require_relative "usernames/version"
 require_relative "usernames/data"
+
+# Every bundled list, read now: a broken install fails here, naming the file.
+Usernames::Data.load!
+
 require_relative "usernames/normalizer"
 require_relative "usernames/phrase"
 require_relative "usernames/result"
@@ -23,14 +28,6 @@ require_relative "usernames/model"
 require_relative "usernames/engine" if defined?(Rails::Engine)
 
 module Usernames
-  class Error < StandardError; end
-
-  # A configuration value the gem cannot use, named in the message.
-  class ConfigurationError < Error; end
-
-  # Every generated candidate was taken (generate_username draws one batch).
-  class NoFreeNameError < Error; end
-
   # Deliberately permissive (PRD §6.3): what may ROUTE is not what may be
   # REGISTERED. A name grandfathered in under older rules still has a page,
   # the validator decides what can be registered, and the database decides

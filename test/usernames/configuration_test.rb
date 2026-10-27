@@ -437,7 +437,64 @@ class ConfigurationTest < UsernamesTestCase
     end
   end
 
-  def test_a_missing_data_file_is_an_empty_list
-    assert_empty Usernames::Data.list("reserved/does-not-exist.txt")
+  # Bundled data is never optional: a missing list would leave `admin`
+  # registrable without a word.
+  def test_a_missing_data_file_is_a_data_error
+    error = assert_raises(Usernames::DataError) { Usernames::Data.list("reserved/does-not-exist.txt") }
+
+    assert_match(%r{data/reserved/does-not-exist\.txt is missing}, error.message)
+    assert_kind_of Usernames::Error, error
+  end
+
+  def test_an_empty_or_malformed_data_file_is_a_data_error
+    Dir.mktmpdir do |dir|
+      empty = File.join(dir, "empty.txt").tap { |path| File.write(path, "# only a comment\n\n") }
+      shapeless = File.join(dir, "leet.yml").tap { |path| File.write(path, "digits: [o, i]\n") }
+      unparsable = File.join(dir, "hate.yml").tap { |path| File.write(path, "always: [unclosed\n") }
+      shape = { "digits" => Hash, "offensive_only" => Hash }
+
+      assert_match(/has no entries/, assert_raises(Usernames::DataError) { Usernames::Data.list(empty) }.message)
+      assert_match(/needs "digits" \(a Hash\)/,
+                   assert_raises(Usernames::DataError) { Usernames::Data.send(:yaml, shapeless, shape) }.message)
+      assert_match(/can't be parsed/,
+                   assert_raises(Usernames::DataError) { Usernames::Data.send(:yaml, unparsable, shape) }.message)
+    end
+  end
+
+  # The whole gem, copied with one data file broken: requiring it fails,
+  # naming the file, before a single name is checked.
+  def test_a_broken_install_fails_when_the_gem_loads
+    {
+      "reserved/web.txt" => nil,
+      "offensive/en.json" => %([{"term": "x", "severity": 9}]),
+      "offensive/leet.yml" => "digits: {}\n",
+      "offensive/es.json" => "[{"
+    }.each do |file, content|
+      output, status = require_a_copy_with(file, content)
+
+      refute_predicate status, :success?, "#{file}: the gem loaded"
+      assert_match(%r{data/#{Regexp.escape(file)} (is missing|is not a list|needs|can't be parsed)}, output)
+      assert_match(/\(Usernames::DataError\)/, output)
+    end
+  end
+
+  def test_the_bundled_data_loads
+    assert_same Usernames::Data, Usernames::Data.load!
+  end
+
+  private
+
+  # Copies lib/, config/ and data/ to a temporary root, replaces `file` under
+  # data/ with `content` (or deletes it), and requires the gem from there.
+  def require_a_copy_with(file, content)
+    root = File.expand_path("../..", __dir__)
+    Dir.mktmpdir do |dir|
+      %w[lib config data].each { |part| FileUtils.cp_r(File.join(root, part), dir) }
+      path = File.join(dir, "data", file)
+      content.nil? ? File.delete(path) : File.write(path, content)
+      script = %(require "bundler/setup"; require "usernames"; puts Usernames.allowed?("admin"))
+      output, status = Open3.capture2e(RbConfig.ruby, "-I", File.join(dir, "lib"), "-e", script)
+      [output, status]
+    end
   end
 end

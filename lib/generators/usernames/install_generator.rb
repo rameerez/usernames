@@ -40,6 +40,12 @@ module Usernames
         ActiveRecord::Generators::Base.next_migration_number(dir)
       end
 
+      # The index and collation depend on the adapter: an unsupported one
+      # stops the generator here, before it writes a single file.
+      def check_the_database_adapter
+        adapter
+      end
+
       def create_initializer
         # Never over an initializer the app has already edited.
         template "usernames.rb", "config/initializers/usernames.rb", skip: true
@@ -187,12 +193,14 @@ module Usernames
       end
 
       # From the model's database configuration, which needs no connection.
-      # When even that is unknown, the migration is written for SQLite
-      # (Rails' default).
+      # The index and the collation depend on it, so an adapter the gem has
+      # no comparison contract for — or none at all — stops the generator.
       def adapter
         @adapter ||= Usernames::Comparison.adapter(connection_owner.connection_db_config&.adapter.to_s)
-      rescue StandardError
-        @adapter = :sqlite
+      rescue Usernames::ConfigurationError => e
+        raise Thor::Error, "#{e.message} (#{model_name}'s database in config/database.yml)"
+      rescue ActiveRecord::ActiveRecordError => e
+        raise Thor::Error, "couldn't read #{model_name}'s database adapter (#{e.message}): the migration depends on it"
       end
 
       def database

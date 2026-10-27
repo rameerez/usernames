@@ -154,7 +154,7 @@ module Usernames
 
       def digit_folds
         @digit_folds ||= begin
-          digits = Data.leet.fetch("digits", {})
+          digits = Data.leet.fetch("digits")
           [digits.keys.join, digits.values.join].map(&:freeze).freeze
         end
       end
