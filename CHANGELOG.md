@@ -1,5 +1,44 @@
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-27
+
+The live availability check moves into the gem. In 0.1 it was a generator that copied a controller, a route, a Stimulus controller and a partial into every app, each yours to keep in step with the gem; now the engine ships all of it, and in an app on the conventional importmap + Stimulus setup a username field that checks names as people type is four lines: `gem "usernames"`, `has_username :handle`, `<%= f.username_field :handle %> <%= f.username_status :handle %>` and `import "usernames"` — with no copied username implementation left in the app. `has_username` also learns three options that apps were writing by hand around it.
+
+### Added
+
+- **The availability endpoint**, `Usernames::AvailabilityController`, at `GET /usernames/availability?username=…&target=…`, answering `{ state: "free" | "taken" | "invalid", message: }` in the model's own words. The guard rails of the 0.1 template come with it: Rails' `rate_limit` (`config.availability.rate_limit`), taken, reserved and disallowed names answered alike as "taken", the server's own normaliser first, and `Cache-Control: no-store` on every answer — 404s, 429s and 503s included.
+- **Targets: an explicit allowlist** of what the endpoint answers for, `config.availability.targets = { "user" => "User#handle" }`, which the installer writes. A request names an alias; only a configured alias is looked up, and the class it names is resolved from your configuration on every request — never from what a client sent — so declaring `has_username` on a model never publishes it. An unknown alias is a 404 (rate limited like any request); a configured one that no longer resolves raises `Usernames::ConfigurationError` instead of answering.
+- **A route drawn by the engine**, appended after yours as `usernames_availability` at `config.availability.path` (`nil` draws none), without a format, and skipped when you draw one of that name yourself. `usernames_availability` is also a routing method, for putting it above a catch-all such as `get "*path"`, which would otherwise swallow it. Its first segment is reserved like any of your routes.
+- **Form helpers.** `f.username_field :handle` renders the input with the `username-check` controller on it — the rules (messages in the model's words), the case mode, the saved name and the endpoint — and `f.username_status :handle` the `<output aria-live="polite">` it writes to. `availability: false` keeps the format hints without a request; `static: true` is a plain field. `class`, `data-controller`, `data-action` and `aria-describedby` join the field's own; ids follow `field_id`, namespaces and indexes included. A field for a column no target names raises in development and test, and renders plain (logged once) in production.
+- **JavaScript shipped by the gem**, in `app/assets/javascripts/usernames/`: the Stimulus controller, and `index.js`, which registers it on stimulus-rails' exported `application` — deterministically, once. With importmap-rails the engine pins `usernames` and `usernames/username-check` (before importmap draws its map); Propshaft and Sprockets serve both files, and Sprockets is told to precompile them. Without importmap-rails, or without an asset pipeline, the engine adds nothing. The controller shows `checking`, `free`, `taken`, `invalid`, `unchanged` or `error` in the status's `data-state`; a request generation counter and aborts make sure only the latest answer is shown (A, then B, then A again included), a 429, 503, network failure or unreadable answer ends in `error` with a localised message (`usernames.availability.error`, in English, Spanish and Portuguese), and the status resets on disconnect, on form reset and before Turbo caches the page. It still never blocks submission.
+- **`required: { on: :profile }`** asks for a name whenever the record is validated in that context (or one of several), on every save there — including an account whose name was blank before the gem arrived, since that form is where they type one. Outside it, nothing changes.
+- **`seed: :first_name`** (or a proc): a generated name starts from that value — `ana`, then `ana_42`, then the default shape when it is blank or every form of it is taken. It is read once per save and reused by a redraw after a lost race; an error raised in it is the app's.
+- **`clearable: false`** refuses saving a saved name blank again (`:blank`), required or not. It is not immutability, leaves stored blanks alone, and — being a validation — is skipped by `update_column` and `update_all`.
+- **`config.availability.parent_controller`** (default: your `ApplicationController` when there is one, so its locale and authentication callbacks apply; `"ActionController::API"` works) and **`config.availability.rate_limit_store`** (default `Rails.cache`, read once when the endpoint's class loads).
+- **`rails generate usernames:javascript`** copies the Stimulus controller into `app/javascript/controllers` for apps that bundle their JavaScript, where `import "usernames"` has nothing to resolve it.
+
+### Changed
+
+- **`rails generate usernames:install`** writes `config.availability.targets` for its `--model`/`--column`, and in an importmap app whose `controllers/application.js` exports the Stimulus application it appends `import "usernames"` to `app/javascript/application.js` — once, never removing anything — saying why not otherwise. It ends with the form line, the Devise strong-parameters line and the production cache store.
+- **`rails generate usernames:availability`** no longer copies anything by default: it explains that the check is built in, and lists the files a 0.1 install copied, with the two ways to upgrade. `--copy` writes a set of your own — the endpoint (replacing the gem's, same class), the Stimulus controller, a partial built on the helpers, and the route at the top of `config/routes.rb` — all speaking the same protocol.
+- **A rate limit store that can't count is a 503 everywhere but development and test.** 0.1 answered 503 only in production and only for a `NullStore`; the endpoint now notices any store whose `increment` returns nothing or fails (a cache whose backend is down, a wrapper around a `NullStore`), and refuses in staging too. In development and test it proceeds unlimited and logs once.
+
+### Fixed
+
+- **A new record saved in a validation context of its own got no generated name.** Generation ran `on: :create`, which an explicit context (`save(context: :import)`) replaces, so such records were saved without one. It now runs for every new record whose name is blank, whatever the context.
+
+### Upgrading from 0.1
+
+Nothing changes for a model with `has_username` and no availability check. If you ran `rails generate usernames:availability` under 0.1:
+
+- **Your copied files speak the 0.1 protocol, and they win over the gem's.** Your controller reads `params[:<column>]` and asks `current_user`; the gem's helpers send `username` and `target`. Pick one mode — `rails generate usernames:availability` lists what it finds. *Managed* (recommended): delete the controller, the `usernames/availability` route, `app/javascript/controllers/username_check_controller.js` and `app/views/usernames/_field.html.erb`; add `config.availability.targets = { "user" => "User#username" }`, replace the partial with `f.username_field` / `f.username_status`, and add `import "usernames"`. *Customized*: keep your pair, set `config.availability.path = nil`, and don't `import "usernames"` (both would register `username-check`).
+- **"Already your name" is the browser's call now.** The endpoint no longer asks who is signed in: the field carries the record's saved name and shows `unchanged` without asking. A server-side `current_user` check in a copied controller is yours to keep or drop.
+- **Staging needs a cache store that counts.** See *Changed*: a `NullStore` there now turns the endpoint off (503) rather than letting it run unlimited.
+- **Devise drops fields it doesn't know.** If people choose their name at sign-up, permit it: `devise_parameter_sanitizer.permit(:sign_up, keys: [:handle])` and `:account_update`.
+- **New locale key** `usernames.availability.error`: an app that translates the gem's messages into a language the gem doesn't ship falls back to English for it until translated.
+- **A new record saved with a custom validation context now gets a generated name** (see *Fixed*). If you relied on it staying blank, pass `generate: false` or a condition.
+- `clearable:` defaults to `true`: names can still be cleared, as in 0.1. Pass `clearable: false` to stop that.
+
 ## [0.1.3] - 2026-10-27
 
 ### Changed

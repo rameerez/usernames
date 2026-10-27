@@ -60,7 +60,7 @@ rails generate usernames:install
 rails db:migrate
 ```
 
-The generator writes `config/initializers/usernames.rb` (ten options, all commented), adds a `username` column to `users` if there isn't one, and adds **the one unique index the gem needs** — with the right collation, so the database agrees with Ruby about what "the same name" means (see [Uniqueness, case and collation](#uniqueness-case-and-collation)).
+The generator writes `config/initializers/usernames.rb` (ten options, all commented, and one live line that publishes the column to the [live availability check](#live-availability-check)), adds a `username` column to `users` if there isn't one, and adds **the one unique index the gem needs** — with the right collation, so the database agrees with Ruby about what "the same name" means (see [Uniqueness, case and collation](#uniqueness-case-and-collation)).
 
 Then, in your model:
 
@@ -80,6 +80,24 @@ end
 
 > [!IMPORTANT]
 > **Already have users?** `has_username` only checks a username **when it changes**, so adding the gem never stops an existing account from saving its other attributes. But Rails' `normalizes` doesn't rewrite rows already in the database, and a stored `JAVI` next to a new `javi` would be two identities. Run `rails usernames:audit` first and read [Adopting an existing column](#adopting-an-existing-column) — it's a five-minute, read-only check.
+
+## Quickstart: a username field in four lines
+
+Once the column is installed and migrated (and audited, if it already held names), this is the whole integration for a `User` with a `handle`, in an app on the conventional importmap + Stimulus setup:
+
+```text
+gem "usernames"                                                                        # Gemfile
+has_username :handle, case: :preserve                                                  # app/models/user.rb
+<%= f.label :handle %> <%= f.username_field :handle %> <%= f.username_status :handle %>   # any form for a User
+import "usernames"                                                                     // app/javascript/application.js
+```
+
+(`rails generate usernames:install --column=handle --case=preserve` writes the migration, adds the `import` line, and publishes `User#handle` to the live check in the initializer.)
+
+As someone types, the field shows the first format rule the name breaks — the same rules and the same words as the server, with no round trip — then, once typing pauses, whether the name is free. Their own saved name is simply *unchanged*. Nothing in the browser blocks submission: the model and its unique index decide.
+
+No copied username implementation lives in your app: the endpoint, its route, the Stimulus controller and the form helpers are the gem's, and upgrade with it. What stays yours is what is genuinely about your app — your forms, your labels and styling, and, with Devise, the one line that permits the field (see [With Devise](#with-devise)). Not on importmap, or no Stimulus? See [How it is wired](#how-it-is-wired-and-how-to-turn-each-piece-off).
+
 
 ## What it checks, in order
 
@@ -190,7 +208,7 @@ Alternatively, `case: :preserve` leaves stored case alone; the audit will tell y
 
 ## Generated names and suggestions
 
-Every new account has a name from day one. A profile with no name is a row that renders as plain text everywhere and has no page — so `has_username` assigns one on create when the field is blank. (Only on create: an existing account may still clear its username, unless you pass `required: true`.)
+Every new account has a name from day one. A profile with no name is a row that renders as plain text everywhere and has no page — so `has_username` assigns one to a new record whose field is blank, whatever validation context it is saved in. (Only to new records: an existing account may still clear its username, unless you pass `required: true` or `clearable: false`.)
 
 ```ruby
 User.create!(email: "ana@example.com").username   # => "quiet_otter_42"
@@ -206,6 +224,32 @@ has_username required: -> { invited? }, generate: false
 ```
 
 By default a name is generated exactly where none is required, record by record. An explicit `generate:` is honoured as given: `required: true, generate: true` fills a blank on create and refuses clearing it later.
+
+A profile form that asks for the name, while sign-up hands one out? Require it in that validation context only:
+
+```ruby
+has_username required: { on: :profile }     # or { on: %i[profile onboarding] }
+```
+
+```ruby
+.save(context: :profile)               # in the profile controller: the name can't be blank here
+```
+
+Presence is then checked on every save in that context — even for an account whose name was blank before the gem arrived, since that form is where they type one. Every other save works as without it. The context has to come from your controller: a form can't set it.
+
+**Keeping a name.** `clearable: false` refuses saving a saved name blank again (`can't be blank`), required or not — a username other people link to stays one. It is not immutability: changing it to another name is fine. A stored blank was never a name, so it saves as before, and `update_column` / `update_all` skip it like any validation.
+
+```ruby
+has_username clearable: false
+```
+
+**Starting from the person's name.** `seed:` names a method (or a proc) whose value a generated name starts from:
+
+```ruby
+has_username seed: :first_name     # Ana → "ana", or "ana_42" if taken, or "quiet_otter_42" when first_name is blank
+```
+
+It is read once per save, cleaned and cut at word boundaries the way `generate_username(from:)` does it below; a redraw after a lost race reuses it, and an error raised in it is your app's. Whatever it returns becomes part of a **public** name: `seed: :email` publishes the local part of people's addresses (`ana+news.com` → `ana`), which is exactly what the gem never does on its own.
 
 From a real name:
 
@@ -240,13 +284,104 @@ Whatever you return still goes through the validator and the redraw logic.
 
 ## Live availability check
 
-```bash
-rails generate usernames:availability
+```erb
+<%= form_with model: @user do |f| %>
+  <%= f.label :handle %>
+  <%= f.username_field :handle %>
+  <%= f.username_status :handle %>
+<% end %>
 ```
 
-Copies into **your** app — nothing is mounted behind your back — a small controller, a route (`GET /usernames/availability?username=…`), a Stimulus controller and a form partial. As people type, the browser shows the format rules instantly (same rules, same words as the server, no round trip) and asks the server whether the name is free, debounced, with stale answers discarded. Browser hints never block submission; the server is the only authority.
+`f.username_field` is a text field (`autocomplete="username"`, no autocapitalise or autocorrect — pass any option to change them) that the gem's `username-check` Stimulus controller watches. `f.username_status` is the `<output for="user_handle" aria-live="polite">` it writes to, so screen readers hear the answer too. The status gets a `data-state` to style: `checking`, `free`, `taken`, `invalid` (a format rule, said at once, in the model's own words), `unchanged` (the record's saved name, typed again in any case — not asked about), or `error` (the answer didn't come: offline, rate limited, switched off). Nothing blocks submission: no `pattern`, no `setCustomValidity`, no `maxlength` (it would cut a pasted `@name` before normalisation; pass `maxlength:` if you want one).
 
-An availability endpoint reveals which names exist by design, so the generated controller comes with guard rails: it rate-limits with Rails' built-in `rate_limit`, it refuses to run (503, with a log line) if your cache store is the `NullStore` — Rails' limiter silently does nothing there — and it answers "taken" for taken, reserved and disallowed names alike. The word lists never reach the browser.
+```erb
+<%= f.username_field :handle, availability: false %>   <%# format hints only, no request %>
+<%= f.username_field :handle, static: true %>          <%# a plain text field %>
+<%= f.username_field :handle, class: "input", data: { controller: "autosize" } %>   <%# joined, not replaced %>
+```
+
+`class`, `data-controller`, `data-action` and `aria-describedby` are joined with the field's own; ids come from `field_id` (`user_handle`, `user_handle_status`), so `namespace:` and `index:` work. Two forms for the same record on one page need different ids: give `form_with` a `namespace:`, or pass the same `id:` to both helpers.
+
+The browser asks `GET /usernames/availability?username=javi&target=user` and gets `{ "state": "free" | "taken" | "invalid", "message": "…" }`. `target` is an alias from `config.availability.targets`, which the installer writes:
+
+```ruby
+config.availability.targets = { "user" => "User#handle" }      # alias => "Model#column"
+```
+
+Only these are ever answered: anything else is a 404, and declaring `has_username` on a model never publishes it. A field for a column that isn't a target raises in development and test (and renders as a plain field, with one log line, in production). A single-table subclass's form uses its parent's target.
+
+An availability endpoint tells anyone which names exist — that is its job — so it comes with guard rails:
+
+- **Rate limited** with Rails' `rate_limit` (30 a minute per IP), counted in `Rails.cache`. If that store can't count — the `NullStore`, or a backend that's down — Rails' limiter silently lets everything through, so outside development and test the endpoint answers **503**, with a log line, until it can. In production that means a shared store: Solid Cache, Redis or Memcached. (A `MemoryStore` works, per process, with a warning.)
+- **Uniform answers**: taken, reserved and disallowed names all answer "taken". No word list, matched word or reason is sent to the browser — though, like any availability check, it can't stop someone inferring a list by asking.
+- **Never cached** (`Cache-Control: no-store`), 404s, 429s and 503s included, and advisory only: the model's validations and the unique index decide at save time.
+- **Public by default.** It inherits your `ApplicationController` (when there is one), so its locale, host and authentication callbacks apply — the messages come in the language your app picked. It knows nothing about who is signed in; "unchanged" is the browser comparing against the saved name the field carries.
+
+### How it is wired (and how to turn each piece off)
+
+| Piece | What the gem does | Off switch |
+|---|---|---|
+| Endpoint | `Usernames::AvailabilityController`, inheriting `config.availability.parent_controller` (default: `ApplicationController` if defined, else `ActionController::Base`; `"ActionController::API"` works) | `config.availability.targets = {}` answers nothing |
+| Route | appended after your routes, named `usernames_availability`, at `config.availability.path` (`/usernames/availability`), no format. Its first segment (`usernames`) is reserved like any of your routes | `config.availability.path = nil`, or draw a route of that name yourself |
+| Rate limit | `config.availability.rate_limit = { to: 30, within: 1.minute }`, counted in `config.availability.rate_limit_store` (default `Rails.cache`, read once at boot) | — (point it at a store that counts) |
+| Form helpers | `f.username_field` / `f.username_status` on every form builder | `availability: false`, `static: true`, or don't use them |
+| JavaScript | with importmap-rails, the pins `usernames` and `usernames/username-check`; Propshaft and Sprockets serve them | leave out `import "usernames"` |
+
+`import "usernames"` imports your `controllers/application` (stimulus-rails' generated file, which exports `application`) and registers `username-check` on it, once. Starting Stimulus some other way? Import the controller alone and register it yourself:
+
+```js
+import UsernameCheckController from "usernames/username-check"
+application.register("username-check", UsernameCheckController)
+```
+
+**Catch-all routes.** The appended route comes after yours, so a catch-all such as `get "*path"` swallows it. Put it above the catch-all yourself, and the gem draws nothing more:
+
+```ruby
+Rails.application.routes.draw do
+  usernames_availability                    # at the top level, before any catch-all
+  get "*path", to: "pages#show"
+end
+```
+
+**No Stimulus** (or JavaScript off): the field is an ordinary text field, and the model still says why a name won't do on submit.
+
+**jsbundling, esbuild, Vite…** `import "usernames"` needs importmap. Copy the controller instead, and register it as `username-check`:
+
+```bash
+rails generate usernames:javascript      # app/javascript/controllers/username_check_controller.js
+```
+
+The copy is then your app's: run the generator again after upgrading the gem.
+
+**Customising the endpoint or the controller**: `rails generate usernames:availability --copy` writes the endpoint (it replaces the gem's — same class), the Stimulus controller, a form partial and the route into your app, all speaking the same protocol. Drop `import "usernames"` then: your Stimulus setup registers your copy.
+
+### With Devise
+
+Devise permits only its own attributes, so a `handle` field it doesn't know about is dropped — the form says the name is free, the save ignores it, and the account gets a generated one. Permit it where people choose or change it:
+
+```ruby
+class ApplicationController < ActionController::Base
+  before_action :configure_permitted_parameters, if: :devise_controller?
+
+  private
+
+  def configure_permitted_parameters
+    devise_parameter_sanitizer.permit(:sign_up, keys: [:handle])
+    devise_parameter_sanitizer.permit(:account_update, keys: [:handle])
+  end
+end
+```
+
+That's strong parameters, which are your app's decision: the gem never mass-assigns anything. Logging in with a username or an email is a recipe [below](#recipes).
+
+### Upgrading from 0.1
+
+0.1's `rails generate usernames:availability` copied a controller, a `usernames/availability` route, a Stimulus controller and a `_field` partial into your app. They speak the 0.1 protocol, and your app's copies win over the gem's, so pick one mode (`rails generate usernames:availability` lists what it finds):
+
+- **Managed** (recommended): delete all four, add `config.availability.targets = { "user" => "User#username" }` to the initializer, replace the partial with `f.username_field` / `f.username_status`, and add `import "usernames"`. From then on the check upgrades with the gem.
+- **Customized**: keep your pair, set `config.availability.path = nil` so the gem draws no route of its own (yours is named `usernames_availability`, so it would skip anyway), and don't `import "usernames"`.
+
+The rest of 0.2.0 is listed in the [CHANGELOG](CHANGELOG.md#upgrading-from-01).
 
 ## Recipes
 
@@ -313,7 +448,7 @@ es:
               username_reserved: "está reservado"
 ```
 
-A per-model override reaches every place the gem speaks for that model: `User.check_username(value)` (`Usernames.check` with the model's rules and words) and `User.username_rules_for_browser` (the hints) look messages up the way the model's own errors do, and the generated availability check uses both, so the form, the hints and the endpoint say the same thing.
+A per-model override reaches every place the gem speaks for that model: `User.check_username(value)` (`Usernames.check` with the model's rules and words) and `User.username_rules_for_browser` (the hints) look messages up the way the model's own errors do, and the availability check uses both, so the form, the hints and the endpoint say the same thing. Its own two messages are `usernames.available` ("is available") and `usernames.availability.error` ("couldn't be checked just now").
 
 `rails generate usernames:locale --locale=fr` copies the English file for you to translate.
 
@@ -338,7 +473,7 @@ Usernames.configure do |config|
 end
 ```
 
-Less common, documented here rather than in the initializer: `first_character` (`:alphanumeric`, or `:letter` for the Snapchat/Telegram rule), `reserve_routes` (`true`), `app_name` (auto-detected; `false` to opt out), `offensive.adapters` (`[:moderate]`), `on_adapter_failure` (`:allow` logs and skips a raising adapter; `:reject` fails the save), `generator.adjectives` / `generator.nouns` / `generator` (a callable), `unique_index` (only if the generator didn't create yours). Every option is also accepted per model — `has_username :handle, length: 2..24` — and per validator call. `has_username` itself takes `required:` (`false`; `true`, a method name such as `required: :handle_required`, or a proc) and `generate:` (by default: wherever a name isn't required). An invalid value raises `Usernames::ConfigurationError` at boot, naming it.
+Less common, documented here rather than in the initializer: `first_character` (`:alphanumeric`, or `:letter` for the Snapchat/Telegram rule), `reserve_routes` (`true`), `app_name` (auto-detected; `false` to opt out), `offensive.adapters` (`[:moderate]`), `on_adapter_failure` (`:allow` logs and skips a raising adapter; `:reject` fails the save), `generator.adjectives` / `generator.nouns` / `generator` (a callable), `unique_index` (only if the generator didn't create yours). Every option is also accepted per model — `has_username :handle, length: 2..24` — and per validator call. `has_username` itself takes `required:` (`false`; `true`, a method name such as `required: :handle_required`, a proc, or `{ on: :profile }`), `generate:` (by default: wherever a name isn't required), `seed:` (a method name or a proc) and `clearable:` (`true`). The availability check reads `config.availability.targets` (`{}` until the installer writes yours), `.path` (`"/usernames/availability"`, `nil` for no route), `.parent_controller` (`nil`: your `ApplicationController`, else `ActionController::Base`), `.rate_limit` (`{ to: 30, within: 1.minute }`) and `.rate_limit_store` (`nil`: `Rails.cache`). An invalid value raises `Usernames::ConfigurationError` at boot, naming it.
 
 ## Data and licences
 
