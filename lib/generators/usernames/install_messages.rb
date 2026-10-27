@@ -43,10 +43,18 @@ module Usernames
         say "\nThen, in any form for a #{model_name}, a username field that checks names as people type:"
         say "  <%= f.label :#{column} %> <%= f.username_field :#{column} %> <%= f.username_status :#{column} %>"
         say "  #{JAVASCRIPT_STEPS.fetch(javascript_setup)}"
-        say "  With Devise, permit it: devise_parameter_sanitizer.permit(:sign_up, keys: [:#{column}]) " \
-            "(and :account_update)."
+        devise_message if defined?(::Devise)
         say "  In production, the check counts requests in Rails.cache: give it a shared store (Solid Cache, " \
             "Redis, Memcached). It answers 503 until one counts."
+      end
+
+      # Devise permits only its own attributes: without these lines a sign-up
+      # form says the name is free, and the save drops it.
+      def devise_message
+        say "  Devise drops attributes it doesn't know, so permit :#{column} where people choose or change " \
+            "it (in ApplicationController, before_action ... if: :devise_controller?):"
+        say "    devise_parameter_sanitizer.permit(:sign_up, keys: [:#{column}])"
+        say "    devise_parameter_sanitizer.permit(:account_update, keys: [:#{column}])"
       end
 
       JAVASCRIPT_STEPS = {

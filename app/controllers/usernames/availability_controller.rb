@@ -94,10 +94,7 @@ module Usernames
 
     # Format failures are shown as they are (the browser hints them anyway);
     # reserved and not-allowed names are reported as taken (see above).
-    FORMAT_FAILURES = %i[
-      username_spaces username_characters username_unicode too_short too_long username_edges
-      username_consecutive username_first_character username_digits_only username_extension
-    ].freeze
+    FORMAT_FAILURES = Rules.format_reasons
 
     # Far beyond any username: what is longer is cut here, before the
     # normaliser sees it, and still breaks the length rule.

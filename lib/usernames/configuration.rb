@@ -119,7 +119,7 @@ module Usernames
       TARGET = /\A[A-Z]\w*(?:::[A-Z]\w*)*#[a-z_]\w*\z/
 
       def initialize
-        @path = "/usernames/availability"
+        @path = Usernames::Routes::DEFAULT_PATH
         @targets = {}.freeze
         @parent_controller = nil
         @rate_limit = { to: 30, within: 1.minute }.freeze
@@ -185,7 +185,7 @@ module Usernames
     CACHE_LIMIT = 64
 
     option :length, :separators, :edge_separators, :case, :first_character, :reserve_routes, :app_name,
-           :reserved, :forbidden, :allowed, :on_adapter_failure, :unique_index
+           :reserved, :forbidden, :allowed, :reserved_if, :on_adapter_failure, :unique_index
 
     attr_reader :offensive, :generator, :availability
 
@@ -200,6 +200,9 @@ module Usernames
       @reserved = Data.reserved
       @forbidden = Data.impersonation
       @allowed = [].freeze
+      # ->(name) { Page.exists?(slug: name) }: names reserved by your data
+      # rather than a list. nil: none.
+      @reserved_if = nil
       @on_adapter_failure = :allow
       @unique_index = nil
       @offensive = Offensive.new(self)
@@ -234,7 +237,7 @@ module Usernames
       {
         length: length, separators: separators, edge_separators: edge_separators, case: @case,
         first_character: first_character, reserve_routes: reserve_routes, app_name: app_name,
-        reserved: reserved, forbidden: forbidden, allowed: allowed, offensive: offensive.to_h,
+        reserved: reserved, forbidden: forbidden, allowed: allowed, reserved_if: reserved_if, offensive: offensive.to_h,
         on_adapter_failure: on_adapter_failure, generator: generator.to_h, unique_index: unique_index
       }
     end

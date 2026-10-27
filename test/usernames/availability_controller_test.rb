@@ -97,6 +97,15 @@ class AvailabilityControllerTest < UsernamesTestCase
     assert_equal({ "state" => "invalid", "message" => "can't be blank" }, json("  "))
   end
 
+  # A name config.reserved_if reserves is taken, like any reserved name.
+  def test_a_name_reserved_by_the_app_is_taken
+    load_controller
+    Usernames.configuration.reserved_if = ->(name) { name == "summer_sale" }
+
+    assert_equal({ "state" => "taken", "message" => "has already been taken" }, json("summer_sale"))
+    assert_equal "free", json("winter_sale")["state"]
+  end
+
   def test_another_target_has_its_own_rules
     load_controller
     Player.create!(handle: "CoolCat")
@@ -224,6 +233,11 @@ class AvailabilityControllerTest < UsernamesTestCase
   end
 
   # --- the route --------------------------------------------------------------------------------------
+
+  # Which answers are "invalid": exactly the format rules' reasons.
+  def test_format_failures_are_the_rules_format_reasons
+    assert_same Usernames::Rules.format_reasons, load_controller::FORMAT_FAILURES
+  end
 
   def test_the_route_takes_no_format
     load_controller

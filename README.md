@@ -147,6 +147,18 @@ end
 | 2 | `config.reserved`, `config.forbidden` | reserved |
 | 3 | your routes | reserved |
 | 4 | the bundled lists | reserved |
+| 5 | `config.reserved_if` | reserved |
+
+**Names your data reserves.** A slug your pages already use, a team or an organisation that shares the URL space — anything that isn't a fixed list — is one callable, asked last, only about names every list has let through:
+
+```ruby
+Usernames.configure do |config|
+  config.reserved_if = ->(name) { Page.exists?(slug: name) || Organization.exists?(handle: name) }
+end
+```
+
+It receives the name as normalised (lowercased in the default mode, case kept with `case: :preserve`), and a truthy answer refuses it as `is reserved` — in validation, in `Usernames.check`, and as "taken" in the availability check. `config.allowed` still lifts it. What it raises is your app's error, not the gem's; it runs on every check that reaches it, so keep it to one indexed query.
+
 
 Your own official account, under a name the gem reserves? Lift exactly that name — `config.allowed += %w[yourapp]` — and register it yourself before launch (a seed, or the console). It frees that exact name only: `yourapp2` and `your.app` stay reserved. `has_username` deliberately has no per-record skip: whether a name may be held is a fact about the name, and a skip that hangs off the record is one `update` away from letting someone else keep `admin`. `rails usernames:reserved` prints the effective list with the source of every word, for when you wonder why `x` is reserved.
 
@@ -473,7 +485,7 @@ Usernames.configure do |config|
 end
 ```
 
-Less common, documented here rather than in the initializer: `first_character` (`:alphanumeric`, or `:letter` for the Snapchat/Telegram rule), `reserve_routes` (`true`), `app_name` (auto-detected; `false` to opt out), `offensive.adapters` (`[:moderate]`), `on_adapter_failure` (`:allow` logs and skips a raising adapter; `:reject` fails the save), `generator.adjectives` / `generator.nouns` / `generator` (a callable), `unique_index` (only if the generator didn't create yours). Every option is also accepted per model — `has_username :handle, length: 2..24` — and per validator call. `has_username` itself takes `required:` (`false`; `true`, a method name such as `required: :handle_required`, a proc, or `{ on: :profile }`), `generate:` (by default: wherever a name isn't required), `seed:` (a method name or a proc) and `clearable:` (`true`). The availability check reads `config.availability.targets` (`{}` until the installer writes yours), `.path` (`"/usernames/availability"`, `nil` for no route), `.parent_controller` (`nil`: your `ApplicationController`, else `ActionController::Base`), `.rate_limit` (`{ to: 30, within: 1.minute }`) and `.rate_limit_store` (`nil`: `Rails.cache`). An invalid value raises `Usernames::ConfigurationError` at boot, naming it.
+Less common, documented here rather than in the initializer: `first_character` (`:alphanumeric`, or `:letter` for the Snapchat/Telegram rule), `reserve_routes` (`true`), `app_name` (auto-detected; `false` to opt out), `offensive.adapters` (`[:moderate]`), `on_adapter_failure` (`:allow` logs and skips a raising adapter; `:reject` fails the save), `generator.adjectives` / `generator.nouns` / `generator` (a callable), `unique_index` (only if the generator didn't create yours), `reserved_if` (`nil`; a callable, see [Reserved names](#reserved-names)). Every option is also accepted per model — `has_username :handle, length: 2..24` — and per validator call. `has_username` itself takes `required:` (`false`; `true`, a method name such as `required: :handle_required`, a proc, or `{ on: :profile }`), `generate:` (by default: wherever a name isn't required), `seed:` (a method name or a proc) and `clearable:` (`true`). The availability check reads `config.availability.targets` (`{}` until the installer writes yours), `.path` (`"/usernames/availability"`, `nil` for no route), `.parent_controller` (`nil`: your `ApplicationController`, else `ActionController::Base`), `.rate_limit` (`{ to: 30, within: 1.minute }`) and `.rate_limit_store` (`nil`: `Rails.cache`). An invalid value raises `Usernames::ConfigurationError` at boot, naming it.
 
 ## Data and licences
 

@@ -102,7 +102,19 @@ class GeneratorInstallTest < Rails::Generators::TestCase
     assert_match(%r{Added `import "usernames"` to app/javascript/application\.js}, output)
     assert_match(/<%= f\.label :username %> <%= f\.username_field :username %> <%= f\.username_status :username %>/,
                  output)
-    assert_match(/devise_parameter_sanitizer\.permit\(:sign_up, keys: \[:username\]\)/, output)
+    refute_match(/devise/i, output, "no Devise here, so nothing about it")
+  end
+
+  # With Devise loaded, the two lines that keep it from dropping the field.
+  def test_with_devise_the_permit_lines
+    Object.const_set(:Devise, Module.new)
+    output = run_generator %w[--model=Account --column=handle]
+
+    assert_match(/Devise drops attributes it doesn't know, so permit :handle/, output)
+    assert_match(/^    devise_parameter_sanitizer\.permit\(:sign_up, keys: \[:handle\]\)$/, output)
+    assert_match(/^    devise_parameter_sanitizer\.permit\(:account_update, keys: \[:handle\]\)$/, output)
+  ensure
+    Object.send(:remove_const, :Devise) if Object.const_defined?(:Devise, false)
   end
 
   def test_appending_is_idempotent

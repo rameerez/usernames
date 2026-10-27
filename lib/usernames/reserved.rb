@@ -32,8 +32,8 @@ module Usernames
     Sets = ::Data.define(:exact, :custom, :impersonation, :allowed)
 
     class << self
-      # The kind of reservation that matched — :impersonation, :exact, :route
-      # or :custom — or nil when the name is free to use. `key` is
+      # The kind of reservation that matched — :impersonation, :exact, :route,
+      # :custom or :reserved_if — or nil when the name is free to use. `key` is
       # Usernames.comparison_key of a name that already passed every format
       # rule; `rules` is the Usernames::Rules in force.
       #
@@ -44,15 +44,16 @@ module Usernames
       # word and reported as :impersonation; :custom names a config.reserved
       # word that is not bundled. A reserved prefix (`.well-known`, `xn--`)
       # is reported as :exact.
-      def verdict(key, rules)
+      #
+      # Last, after every list, config.reserved_if is asked about `name` —
+      # the name as normalised, case kept in preserve mode — and a truthy
+      # answer is :reserved_if. It runs on the checks the lists let
+      # through, and whatever it raises is the app's.
+      def verdict(key, rules, name = key)
         sets = sets_for(rules)
         return if sets.allowed.include?(key)
 
-        if impersonation?(key, sets.impersonation) then :impersonation
-        elsif sets.custom.include?(key) then :custom
-        elsif sets.exact.include?(key) || prefix?(key) then :exact
-        elsif rules.reserve_routes && routes.include?(key) then :route
-        end
+        listed(key, sets, rules) || (:reserved_if if rules.reserved_if&.call(name))
       end
 
       # Whether any spelling of the name is an impersonation entry: the name
@@ -114,6 +115,15 @@ module Usernames
       end
 
       private
+
+      # The list that reserves `key`, in the order they are asked.
+      def listed(key, sets, rules)
+        if impersonation?(key, sets.impersonation) then :impersonation
+        elsif sets.custom.include?(key) then :custom
+        elsif sets.exact.include?(key) || prefix?(key) then :exact
+        elsif rules.reserve_routes && routes.include?(key) then :route
+        end
+      end
 
       def sets_for(rules)
         rules.compiled(:reserved) do

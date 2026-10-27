@@ -219,6 +219,14 @@ class RakeTasksTest < UsernamesTestCase
     assert_match(/Lifted by config\.allowed: help/, output)
   end
 
+  def test_reserved_names_config_reserved_if
+    refute_match(/reserved_if/, run_task("usernames:reserved"))
+
+    output = with_config(reserved_if: ->(_name) { false }) { run_task("usernames:reserved") }
+
+    assert_match(/^And whatever config\.reserved_if reserves, asked after these lists\.$/, output)
+  end
+
   def test_reserved_marks_routes
     Usernames::Reserved.stub(:routes, Set["recipes"]) do
       assert_match(%r{^  recipes +route /recipes$}, run_task("usernames:reserved"))

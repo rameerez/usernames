@@ -37,6 +37,7 @@ module Usernames
           words.each { |word, source| io.puts "  #{word.ljust(width)}  #{source}" }
           lifted = allowed(rules)
           io.puts "Lifted by config.allowed: #{lifted.join(' ')}" if lifted.any?
+          io.puts "And whatever config.reserved_if reserves, asked after these lists." if rules.reserved_if
           words.size
         end
 

@@ -496,6 +496,7 @@ class ConfigurationTest < UsernamesTestCase
   def test_availability_defaults
     availability = Usernames.configuration.availability
 
+    assert_same Usernames::Routes::DEFAULT_PATH, availability.path, "one constant for the default path"
     assert_equal "/usernames/availability", availability.path
     assert_empty availability.targets, "nothing is published until the app says so"
     assert_nil availability.parent_controller

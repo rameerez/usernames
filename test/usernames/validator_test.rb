@@ -241,7 +241,7 @@ class ValidatorTest < UsernamesTestCase
     keys = []
     custom = model { validates :handle, username: { case: :preserve } }
 
-    Usernames::Reserved.stub(:verdict, ->(key, _rules) { (keys << key) && nil }) do
+    Usernames::Reserved.stub(:verdict, ->(key, _rules, *) { (keys << key) && nil }) do
       custom.new(handle: "JaVi").validate
     end
 
