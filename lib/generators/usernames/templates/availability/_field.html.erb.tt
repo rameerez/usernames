@@ -11,7 +11,7 @@
 <div data-controller="username-check"
      data-username-check-url-value="<%%= usernames_availability_path %>"
      data-username-check-param-value="<%= column %>"
-     data-username-check-rules-value="<%%= Usernames.rules_for_browser(**<%= model_name %>.<%= column %>_options).to_json %>"
+     data-username-check-rules-value="<%%= <%= model_name %>.<%= column %>_rules_for_browser.to_json %>"
      data-username-check-lowercase-value="<%%= <%= model_name %>.<%= column %>_options[:case] != :preserve %>">
   <%%= form.label attribute, label %>
   <%%= form.text_field attribute,

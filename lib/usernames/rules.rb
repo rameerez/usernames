@@ -114,10 +114,11 @@ module Usernames
     # disagree on NUL, U+FEFF and U+1680, so the browser approximates
     # normalisation and the server stays the only authority. A pattern
     # MATCHES a name that breaks the rule, and is written in the subset both
-    # engines read the same way — no \A, \z, lookbehind or \p{…}.
-    def for_browser
+    # engines read the same way — no \A, \z, lookbehind or \p{…}. With a
+    # `record` and `attribute`, the messages are that model's (Failure#message).
+    def for_browser(record = nil, attribute = nil)
       format_checks.filter_map do |reason, _test, source|
-        { rule: reason, pattern: source, message: failure(reason).message } if source
+        { rule: reason, pattern: source, message: failure(reason).message(record, attribute) } if source
       end
     end
 

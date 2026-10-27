@@ -43,7 +43,8 @@ module Usernames
     #    never a RecordNotUnique 500.
     #
     # And the class helpers, named after the column: `username_available?`,
-    # `suggest_usernames`, `generate_username`, `find_by_username`
+    # `suggest_usernames`, `generate_username`, `find_by_username`,
+    # `username_options`, `check_username`, `username_rules_for_browser`
     # (`handle_available?`, `suggest_handles`, … for `has_username :handle`).
     #
     # The case mode is read here, once: the unique index is built for one
@@ -158,7 +159,7 @@ module Usernames
     module ClassMethods
       def self.for(column)
         Module.new.tap do |helpers|
-          %i[available suggest generate find_by options].each { |helper| send(helper, helpers, column) }
+          %i[available suggest generate find_by options check browser].each { |helper| send(helper, helpers, column) }
         end
       end
 
@@ -200,12 +201,31 @@ module Usernames
         end
       end
 
-      # The rule options of this column, for Usernames.check and
-      # Usernames.rules_for_browser (the generated availability check uses them).
+      # The rule options of this column, for Usernames.check,
+      # Usernames.comparison_key and Usernames.rules_for_browser.
       # NOTE(p3): not in PRD §6.1's list; the availability generator needs
       # the model's own rules to tell "invalid" from "taken".
       def self.options(helpers, column)
         helpers.define_method(:"#{column.name}_options") { column.options }
+      end
+
+      # User.check_username("Ad_min") — Usernames.check with this column's
+      # rules, its message worded as this model's own error would be (a
+      # per-model translation wins). Eligibility only, like Usernames.check:
+      # no query, so `ok?` says nothing about whether the name is free.
+      def self.check(helpers, column)
+        helpers.define_method(:"check_#{column.name}") do |value|
+          rules = column.rules
+          canonical = rules.normalize(value)
+          Result.for(canonical, rules.failure_for(canonical), record: new, attribute: column.name)
+        end
+      end
+
+      # User.username_rules_for_browser — Usernames.rules_for_browser with
+      # this column's rules and this model's words, for the hints a form
+      # shows while someone types.
+      def self.browser(helpers, column)
+        helpers.define_method(:"#{column.name}_rules_for_browser") { column.rules.for_browser(new, column.name) }
       end
     end
 

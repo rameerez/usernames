@@ -17,10 +17,13 @@ module Usernames
   #
   # `::Data`, not `Data`: inside this namespace `Data` is Usernames::Data.
   Result = ::Data.define(:ok?, :reason, :rule, :canonical, :message) do
-    def self.for(canonical, failure)
+    # `record` and `attribute` word the message the way that model's own
+    # error would be worded (see Failure#message).
+    def self.for(canonical, failure, record: nil, attribute: nil)
       return new(ok?: true, reason: nil, rule: nil, canonical: canonical, message: nil) unless failure
 
-      new(ok?: false, reason: failure.reason, rule: failure.rule, canonical: canonical, message: failure.message)
+      new(ok?: false, reason: failure.reason, rule: failure.rule, canonical: canonical,
+          message: failure.message(record, attribute))
     end
   end
 
@@ -36,7 +39,15 @@ module Usernames
 
     # A Symbol :message in the details names the translation to use while the
     # type stays `reason` — Active Model's own convention for errors.add.
-    def message
+    #
+    # With a `record` (any instance of the model) and its `attribute`, the
+    # message is looked up exactly as that model's error would be
+    # (activerecord.errors.models.user.attributes.handle.too_short first, then
+    # up to errors.messages), so the browser hints and the availability
+    # check say what the form says.
+    def message(record = nil, attribute = nil)
+      return record.errors.generate_message(attribute, reason, details.dup) if record
+
       I18n.t(details.fetch(:message, reason), scope: %i[errors messages], **details.except(:message)).to_s
     end
   end

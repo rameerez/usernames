@@ -60,8 +60,8 @@ module Usernames
   # has_username(column = :username, required: false, generate: true, **rules)
   #
   # Also defines, named after the column: <column>_available?, suggest_<column>s,
-  # generate_<column>, find_by_<column>, <column>_options, and <column>_generated?
-  # on instances.
+  # generate_<column>, find_by_<column>, <column>_options, check_<column>,
+  # <column>_rules_for_browser, and <column>_generated? on instances.
   module Model
     def has_username: (?(Symbol | String) column, ?required: bool, ?generate: bool, **untyped rules) -> void
   end

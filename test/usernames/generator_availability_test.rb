@@ -59,7 +59,10 @@ class GeneratorAvailabilityTest < Rails::Generators::TestCase
   def test_another_model_and_column
     run_generator %w[--model=Player --column=handle]
 
-    assert_file CONTROLLER, /Player\.handle_available\?/, /params\[:handle\]/, /Player\.handle_options/
+    assert_file CONTROLLER, /Player\.handle_available\?/, /params\[:handle\]/, /Player\.handle_options/,
+                /Player\.check_handle\(value\)/, /errors\.generate_message\(:handle, type\)/,
+                /activerecord\.errors\.models\.player\.attributes\.handle/
+    assert_file PARTIAL, /Player\.handle_rules_for_browser\.to_json/
     assert_file PARTIAL, /data-username-check-param-value="handle"/, /attribute: :handle/
   end
 
@@ -94,7 +97,7 @@ class GeneratorAvailabilityTest < Rails::Generators::TestCase
 
     assert_file PARTIAL do |content|
       assert_includes content, %(data-controller="username-check")
-      assert_includes content, "Usernames.rules_for_browser(**User.username_options).to_json"
+      assert_includes content, "User.username_rules_for_browser.to_json"
       assert_includes content, "usernames_availability_path"
       assert_includes content, %(input->username-check#check)
       assert_includes content, "<%# locals: (form:, attribute: :username, label: nil) -%>"
@@ -129,6 +132,25 @@ class GeneratorAvailabilityTest < Rails::Generators::TestCase
                  get(controller, "_javi")[:json])
     assert_equal({ "state" => "invalid", "message" => "can't be blank" }, get(controller, "  ")[:json])
     assert_equal "no-store", get(controller, "ana")[:headers]["cache-control"]
+  end
+
+  # A host app that words its errors per model gets the same words from the
+  # endpoint as from its form.
+  def test_answers_in_the_models_own_words
+    I18n.backend.store_translations(:en, activerecord: { errors: { models: { user: { attributes: { username: {
+                                      username_edges: "starts and ends with a letter or number",
+                                      taken: "belongs to someone else", blank: "is needed"
+                                    } } } } } })
+    controller = load_controller(ActiveSupport::Cache::MemoryStore.new)
+    User.create!(username: "javi", email: "j@example.com")
+
+    assert_equal "starts and ends with a letter or number", get(controller, "_javi")[:json]["message"]
+    assert_equal ["belongs to someone else"], [get(controller, "javi"), get(controller, "admin")].map { |answer|
+      answer[:json]["message"]
+    }.uniq
+    assert_equal "is needed", get(controller, " ")[:json]["message"]
+  ensure
+    I18n.backend.reload!
   end
 
   def test_the_signed_in_persons_own_name_is_free

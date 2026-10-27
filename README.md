@@ -298,6 +298,8 @@ es:
               username_reserved: "está reservado"
 ```
 
+A per-model override reaches every place the gem speaks for that model: `User.check_username(value)` (`Usernames.check` with the model's rules and words) and `User.username_rules_for_browser` (the hints) look messages up the way the model's own errors do, and the generated availability check uses both, so the form, the hints and the endpoint say the same thing.
+
 `rails generate usernames:locale --locale=fr` copies the English file for you to translate.
 
 ## Configuration reference

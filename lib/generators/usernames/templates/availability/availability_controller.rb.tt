@@ -44,11 +44,13 @@ module Usernames
 
     private
 
+    # Every message in <%= model_name %>'s own words: a translation under
+    # activerecord.errors.models.<%= singular %>.attributes.<%= column %> wins here as on the form.
     def answer_for(value)
-      result = Usernames.check(value, **rules)
+      result = <%= model_name %>.check_<%= column %>(value)
 
       if result.canonical.empty?
-        { state: "invalid", message: I18n.t("errors.messages.blank") }
+        { state: "invalid", message: message(:blank) }
       elsif own?(result.canonical)
         { state: "free", message: nil }
       elsif FORMAT_FAILURES.include?(result.reason)
@@ -56,8 +58,12 @@ module Usernames
       elsif result.ok? && <%= model_name %>.<%= column %>_available?(result.canonical)
         { state: "free", message: nil }
       else
-        { state: "taken", message: I18n.t("errors.messages.taken") }
+        { state: "taken", message: message(:taken) }
       end
+    end
+
+    def message(type)
+      <%= model_name %>.new.errors.generate_message(:<%= column %>, type)
     end
 
     def rules

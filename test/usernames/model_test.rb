@@ -370,6 +370,43 @@ class ModelTest < UsernamesTestCase
     assert_equal({ length: 2..24, case: :preserve, separators: %w[_ . -] }, Player.handle_options)
   end
 
+  # The model's error, the pure check and the browser hints say one thing,
+  # and a per-model translation is that thing on all three.
+  def test_check_and_browser_rules_speak_in_the_models_words
+    I18n.backend.store_translations(:en, activerecord: { errors: { models: { player: { attributes: { handle: {
+                                      username_edges: "starts and ends with a letter or number",
+                                      too_short: { one: "one at least", other: "%{count} at least" }
+                                    } } } } } })
+
+    result = Player.check_handle(" _Javi ")
+
+    assert_equal [false, :username_edges, "_Javi"], [result.ok?, result.reason, result.canonical]
+    assert_equal "starts and ends with a letter or number", result.message
+    assert_equal [result.message], Player.new(handle: "_Javi").tap(&:validate).errors[:handle]
+    assert_equal "2 at least", Player.check_handle("J").message
+    hints = Player.handle_rules_for_browser.to_h { |rule| [rule[:rule], rule[:message]] }
+
+    assert_equal "starts and ends with a letter or number", hints[:username_edges]
+    assert_equal "2 at least", hints[:too_short]
+    patterns = [Usernames.rules_for_browser(**Player.handle_options), Player.handle_rules_for_browser].map do |rules|
+      rules.map { |rule| rule[:pattern] }
+    end
+
+    assert_equal patterns.first, patterns.last
+    assert_equal "can't start or end with an underscore, a period or a dash",
+                 Usernames.check("_Javi", **Player.handle_options).message, "the global check keeps the gem's words"
+  ensure
+    I18n.backend.reload!
+  end
+
+  def test_check_is_eligibility_only
+    Player.create!(handle: "Javi")
+
+    assert_predicate Player.check_handle("javi"), :ok?, "taken is availability, not eligibility"
+    assert_equal :username_reserved, Player.check_handle("admin").reason
+    assert_nil Player.check_handle("javi").message
+  end
+
   def test_the_case_mode_is_pinned_when_the_model_is_declared
     with_config(case: :preserve) do
       assert_equal "javi", User.new(username: "Javi").username
@@ -379,7 +416,8 @@ class ModelTest < UsernamesTestCase
   # --- a renamed column, kept case (Player#handle) ----------------------------------------------------
 
   def test_helpers_are_named_after_the_column
-    %i[handle_available? suggest_handles generate_handle find_by_handle].each do |helper|
+    %i[handle_available? suggest_handles generate_handle find_by_handle handle_options check_handle
+       handle_rules_for_browser].each do |helper|
       assert_respond_to Player, helper
     end
     refute_respond_to Player, :suggest_usernames
