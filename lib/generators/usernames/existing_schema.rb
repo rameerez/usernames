@@ -10,11 +10,12 @@ module Usernames
     # fresh checkout, CI, a laptop with the server off). Then nothing is known,
     # and the column is assumed missing.
     class ExistingSchema
-      attr_reader :column, :indexes, :matching_index
+      attr_reader :column, :indexes
 
       # `owner` is the model (or ActiveRecord::Base) whose database holds the
       # table; `mode` is the case mode the index is for: the first index that
-      # enforces its comparison contract is the matching one.
+      # enforces its comparison contract is the matching one. Every other
+      # index involving the column is kept with why it does not count.
       def self.read(owner, table, column, mode)
         owner.with_connection do |connection|
           next new(reachable: true) unless connection.table_exists?(table)
@@ -23,7 +24,7 @@ module Usernames
           indexes = connection.indexes(table)
           contract = Usernames::Comparison::IndexContract.new(connection, table: table, column: column, mode: mode)
           new(reachable: true, column: existing, indexes: indexes,
-              matching_index: indexes.find { |index| contract.satisfied_by?(index) },
+              verdicts: verdicts(indexes, contract),
               populated: !existing.nil? && rows?(connection, table, column))
         end
       rescue StandardError
@@ -42,18 +43,34 @@ module Usernames
         "remove_index #{Usernames::Comparison.ruby_name(table)}, #{options.join(', ')}"
       end
 
+      # [[index, reason], …] for every index involving the column; reason nil
+      # when it enforces the contract.
+      def self.verdicts(indexes, contract)
+        indexes.select { |index| contract.mentions?(index) }.map { |index| [index, contract.violation(index)] }
+      end
+
       def self.rows?(connection, table, column)
         sql = "SELECT 1 FROM #{connection.quote_table_name(table)} " \
               "WHERE #{connection.quote_column_name(column)} IS NOT NULL LIMIT 1"
         !connection.select_value(sql).nil?
       end
 
-      def initialize(reachable:, column: nil, indexes: [], matching_index: nil, populated: false)
+      def initialize(reachable:, column: nil, indexes: [], verdicts: [], populated: false)
         @reachable = reachable
         @column = column
         @indexes = indexes
-        @matching_index = matching_index
+        @verdicts = verdicts
         @populated = populated
+      end
+
+      # The first index that enforces the contract, or nil.
+      def matching_index
+        @verdicts.find { |_index, reason| reason.nil? }&.first
+      end
+
+      # [[index, reason], …]: the indexes on the column that do not.
+      def rejected_indexes
+        @verdicts.select { |_index, reason| reason }
       end
 
       def reachable?

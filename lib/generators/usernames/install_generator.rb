@@ -57,6 +57,11 @@ module Usernames
           return
         end
 
+        # An index on the column that looks like the one but does not count
+        # gets said why, rather than a second unique index appearing unexplained.
+        database.rejected_indexes.each do |existing, reason|
+          say_status :ignore, "#{existing.name} doesn't make #{column} unique: it #{reason}", :yellow
+        end
         migration_template "add_username.rb.erb", File.join(db_migrate_path, "#{migration_name}.rb")
       end
 

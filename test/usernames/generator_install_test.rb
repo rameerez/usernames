@@ -309,10 +309,12 @@ class GeneratorInstallTest < Rails::Generators::TestCase
     connection = Member.lease_connection
     connection.add_index :members, :username, unique: true, where: "email IS NOT NULL", name: "members_partial"
 
-    run_generator %w[--model=Member]
+    output = run_generator %w[--model=Member]
 
     assert_migration "db/migrate/add_unique_username_index_to_members.rb",
                      /add_index :members, :username, unique: true, name: "index_members_on_username"/
+    assert_match(/ignore  members_partial doesn't make username unique: it only covers rows WHERE \(?email IS NOT NULL/,
+                 output)
   ensure
     connection.remove_index :members, name: "members_partial", if_exists: true
   end

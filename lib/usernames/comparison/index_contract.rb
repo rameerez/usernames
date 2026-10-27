@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative "index_expression"
+
 module Usernames
   module Comparison
     # Whether an index read back from the database enforces the comparison
@@ -12,8 +14,17 @@ module Usernames
     #   contract.violation(index)       # => nil, or why not: "only covers rows WHERE (active = 1)"
     #   contract.satisfied_by?(index)   # => true / false
     #
-    # An index enforces it when it is unique, valid, on exactly the column (or
-    # exactly the comparison expression), over every row, and compares bytes:
+    # It is a recogniser, not a normaliser: the index is read as SQL
+    # (IndexExpression) and has to be one of the few shapes the gem's own
+    # index takes as each database prints it back; anything else does not
+    # count, however much it looks like one.
+    #
+    #                lowercase mode                  preserve mode
+    #   PostgreSQL   username, (username)::text      lower(username COLLATE "C"), lower((username)::text COLLATE "C")
+    #   SQLite       username                        lower(username)
+    #   MySQL        username                        lower(username)
+    #
+    # And it must be unique, valid, over every row and byte-compared:
     #
     # * unique over every row: a partial index (`WHERE active`) lets two
     #   inactive accounts share a name. `WHERE username IS NOT NULL` is the
@@ -30,9 +41,25 @@ module Usernames
       # Collations that compare bytes, per adapter (SQLite's BINARY is the default).
       BYTEWISE = { sqlite: %w[binary], postgresql: %w[c posix], mysql: %w[utf8mb4_bin] }.freeze
 
-      COLLATE = /\bCOLLATE\s+"?([^\s"()]+)"?/i
+      Expression = IndexExpression
 
       attr_reader :table, :column, :mode, :adapter
+
+      # Whether a column under `collation` is compared the way `mode` needs
+      # on `adapter` — the rule the audit's column check and violation share.
+      # `collation` nil is the column's default: SQLite's BINARY, while
+      # MySQL's default is the server's, which is not utf8mb4_bin.
+      def self.column_collation_ok?(adapter, mode, collation)
+        return true if mode == :preserve && adapter == :postgresql
+
+        bytewise?(adapter, collation)
+      end
+
+      def self.bytewise?(adapter, collation)
+        return adapter == :sqlite if collation.nil?
+
+        BYTEWISE.fetch(adapter).include?(collation.downcase)
+      end
 
       def initialize(connection, table:, column:, mode:)
         @connection = connection
@@ -55,10 +82,8 @@ module Usernames
       def violation(index)
         return "isn't unique" unless index.unique
         return "isn't valid (an interrupted concurrent build enforces nothing)" if index.try(:valid?) == false
-        return "is on #{Array(index.columns).join(', ')}, not #{expected_key}" unless same_key?(index)
-        return "only covers rows WHERE #{index.where}" unless every_row?(index)
 
-        collation_violation(index)
+        key_violation(index) || predicate_violation(index) || collation_violation(index)
       end
 
       # Whether `index` involves the column at all, so the audit lists it.
@@ -66,7 +91,7 @@ module Usernames
         columns = index.columns
         return Array(columns).map(&:to_s).include?(column) unless columns.is_a?(String)
 
-        columns.match?(/(?<![\w$])"?#{Regexp.escape(column)}"?(?![\w$])/)
+        Expression.names(columns).any? { |name| name.named?(column) }
       end
 
       private
@@ -75,24 +100,54 @@ module Usernames
         definition[:column].to_s
       end
 
-      # The database spells an expression its own way — PostgreSQL reads
-      # `lower(username COLLATE "C")` back as `lower(((username)::text
-      # COLLATE "C"))` — so both are reduced to their letters first.
-      def same_key?(index)
-        wanted = definition[:column]
-        return index.columns == [wanted.to_s] if wanted.is_a?(Symbol)
-
-        index.columns.is_a?(String) && squeeze(index.columns) == squeeze(wanted)
+      def postgresql?
+        adapter == :postgresql
       end
 
-      def every_row?(index)
-        index.where.blank? || squeeze(index.where) == squeeze("#{column} IS NOT NULL")
+      # Active Record reads a plain index back as its columns, and an
+      # expression as the database prints it.
+      def key_violation(index)
+        columns = index.columns
+        unless columns.is_a?(String)
+          return if mode == :lowercase && Array(columns).map(&:to_s) == [column]
+
+          return "is on #{Array(columns).join(', ')}, not #{expected_key}"
+        end
+
+        node = Expression.parse(columns)
+        return "is on an unsupported expression: #{columns}" unless node
+
+        "is on #{columns}, not #{expected_key}" unless expected_key?(node)
+      end
+
+      def expected_key?(node)
+        if mode == :lowercase
+          column?(node, cast: postgresql?)
+        elsif postgresql?
+          node.is_a?(Expression::Lower) && node.operand.is_a?(Expression::Collate) &&
+            node.operand.collation == "C" && column?(node.operand.operand, cast: true)
+        else
+          node.is_a?(Expression::Lower) && column?(node.operand, cast: false)
+        end
+      end
+
+      def column?(node, cast:)
+        node = node.operand if cast && node.is_a?(Expression::Cast)
+        node.is_a?(Expression::Column) && node.named?(column)
+      end
+
+      def predicate_violation(index)
+        return if index.where.blank?
+
+        node = Expression.parse(index.where)
+        return if node.is_a?(Expression::NotNull) && column?(node.operand, cast: false)
+
+        "only covers rows WHERE #{index.where}"
       end
 
       def collation_violation(index)
-        bytewise = BYTEWISE.fetch(adapter)
         collation = effective_collation(index)
-        return if collation.nil? || bytewise.include?(collation.downcase)
+        return if collation.nil? || self.class.bytewise?(adapter, collation)
 
         "compares under collation #{collation.inspect}, not byte by byte"
       end
@@ -101,19 +156,18 @@ module Usernames
       # itself is `lower(column COLLATE "C")` (checked above), so only an
       # extra collation on the index could change it.
       def effective_collation(index)
-        own = collations_in(index_sql(index)).reject { |name| preserve_c?(name) }
+        own = collations_in(index_sql(index)).reject { |name| mode == :preserve && postgresql? && name.casecmp?("C") }
         return own.first if own.any?
-        return if mode == :preserve && adapter == :postgresql
+        return if mode == :preserve && postgresql?
 
         column_collation
       end
 
-      def preserve_c?(name)
-        mode == :preserve && adapter == :postgresql && name.casecmp?("C")
-      end
-
+      # Every name that follows a COLLATE in the index's own SQL.
       def collations_in(sql)
-        sql.to_s.scan(COLLATE).flatten
+        Expression.tokens(sql).each_cons(2).filter_map do |(kind, text), (_, name)|
+          name if kind == :word && text.casecmp?("collate")
+        end
       end
 
       # The index as the database itself prints it: Active Record reads back
@@ -130,15 +184,13 @@ module Usernames
         end
       end
 
+      # The column's own collation; on PostgreSQL a column without one has
+      # the database's.
       def column_collation
         found = @connection.columns(table).find { |each| each.name == column }&.collation
-        return found if found || adapter != :postgresql
+        return found if found || !postgresql?
 
         @connection.select_value("SELECT datcollate FROM pg_database WHERE datname = current_database()")
-      end
-
-      def squeeze(expression)
-        expression.to_s.downcase.gsub(/::(text|character varying)/, "").gsub(/[\s"`()]/, "")
       end
     end
   end

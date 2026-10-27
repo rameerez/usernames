@@ -52,7 +52,38 @@ class IndexContractTest < UsernamesTestCase
   end
 
   def test_an_expression_that_merely_mentions_the_column
-    assert_match(/\Ais on substr\(.*username.*\), not username\z/, verdict("substr(username, 1, 3)"))
+    assert_match(/\Ais on an unsupported expression: substr\(.*username.*\)\z/, verdict("substr(username, 1, 3)"))
+  end
+
+  # A column whose name merely contains "username is not null" is a
+  # condition on another column: two rows with it false share a name.
+  def test_a_condition_on_a_column_named_like_the_null_test
+    assert_match(/\Aonly covers rows WHERE "?usernameisnotnull"?\z/, verdict(:username, where: '"usernameisnotnull"'))
+    assert_match(/\Aonly covers rows WHERE/, verdict(:username, where: "username IS NOT NULL AND active = 1"))
+    assert_match(/\Aonly covers rows WHERE/, verdict(:username, where: "active IS NOT NULL"))
+  end
+
+  # "user name" is another column, however its letters squeeze.
+  def test_a_quoted_column_that_is_not_the_username
+    key = POSTGRESQL ? 'lower("user name" COLLATE "C")' : 'lower("user name")'
+
+    assert_match(/\Ais on lower\(.*"user name".*\), not lower\(username/, verdict(key, mode: :preserve))
+    assert_match(/\Ais on user name, not username\z/, verdict(["user name"]))
+  end
+
+  # The shapes each database prints back, and the ones it does not.
+  def test_quoted_and_parenthesised_spellings_of_the_same_index
+    assert_nil verdict('"username"', where: '("username" IS NOT NULL)')
+    if POSTGRESQL
+      assert_nil verdict('lower((username)::text COLLATE "C")', mode: :preserve)
+      assert_nil verdict("((username)::text)")
+    else
+      assert_nil verdict('lower("username")', mode: :preserve)
+    end
+
+    assert_match(/\Ais on lower\(lower\(/, verdict("lower(lower(username))", mode: :preserve))
+    assert_match(/\Ais on an unsupported expression: /, verdict("trim(username)", mode: :preserve))
+    assert_match(/\Ais on an unsupported expression/, verdict("(username || 'x')"))
   end
 
   def test_the_wrong_mode
@@ -115,6 +146,9 @@ class IndexContractTest < UsernamesTestCase
     assert contract.mentions?(index.call(%(lower(((username)::text COLLATE "C")))))
     refute contract.mentions?(index.call(["username_hash"]))
     refute contract.mentions?(index.call("lower(usernames)"))
+    refute contract.mentions?(index.call('lower("user name")'))
+    assert contract.mentions?(index.call("lower(USERNAME)")), "a bare name in any case"
+    refute contract.mentions?(index.call(%(lower("USERNAME")))), "a quoted one exactly"
   end
 
   def test_the_definition_is_the_gems_own_index
@@ -133,6 +167,8 @@ class IndexContractTest < UsernamesTestCase
       t.string :username, **(collation ? { collation: collation } : COLLATION)
       t.string :tenant
       t.integer :active
+      POSTGRESQL ? t.boolean(:usernameisnotnull) : t.integer(:usernameisnotnull)
+      t.string "user name"
     end
   end
 
