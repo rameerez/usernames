@@ -262,7 +262,8 @@ module Usernames
 
     def test_leet_table_is_the_curated_subset
       assert_equal({ "0" => "o", "1" => "i", "3" => "e", "4" => "a", "5" => "s", "7" => "t" }, leet["digits"])
-      assert_equal({ "vv" => "w", "ph" => "f", "x" => "ks" }, leet["offensive_only"])
+      assert_equal({ "vv" => "w", "v" => "u", "ph" => "f", "x" => "ks" }, leet["offensive_only"])
+      assert_equal %w[vv v ph x], leet["offensive_only"].keys, "vv before v: the order is the rule"
     end
   end
 

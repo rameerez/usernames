@@ -191,7 +191,8 @@ class GeneratorInstallTest < Rails::Generators::TestCase
   # An index already in place compares what is stored: a raw JAVI and a new
   # javi are two names to it. So a populated column always gets the audit.
   def test_a_populated_column_with_its_index_in_place_still_gets_the_adoption_workflow
-    User.lease_connection.execute("INSERT INTO users (username, email) VALUES ('JAVI', 'j@example.com')")
+    User.delete_all
+    User.lease_connection.execute("INSERT INTO users (username, email) VALUES ('JAVI', 'adopted@example.com')")
 
     output = output_of("--model=User")
 

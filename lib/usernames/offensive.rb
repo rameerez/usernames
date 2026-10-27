@@ -30,6 +30,9 @@ module Usernames
     # Which tiers rule b looks at, per severity mode (nil: rule b is off).
     EQUAL_FROM = { severe: nil, strong: 3, mild: 1 }.freeze
 
+    # A letter repeated three times or more: a stretched spelling (`fuuuuuck`).
+    STRETCH = /([a-z])\1{2,}/
+
     class << self
       # The kind of match — :severe, :strong, :hate_number or :adapter — or nil
       # when the name is fine. `key` is Usernames.comparison_key of a name that
@@ -51,13 +54,26 @@ module Usernames
         adapter_verdict(key, rules)
       end
 
-      # R1 of PRD §10.2: the digit folds (`sh1t` → `shit`), then `vv`→`w`,
-      # `ph`→`f`, `x`→`ks`, in that order. Terms are folded the same way when
-      # they are loaded, so `phuck` in the data and `fuck` typed meet.
+      # A name's folded form (R1): the digit folds (`sh1t` → `shit`), then
+      # #rewrite. Terms are folded the same way when they are loaded, so
+      # `phuck` in the data and `fuck` typed meet.
       def fold(string)
-        rewrites.reduce(Reserved.leet(string)) do |folded, (from, to)|
-          folded.include?(from) ? folded.gsub(from, to) : folded
+        rewrite(Reserved.leet(string))
+      end
+
+      # The rewrites of data/offensive/leet.yml in order — `vv`→`w`, `v`→`u`,
+      # `ph`→`f`, `x`→`ks` — then every run of three or more of one letter cut
+      # to two (`fuuuuuck` → `fuuck`). Not doubles: `ass` and `book` stay.
+      def rewrite(string)
+        rewritten = rewrites.reduce(string) do |text, (from, to)|
+          text.include?(from) ? text.gsub(from, to) : text
         end
+        rewritten.gsub(STRETCH, '\1\1')
+      end
+
+      # [[from, to], …]: the offensive-only rewrites of data/offensive/leet.yml, in order.
+      def rewrites
+        @rewrites ||= Data.leet.fetch("offensive_only").to_a.freeze
       end
 
       private
@@ -113,10 +129,6 @@ module Usernames
       def log(message)
         logger = ::Rails.logger if defined?(::Rails) && ::Rails.respond_to?(:logger)
         logger ? logger.warn(message) : warn(message)
-      end
-
-      def rewrites
-        @rewrites ||= Data.leet.fetch("offensive_only").to_a.freeze
       end
     end
   end

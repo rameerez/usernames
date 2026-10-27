@@ -1,5 +1,5 @@
-# Leetspeak folding (PRD §9.2, §10.2; research 17 §3; D-15). Applied to the input AND, at load
-# time, to every term, so terms are stored un-folded in <locale>.json.
+# Leetspeak folding. Applied to the input AND, at load time, to every term, so terms are stored
+# un-folded in <locale>.json.
 
 # Digit → letter. Used by BOTH the reserved impersonation check (R1) and the offensive matcher.
 digits:
@@ -10,13 +10,18 @@ digits:
   "5": s
   "7": t
 
-# Multi-letter rewrites used by the offensive matcher ONLY, applied after the digit folds, in
-# this order. Measured cost on 235,974 web2 words: vv→w and x→ks add 0 innocent hits, ph→f adds 11.
+# Rewrites used by the offensive matcher ONLY, applied after the digit folds, in this order — to
+# each segment, and again to the whole name once its separators are gone, so `p_huck` is `phuck`
+# is `fuck`. `v` → `u` comes after `vv` → `w`: `fvck` is `fuck`, `vvhore` still `whore`. Then
+# every run of three or more of one letter is cut to two (`fuuuuuck` → `fuuck`, which the
+# stretched variants fold to as well).
+# Measured cost on 235,974 web2 words: vv→w and x→ks add 0 innocent hits, ph→f adds 11.
 offensive_only:
   vv: w
+  v: u
   ph: f
   x: ks
 
-# Deliberately NOT folded (measured, research 17 §3): cl→d (+879 innocent words), rn→m (+30),
-# l↔i (+26), ck→k (+24), and blanket repeated-letter collapsing (8,053 vs 2,798 baseline;
-# `ass`→`as`). Stretched spellings (fuuuck) are listed as variants in the term data instead.
+# Deliberately NOT folded (measured): cl→d (+879 innocent words), rn→m (+30), l↔i (+26),
+# ck→k (+24), and collapsing every double letter (8,053 vs 2,798 baseline; `ass`→`as`) — only runs
+# of three or more are cut.

@@ -116,7 +116,8 @@ write("eligible.txt",
 offensive = %w[xxfuckxx f.u.c.k fu_ck sh1thead shithead1 shithead2 shithead_bob sh1thead_bob BigCunt
                n1gger 1488 14_88 hh88 heil_hitler scunt_horpe scunthorpe_fuck scunthorpeunited sus.sex
                cunt s.cunt.horpe gr_ape ther_apist kkk
-               chingchong ching_chong neonazi neo_nazi xneonazix jap jap_99 wog wogs]
+               chingchong ching_chong neonazi neo_nazi xneonazix jap jap_99 wog wogs
+               p_huck fvck fuuuuuck f_vck fuuuu_ck]
 write("offensive.txt",
       ["Evasions the offensive matcher must REJECT at :strong (PRD §10.6 gate: 100 % rejected).",
        "Case is kept on purpose (BigCunt): the corpus is run through normalisation first."],
