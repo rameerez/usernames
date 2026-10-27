@@ -44,6 +44,15 @@
     "exceptions": []
   },
   {
+    "term": "chingchong",
+    "severity": 4,
+    "variants": [],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
     "term": "chink",
     "severity": 4,
     "variants": [
@@ -489,6 +498,15 @@
     "exceptions": []
   },
   {
+    "term": "neonazi",
+    "severity": 4,
+    "variants": [],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": []
+  },
+  {
     "term": "nigger",
     "severity": 4,
     "variants": [
@@ -704,16 +722,6 @@
       "racial"
     ],
     "exceptions": []
-  },
-  {
-    "term": "shota",
-    "severity": 4,
-    "variants": [],
-    "tags": [
-      "sexual"
-    ],
-    "exceptions": [],
-    "segment_only": true
   },
   {
     "term": "strappado",
@@ -1641,26 +1649,6 @@
     "exceptions": []
   },
   {
-    "term": "cishet",
-    "severity": 3,
-    "variants": [],
-    "tags": [
-      "lgbtq"
-    ],
-    "exceptions": []
-  },
-  {
-    "term": "cissy",
-    "severity": 3,
-    "variants": [
-      "cissie"
-    ],
-    "tags": [
-      "lgbtq"
-    ],
-    "exceptions": []
-  },
-  {
     "term": "claustrophilia",
     "severity": 3,
     "variants": [
@@ -2187,32 +2175,6 @@
     "exceptions": []
   },
   {
-    "term": "enby",
-    "severity": 3,
-    "variants": [],
-    "tags": [
-      "lgbtq"
-    ],
-    "exceptions": [
-      "allenby",
-      "asenby",
-      "brookenby",
-      "caenby",
-      "denby",
-      "frozenbyte",
-      "gatenby",
-      "holdenby",
-      "lackenby",
-      "lazenby",
-      "navenby",
-      "ottenby",
-      "renbygda",
-      "tenby",
-      "warrenby",
-      "whenby"
-    ]
-  },
-  {
     "term": "eskimotrebuchet",
     "severity": 3,
     "variants": [],
@@ -2309,18 +2271,6 @@
     ],
     "tags": [
       "sexual"
-    ],
-    "exceptions": []
-  },
-  {
-    "term": "finocchio",
-    "severity": 3,
-    "variants": [
-      "finoccio",
-      "finochio"
-    ],
-    "tags": [
-      "lgbtq"
     ],
     "exceptions": []
   },
@@ -2528,19 +2478,6 @@
     "exceptions": []
   },
   {
-    "term": "hermie",
-    "severity": 3,
-    "variants": [],
-    "tags": [
-      "lgbtq"
-    ],
-    "exceptions": [
-      "diathermies",
-      "endothermies",
-      "homeothermies"
-    ]
-  },
-  {
     "term": "hickoryswitch",
     "severity": 3,
     "variants": [],
@@ -2622,6 +2559,43 @@
       "sexual"
     ],
     "exceptions": []
+  },
+  {
+    "term": "jap",
+    "severity": 3,
+    "variants": [],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": [
+      "cajaput",
+      "cajaputs",
+      "japan",
+      "japanize",
+      "japanized",
+      "japanizes",
+      "japanizing",
+      "japanned",
+      "japanner",
+      "japanners",
+      "japanning",
+      "japans",
+      "jape",
+      "japed",
+      "japer",
+      "japeries",
+      "japers",
+      "japery",
+      "japes",
+      "japing",
+      "japingly",
+      "japonaiserie",
+      "japonaiseries",
+      "japonica",
+      "japonicas",
+      "jipijapa",
+      "jipijapas"
+    ]
   },
   {
     "term": "jellydonut",
@@ -3219,15 +3193,6 @@
     "exceptions": []
   },
   {
-    "term": "pansy",
-    "severity": 3,
-    "variants": [],
-    "tags": [
-      "lgbtq"
-    ],
-    "exceptions": []
-  },
-  {
     "term": "panties",
     "severity": 3,
     "variants": [],
@@ -3669,15 +3634,6 @@
   },
   {
     "term": "rustytrombone",
-    "severity": 3,
-    "variants": [],
-    "tags": [
-      "sexual"
-    ],
-    "exceptions": []
-  },
-  {
-    "term": "santorum",
     "severity": 3,
     "variants": [],
     "tags": [
@@ -4287,6 +4243,26 @@
     "exceptions": []
   },
   {
+    "term": "wog",
+    "severity": 3,
+    "variants": [
+      "wogs"
+    ],
+    "tags": [
+      "racial"
+    ],
+    "exceptions": [
+      "hornswoggle",
+      "hornswoggled",
+      "hornswoggles",
+      "hornswoggling",
+      "polliwog",
+      "polliwogs",
+      "pollywog",
+      "pollywogs"
+    ]
+  },
+  {
     "term": "wolfbagging",
     "severity": 3,
     "variants": [],
@@ -4447,11 +4423,13 @@
     "exceptions": []
   },
   {
-    "term": "chingchong",
+    "term": "cissy",
     "severity": 2,
-    "variants": [],
+    "variants": [
+      "cissie"
+    ],
     "tags": [
-      "racial"
+      "lgbtq"
     ],
     "exceptions": []
   },
@@ -4659,6 +4637,18 @@
     "exceptions": []
   },
   {
+    "term": "finocchio",
+    "severity": 2,
+    "variants": [
+      "finoccio",
+      "finochio"
+    ],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": []
+  },
+  {
     "term": "frogeater",
     "severity": 2,
     "variants": [],
@@ -4723,6 +4713,19 @@
       "racial"
     ],
     "exceptions": []
+  },
+  {
+    "term": "hermie",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "lgbtq"
+    ],
+    "exceptions": [
+      "diathermies",
+      "endothermies",
+      "homeothermies"
+    ]
   },
   {
     "term": "honkey",
@@ -4908,11 +4911,11 @@
     "exceptions": []
   },
   {
-    "term": "neonazi",
+    "term": "pansy",
     "severity": 2,
     "variants": [],
     "tags": [
-      "racial"
+      "lgbtq"
     ],
     "exceptions": []
   },
@@ -5003,6 +5006,15 @@
     "exceptions": []
   },
   {
+    "term": "santorum",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "sexual"
+    ],
+    "exceptions": []
+  },
+  {
     "term": "sheepshagger",
     "severity": 2,
     "variants": [],
@@ -5063,6 +5075,15 @@
     ],
     "tags": [
       "general"
+    ],
+    "exceptions": []
+  },
+  {
+    "term": "shota",
+    "severity": 2,
+    "variants": [],
+    "tags": [
+      "sexual"
     ],
     "exceptions": []
   },
@@ -5430,43 +5451,6 @@
     ]
   },
   {
-    "term": "jap",
-    "severity": 1,
-    "variants": [],
-    "tags": [
-      "racial"
-    ],
-    "exceptions": [
-      "cajaput",
-      "cajaputs",
-      "japan",
-      "japanize",
-      "japanized",
-      "japanizes",
-      "japanizing",
-      "japanned",
-      "japanner",
-      "japanners",
-      "japanning",
-      "japans",
-      "jape",
-      "japed",
-      "japer",
-      "japeries",
-      "japers",
-      "japery",
-      "japes",
-      "japing",
-      "japingly",
-      "japonaiserie",
-      "japonaiseries",
-      "japonica",
-      "japonicas",
-      "jipijapa",
-      "jipijapas"
-    ]
-  },
-  {
     "term": "jesus",
     "severity": 1,
     "variants": [
@@ -5692,25 +5676,5 @@
       "sexual"
     ],
     "exceptions": []
-  },
-  {
-    "term": "wog",
-    "severity": 1,
-    "variants": [
-      "wogs"
-    ],
-    "tags": [
-      "racial"
-    ],
-    "exceptions": [
-      "hornswoggle",
-      "hornswoggled",
-      "hornswoggles",
-      "hornswoggling",
-      "polliwog",
-      "polliwogs",
-      "pollywog",
-      "pollywogs"
-    ]
   }
 ]

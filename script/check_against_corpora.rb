@@ -15,7 +15,8 @@
 #   3. words/*.txt — words that equal or contain a severity >= 3 term; adjective_animal pairs
 #      Usernames.check refuses at :strong (the generator's guarantee, also in words_test.rb).
 #   4. The PRD §10.6 gates through Usernames.check at :strong: legitimate.txt and the name corpora
-#      (gate: 0 refused by the offensive matcher) and offensive.txt (gate: all refused).
+#      (gate: 0 refused by the offensive matcher), eligible.txt (gate: 0 refused by any rule) and
+#      offensive.txt (gate: all refused).
 
 require "json"
 
@@ -40,6 +41,7 @@ FIRST = lines("test/corpora/first_names.txt").to_set
 SUR = lines("test/corpora/surnames.txt").to_set
 DICT = lines("test/corpora/words_en_50k.txt").to_set
 LEGIT = lines("test/corpora/legitimate.txt")
+ELIGIBLE = lines("test/corpora/eligible.txt")
 EVASIONS = lines("test/corpora/offensive.txt")
 NAMES = FIRST | SUR
 
@@ -101,6 +103,7 @@ offensive_refusal = lambda do |name|
   "#{name}(#{verdict || result.rule})" if verdict || result.reason == :username_not_allowed
 end
 show("legitimate.txt refused (gate: 0)", LEGIT.filter_map(&offensive_refusal))
+show("eligible.txt refused by any rule (gate: 0)", ELIGIBLE.reject { Usernames.check(_1).ok? })
 show("first names + surnames refused (gate: 0)", NAMES.sort.filter_map(&offensive_refusal))
 passed = EVASIONS.select { |name| Usernames.check(name, separators: ALL_SEPARATORS).ok? || !refusal(name) }
 show("offensive.txt NOT refused (gate: 0)", passed)

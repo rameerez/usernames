@@ -65,6 +65,10 @@ GITHUB_ONLY = words(<<~W).to_set
   customer-stories works-with site-policy social-impact garage cla ten
 W
 TYPOS = words("iamges").to_set
+# Words a source reserves as a path that read first as somebody's handle: refusing them costs real
+# people more than the route collision it prevents (an app with such a page reserves it through its
+# routes anyway).
+PLAUSIBLE_USERNAMES = words("analysis").to_set
 
 # --- Hand-typed facts (research 12): words retyped from public facts, no file copied -------------
 IMPERSONATION = [
@@ -193,6 +197,7 @@ def keep?(word) # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity,
     elsif BRANDS.include?(word) then :brand
     elsif GITHUB_ONLY.include?(word) then :github_only
     elsif TYPOS.include?(word) then :typo
+    elsif PLAUSIBLE_USERNAMES.include?(word) then :plausible_username
     elsif (FIRST.include?(word) || SUR.include?(word)) && !EXCEPTIONS.key?(word) then :name
     end
   DROPPED[reason] << word if reason

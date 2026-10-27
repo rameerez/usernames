@@ -44,6 +44,18 @@ class OffensiveTest < UsernamesTestCase
     assert_empty by_check
   end
 
+  # legitimate.txt is lexical safety (the offensive matcher only: `ho` is too
+  # short to register, and that is not this gate's business); eligible.txt is
+  # whole usernames, which must pass every rule.
+  def test_gate_eligible_usernames_pass_every_rule
+    refused = corpus("eligible.txt").filter_map do |name|
+      result = Usernames.check(name)
+      "#{name} (#{result.reason})" unless result.ok?
+    end
+
+    assert_empty refused
+  end
+
   def test_gate_every_evasion_is_refused
     names = corpus("offensive.txt")
     passed_matcher = names.reject { |name| offensive(name) }
