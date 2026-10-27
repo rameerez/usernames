@@ -346,6 +346,7 @@ module Usernames
     def test_every_term_exception_passes_in_its_language
       %w[en es].each do |locale|
         offensive(locale).each do |entry|
+          entry["exceptions"].each do |word|
             assert_nil verdict(word, offensive: { languages: [locale.to_sym] }), "#{locale}: #{entry['term']} / #{word}"
           end
         end
