@@ -93,6 +93,14 @@ ActiveRecord::Schema.define(version: 1) do
   end
   add_index :players, POSTGRESQL ? 'lower(handle COLLATE "C")' : "lower(handle)",
             unique: true, name: "index_players_on_lower_handle"
+
+  # Single-table inheritance (see model_test.rb): one name space for every subclass.
+  create_table :personas, force: true do |t|
+    t.string :type
+    t.string :handle
+  end
+  add_index :personas, POSTGRESQL ? 'lower(handle COLLATE "C")' : "lower(handle)",
+            unique: true, name: "index_personas_on_lower_handle"
 end
 
 # The bare validator, on the attribute as supplied.

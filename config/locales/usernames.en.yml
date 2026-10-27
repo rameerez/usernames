@@ -34,6 +34,9 @@ en:
       username_extension: "can't end like a file name (.json, .png…)"
       username_reserved: "is reserved"
       username_not_allowed: "isn't allowed"
+      # A name could not be generated for a new record: every candidate the
+      # generator drew was taken or not allowed.
+      username_unavailable: "couldn't be assigned automatically, please choose one"
       # Rails' own errors, as Rails words them; here so every message a
       # username can get ships in every language this gem ships.
       blank: "can't be blank"

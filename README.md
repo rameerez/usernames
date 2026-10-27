@@ -170,7 +170,9 @@ Declare it on the model first (or pass `--case=preserve` to the install generato
 
 Two names that differ only in punctuation are **different** names: `john.doe` and `johndoe` are two people. (npm and PyPI decided otherwise for package names; for people, literal is less surprising.)
 
-When two sign-ups race for the same generated name, the unique index refuses the second and the gem silently draws another, inside a savepoint so your surrounding transaction survives. When two people race for the same *typed* name, the loser gets the ordinary `has already been taken` error — `save` returns `false`, `save!` raises `ActiveRecord::RecordInvalid` — never a 500.
+When two sign-ups race for the same generated name, the unique index refuses the second and the gem silently draws another, inside a savepoint so your surrounding transaction survives. When two people race for the same *typed* name, the loser gets the ordinary `has already been taken` error — `save` returns `false`, `save!` raises `ActiveRecord::RecordInvalid` — never a `RecordNotUnique` 500. (What the gem handles is the unique index refusing a name. Two writers waiting on each other is the database's concern: on SQLite, give the database a `timeout` in `config/database.yml` so concurrent writers wait for the lock instead of failing with `SQLite3::BusyException`.)
+
+A redraw tries the insert again, so your `before_create` and `around_create` callbacks may run once per attempt (at most four times); validations and `before_save` run once, and `after_create` and `after_commit` run once, for the attempt that succeeded. Keep side effects — emails, API calls — out of `before_create`: `after_commit` is the place for them.
 
 ## Adopting an existing column
 
@@ -192,7 +194,7 @@ Every account has a name from the moment it exists. A profile with no name is a 
 User.create!(email: "ana@example.com").username   # => "quiet_otter_42"
 ```
 
-Adjective + animal + two random digits, from a vocabulary curated for this purpose (no brands, no body parts, nothing a slur list could trip on — and the test suite proves it, pair by pair). Digits come from `SecureRandom`, never a counter, so names don't reveal sign-up order. On collision the digits grow (`quiet_otter_417`), then fall back to hex. Pass `required: true` instead if you'd rather make people choose, or `generate: false` to leave it blank.
+Adjective + animal + two random digits, from a vocabulary curated for this purpose (no brands, no body parts, nothing a slur list could trip on — and the test suite proves it, pair by pair). Digits come from `SecureRandom`, never a counter, so names don't reveal sign-up order. On collision the digits grow (`quiet_otter_417`), then fall back to hex. If every name a batch draws is taken or not allowed (a tiny custom vocabulary, a very short length), the save fails with `username_unavailable` ("couldn't be assigned automatically, please choose one") rather than raising; `generate_username` itself raises `Usernames::NoFreeNameError`. Pass `required: true` instead if you'd rather make people choose, or `generate: false` to leave it blank.
 
 From a real name:
 
@@ -285,7 +287,7 @@ Usernames.generate                 # => "quiet_otter_42"
 
 ## Translating messages
 
-Every message is a standard Active Model error (`errors.messages.username_reserved`, `username_edges`, `username_consecutive`, `username_digits_only`, `username_characters`, `username_not_allowed`…, plus Rails' own `too_short`, `too_long`, `blank`, `taken`). English, Spanish and Portuguese ship with the gem; Rails loads an engine's locale files before your app's, so a key in your `config/locales/*.yml` always wins, and the usual per-model override works too:
+Every message is a standard Active Model error (`errors.messages.username_reserved`, `username_edges`, `username_consecutive`, `username_digits_only`, `username_characters`, `username_not_allowed`, `username_unavailable`…, plus Rails' own `too_short`, `too_long`, `blank`, `taken`). English, Spanish and Portuguese ship with the gem; Rails loads an engine's locale files before your app's, so a key in your `config/locales/*.yml` always wins, and the usual per-model override works too:
 
 ```yaml
 es:
