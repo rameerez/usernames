@@ -65,10 +65,10 @@ GITHUB_ONLY = words(<<~W).to_set
   customer-stories works-with site-policy social-impact garage cla ten
 W
 TYPOS = words("iamges").to_set
-# Words a source reserves as a path that read first as somebody's handle: refusing them costs real
-# people more than the route collision it prevents (an app with such a page reserves it through its
-# routes anyway).
-PLAUSIBLE_USERNAMES = words("analysis").to_set
+# Words a source reserves as a path that read first as somebody's handle (a nickname, a word people
+# go by): refusing them costs real people more than the route collision it prevents. An app that has
+# such a page gets it reserved automatically from its router.
+PLAUSIBLE_USERNAMES = words("analysis flash free master recent alpha beta").to_set
 
 # --- Hand-typed facts (research 12): words retyped from public facts, no file copied -------------
 IMPERSONATION = [

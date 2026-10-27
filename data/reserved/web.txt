@@ -312,7 +312,6 @@ affiliates
 ajax
 alert
 alerts
-alpha
 amp
 analytics
 app
@@ -323,7 +322,6 @@ authentication
 banner
 banners
 bbs
-beta
 billings
 blogs
 board
@@ -458,7 +456,6 @@ mail7
 mail8
 mail9
 map
-master
 media
 member
 members
@@ -651,11 +648,9 @@ favorite
 favorites
 feature
 first
-flash
 fleet
 fleets
 flog
-free
 gadget
 gadgets
 game
@@ -733,7 +728,6 @@ query
 random
 ranking
 read
-recent
 recruit
 recruitment
 release

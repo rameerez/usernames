@@ -80,6 +80,9 @@ probes = %w[scunthorpe penistone clitheroe sussex cockburn assassin therapist gr
             scunthorpe_united]
 # Names and identity words the en tiers once refused, reviewed out of them (data/offensive/README.md).
 reviewed = %w[enby cishet pansy cissy hermie santorum finocchio shota]
+# Words people go by that the reserved web list leaves out on purpose (script/build_reserved_data.rb,
+# PLAUSIBLE_USERNAMES): an app with such a route has it reserved from its router instead.
+handles = %w[alpha beta flash free master recent]
 
 # Real names that ARE a blocked term (severity >= 3) in a launch locale cannot pass by design;
 # they are listed here, not silently dropped (the policy decision is recorded in data/offensive/README.md).
@@ -109,8 +112,9 @@ write("legitimate.txt",
 # usernames anyone needs to register); this one is run through Usernames.check at the defaults.
 write("eligible.txt",
       ["Usernames that must pass Usernames.check at the defaults (every rule: format, reserved, offensive).",
-       "The probes and reviewed names of legitimate.txt that are whole usernames."],
-      (probes + reviewed).uniq.sort)
+       "The probes and reviewed names of legitimate.txt that are whole usernames, and words people go by",
+       "that the reserved web list leaves out on purpose."],
+      (probes + reviewed + handles).uniq.sort)
 
 # --- offensive / evasion -------------------------------------------------------------------------
 offensive = %w[xxfuckxx f.u.c.k fu_ck sh1thead shithead1 shithead2 shithead_bob sh1thead_bob BigCunt

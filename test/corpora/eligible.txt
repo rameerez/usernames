@@ -1,8 +1,11 @@
 # Usernames that must pass Usernames.check at the defaults (every rule: format, reserved, offensive).
-# The probes and reviewed names of legitimate.txt that are whole usernames.
+# The probes and reviewed names of legitimate.txt that are whole usernames, and words people go by
+# that the reserved web list leaves out on purpose.
+alpha
 analysis
 assassin
 bass
+beta
 chujew
 cishet
 cissy
@@ -12,17 +15,21 @@ cockburn
 computadora
 enby
 finocchio
+flash
+free
 gcastro
 grape
 hello
 hermie
 josh1979
+master
 mike88
 mjordan
 montenegro
 negro
 pansy
 penistone
+recent
 santorum
 scunthorpe
 scunthorpe_united
