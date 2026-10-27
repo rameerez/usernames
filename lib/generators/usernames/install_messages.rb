@@ -55,8 +55,13 @@ module Usernames
         no_importmap: "No importmap here: run 'rails generate usernames:javascript' to copy the Stimulus controller " \
                       "into app/javascript/controllers (then it is yours to keep up to date).",
         no_entrypoint: %(No app/javascript/application.js: add `import "usernames"` to your importmap entrypoint.),
-        no_stimulus: "No Stimulus application exported by app/javascript/controllers/application.js: the field " \
-                     "works as a plain input; with stimulus-rails, add `import \"usernames\"` for the live check."
+        no_stimulus: "No app/javascript/controllers/application.js (stimulus-rails' Stimulus setup): the field " \
+                     "works as a plain input; with stimulus-rails, add `import \"usernames\"` for the live check.",
+        no_application_export: "Didn't add `import \"usernames\"`: app/javascript/controllers/application.js " \
+                               "doesn't export the Stimulus application by the name `application` " \
+                               "(`export { application }`), which it imports, and a missing export would stop " \
+                               "app/javascript/application.js loading at all. Export it under that name and add the " \
+                               "line, or register \"usernames/username-check\" on your application yourself."
       }.freeze
       private_constant :JAVASCRIPT_STEPS
 

@@ -34,10 +34,8 @@ module Usernames
       html = Field.attributes(html)
       return text_field(column, Field::TYPING.merge(html)) if static
 
-      # Given explicitly, so the input has the id the status points at even
-      # where form_with generates none; Rails prefixes the namespace to it.
-      own = html.fetch(:id) { field_id(column, namespace: nil) }
-      check = Field.check(@template, object, column, id: username_input_id(own), availability: availability)
+      own, input = username_field_ids(column, html)
+      check = Field.check(@template, object, column, id: input, availability: availability)
       return text_field(column, Field::TYPING.merge(html)) if check.nil?
 
       text_field(column, Field.combine(Field::TYPING.merge(html), check).merge(id: own))
@@ -46,19 +44,29 @@ module Usernames
     # <output id="user_handle_status" for="user_handle" aria-live="polite">,
     # empty until someone types; the controller sets its data-state
     # (checking, free, taken, invalid, unchanged, error) for styling.
-    # Pass the field's `id:` here too if you gave it one.
+    # Pass the field's `id:`, `namespace:` or `index:` here too if you gave it them.
     def username_status(column = :username, **html)
       html = Field.attributes(html)
-      input = html.key?(:id) ? username_input_id(html.delete(:id)) : field_id(column)
+      _own, input = username_field_ids(column, html)
       own = { id: "#{input}_status", for: input, aria: { "live" => "polite" } }
-      @template.tag.output("", **Field.combine(html, own))
+      @template.tag.output("", **Field.combine(html.except(:id, :namespace, :index), own))
     end
 
     private
 
-    # An input's id as Rails renders it: the form's namespace, then the id.
-    def username_input_id(id)
-      [options[:namespace], id].compact.join("_")
+    # The id the field gives Rails, and the id Rails renders from it. Given
+    # explicitly, so the input has the id the status points at even where
+    # form_with generates none; Rails prefixes the namespace to it (the
+    # field's own `namespace:`, else the form's), so this does too, and a
+    # field's own `index:` is in its id as in its name.
+    def username_field_ids(column, html)
+      own = html.fetch(:id) { field_id(column, namespace: nil, index: html.fetch(:index) { options[:index] }) }
+      [own, username_input_id(own, html.fetch(:namespace) { options[:namespace] })]
+    end
+
+    # An input's id as Rails renders it: the namespace, then the id.
+    def username_input_id(id, namespace)
+      namespace ? "#{namespace}_#{id}" : id
     end
   end
 
@@ -72,6 +80,8 @@ module Usernames
     TOKEN_LISTS = %w[data-controller data-action aria-describedby].freeze
 
     NESTED = %w[data aria].freeze
+
+    ERROR_MESSAGE = %i[usernames availability].freeze
 
     MISSING_TARGET_LOGGED = Concurrent::AtomicBoolean.new(false)
 
@@ -147,7 +157,17 @@ module Usernames
         return missing_target(model, column) if target.nil?
 
         { "username-check-url-value" => url, "username-check-target-value" => target,
-          "username-check-error-message-value" => I18n.t(:error, scope: %i[usernames availability]) }
+          "username-check-error-message-value" => error_message }
+      end
+
+      # In the page's language, or — in one the app translates the gem into
+      # but hasn't given this key yet — in English (the app's own English
+      # wording of it, if it has one), never "Translation missing". Read from
+      # the backend, so it holds where English isn't an available locale.
+      def error_message
+        I18n.t(:error, scope: ERROR_MESSAGE, raise: true)
+      rescue I18n::MissingTranslationData
+        I18n.backend.translate(:en, :error, scope: ERROR_MESSAGE)
       end
 
       # Through the app's route helper (`main_app` from inside an engine's
@@ -181,8 +201,20 @@ module Usernames
         TOKEN_LISTS.include?(name)
       end
 
+      # Joined as Rails joins a token list (token_list, class_names): Arrays
+      # flattened, a Hash keeping the keys whose values are truthy, nil and
+      # false left out; then split on whitespace and deduplicated.
       def tokens(*lists)
-        lists.flat_map { |list| list.to_s.split }.uniq.join(" ")
+        lists.flat_map { |list| token_values(list) }.flat_map { |value| value.to_s.split }.uniq.join(" ")
+      end
+
+      def token_values(value)
+        case value
+        when Hash then value.filter_map { |token, wanted| token if wanted }
+        when Array then value.flat_map { |each| token_values(each) }
+        when nil, false then []
+        else [value]
+        end
       end
     end
   end

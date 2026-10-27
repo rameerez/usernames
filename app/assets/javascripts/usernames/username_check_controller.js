@@ -30,7 +30,9 @@ export default class extends Controller {
     persisted: String,
     statusId: String,
     errorMessage: String,
-    delay: { type: Number, default: 300 }
+    delay: { type: Number, default: 300 },
+    // How long an answer may take, headers and body together, before it is an error.
+    timeout: { type: Number, default: 8000 }
   }
 
   connect() {
@@ -76,22 +78,41 @@ export default class extends Controller {
     url.searchParams.set("username", name)
     if (this.targetValue) url.searchParams.set("target", this.targetValue)
 
+    // The deadline covers the headers and the body alike: a stalled
+    // connection, or a body that never finishes, ends in "error" too.
+    // Aborting rejects `abandoned`, so neither await can outlive it.
+    let timedOut = false
+    const abandoned = new Promise((_resolve, reject) => {
+      request.signal.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError")), { once: true })
+    })
+    abandoned.catch(() => {})
+    const deadline = setTimeout(() => {
+      timedOut = true
+      request.abort()
+    }, this.timeoutValue)
+    this.deadline = deadline
+
     let answer = null
     try {
-      const response = await fetch(url, {
+      const response = await Promise.race([fetch(url, {
         headers: { Accept: "application/json" },
         signal: request.signal,
         credentials: "same-origin"
-      })
-      if (response.ok) answer = await response.json()
+      }), abandoned])
+      if (response.ok) answer = await Promise.race([response.json(), abandoned])
     } catch (error) {
-      if (error.name === "AbortError") return // a newer check took over
+      // Cancelled because a newer check took over, or by a reset: say
+      // nothing. Out of time is an answer of its own, below.
+      if (error.name === "AbortError" && !timedOut) return
+    } finally {
+      clearTimeout(deadline)
     }
     // A slow answer for something typed earlier is not an answer for this.
     if (generation !== this.generation) return
 
     this.request = null
-    // 429, 503, a network failure or something unreadable: say so, never "checking" forever.
+    // 429, 503, a network failure, no answer in time or something unreadable:
+    // say so, never "checking" forever.
     this.render(this.understood(answer) ? answer : { state: "error", message: this.errorMessageValue })
   }
 
@@ -163,6 +184,7 @@ export default class extends Controller {
 
   cancel() {
     clearTimeout(this.timer)
+    clearTimeout(this.deadline)
     if (this.request) this.request.abort()
     this.request = null
   }

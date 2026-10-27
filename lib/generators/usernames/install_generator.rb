@@ -79,7 +79,9 @@ module Usernames
         return unless javascript_setup == :ready
 
         separator = File.read(destination(APPLICATION_JS)).end_with?("\n") ? "" : "\n"
-        append_to_file APPLICATION_JS, %(#{separator}import "usernames"\n)
+        # force: Thor would skip text it finds anywhere in the file, even in a
+        # comment; javascript_setup has already said the import is missing.
+        append_to_file APPLICATION_JS, %(#{separator}import "usernames"\n), force: true
       end
 
       def display_post_install_message

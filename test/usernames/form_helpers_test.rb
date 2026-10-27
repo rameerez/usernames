@@ -88,6 +88,34 @@ class FormHelpersTest < UsernamesTestCase
     I18n.backend.reload!
   end
 
+  # A language the app translates the gem into but that lacks this newer
+  # key: the English text, never "Translation missing".
+  def test_the_error_message_falls_back_to_english
+    I18n.available_locales += [:fr]
+    I18n.backend.store_translations(:fr, usernames: { available: "est disponible" })
+    message = I18n.with_locale(:fr) { field(User.new)["data-username-check-error-message-value"] }
+
+    assert_equal "couldn't be checked just now", message
+    assert_equal "no se pudo comprobar ahora",
+                 I18n.with_locale(:es) { field(User.new)["data-username-check-error-message-value"] }
+  ensure
+    I18n.available_locales -= [:fr]
+    I18n.backend.reload!
+  end
+
+  # Where English isn't an available locale, the gem's English still is the fallback.
+  def test_the_english_fallback_needs_no_english_locale
+    available = I18n.available_locales
+    I18n.available_locales = %i[es fr]
+    I18n.locale = :fr
+    message = field(User.new)["data-username-check-error-message-value"]
+
+    assert_equal "couldn't be checked just now", message
+  ensure
+    I18n.available_locales = available
+    I18n.locale = :en
+  end
+
   def test_a_preserve_mode_column
     input = field(Player.new, :handle)
 
@@ -206,6 +234,24 @@ class FormHelpersTest < UsernamesTestCase
     assert_equal "handle_help user_username_status", input["aria-describedby"]
   end
 
+  # Token values the way Rails takes them: Arrays, and Hashes whose truthy
+  # keys count.
+  def test_array_and_conditional_hash_token_values
+    input = field(User.new, class: ["input", { wide: true, narrow: false }],
+                            data: { controller: ["autosize", { tooltip: true, hidden: nil }] },
+                            aria: { describedby: ["help", { rules: true, legacy: false }] })
+
+    assert_equal "input wide", input["class"]
+    assert_equal "autosize tooltip username-check", input["data-controller"]
+    assert_equal "help rules user_username_status", input["aria-describedby"]
+  end
+
+  def test_token_values_are_deduplicated_and_split
+    input = field(User.new, aria: { describedby: [" help  rules ", "user_username_status", nil] })
+
+    assert_equal "help rules user_username_status", input["aria-describedby"]
+  end
+
   def test_attributes_given_as_plain_keys_are_merged_the_same_way
     input = field(User.new, "data-controller" => "autosize", "aria-describedby" => "handle_help", "data-x" => "1")
 
@@ -282,6 +328,39 @@ class FormHelpersTest < UsernamesTestCase
     assert_equal "signup_handle", input["id"]
     assert_equal "signup_handle_status", input["aria-describedby"]
     assert_equal %w[signup_handle_status signup_handle], attributes(output, "id", "for")
+  end
+
+  # A field's own `namespace:` is the one Rails prefixes, over the form's:
+  # the status follows it, given to both helpers.
+  def test_a_per_field_namespace
+    {
+      [{ namespace: "3" }, {}] => "3_user_username",
+      [{ namespace: "3", id: "handle" }, {}] => "3_handle",
+      [{}, { namespace: "signup" }] => "signup_user_username",
+      [{ namespace: "3" }, { namespace: "signup" }] => "3_user_username",
+      [{ namespace: "3", id: "handle" }, { namespace: "signup" }] => "3_handle"
+    }.each do |(options, form), id|
+      input = field(User.new, form: form, **options)
+      output = status(User.new, form: form, **options)
+
+      assert_equal id, input["id"], options.inspect
+      assert_equal "#{id}_status", input["aria-describedby"]
+      assert_equal "#{id}_status", input["data-username-check-status-id-value"]
+      assert_equal ["#{id}_status", id], attributes(output, "id", "for")
+      assert_nil output["namespace"], "consumed, not rendered"
+    end
+  end
+
+  # So is a field's own `index:`: in its id as Rails puts it in its name.
+  def test_a_per_field_index
+    input = field(User.new, index: 3)
+    output = status(User.new, index: 3)
+
+    assert_equal "user[3][username]", input["name"]
+    assert_equal "user_3_username", input["id"]
+    assert_equal "user_3_username_status", input["aria-describedby"]
+    assert_equal %w[user_3_username_status user_3_username], attributes(output, "id", "for")
+    assert_equal "user_3_username_status", field(User.new, index: 3, form: { index: 9 })["aria-describedby"]
   end
 
   def test_an_indexed_form

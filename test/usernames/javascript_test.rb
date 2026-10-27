@@ -31,20 +31,27 @@ class JavascriptTest < UsernamesTestCase
       ok: status >= 200 && status < 300, status,
       json: async () => (typeof body === "string" ? JSON.parse(body) : body)
     })
-    const settle = () => new Promise((resolve) => setTimeout(resolve, 5))
+    const settle = (ms = 5) => new Promise((resolve) => setTimeout(resolve, ms))
+    // A fetch that never answers and ignores its signal, as a stalled connection does.
+    const stalled = () => new Promise(() => {})
+    // Headers that arrive, then a body that never finishes.
+    const stalledBody = () => Promise.resolve(new Response(new ReadableStream({
+      start(stream) { stream.enqueue(new TextEncoder().encode('{"state":')) }
+    }), { status: 200, headers: { "Content-Type": "application/json" } }))
     const output = (id, tagName = "OUTPUT") => (outputs[id] = { tagName, dataset: {}, textContent: "" })
     const rules = [
       { rule: "username_edges", pattern: "^[_]|[_]$", message: "can't start or end with an underscore" },
       { rule: "too_short", pattern: "^[\\\\s\\\\S]{0,2}$", message: "is too short" }
     ]
     function field({ value = "", persisted = "", url = "/usernames/availability", target = "user", lowercase = true,
-                     statusId = "user_handle_status", describedby = "user_handle_status" } = {}) {
+                     statusId = "user_handle_status", describedby = "user_handle_status", timeout = 8000 } = {}) {
       const form = new EventTarget()
       const element = { value, form, getAttribute: (name) => (name === "aria-describedby" ? describedby : null) }
       const check = new UsernameCheck()
       Object.assign(check, { element, urlValue: url, targetValue: target, rulesValue: rules, lowercaseValue: lowercase,
                              persistedValue: persisted, statusIdValue: statusId,
-                             errorMessageValue: "couldn't be checked just now", delayValue: 0 })
+                             errorMessageValue: "couldn't be checked just now", delayValue: 0,
+                             timeoutValue: timeout })
       check.connect()
       const type = async (text) => { element.value = text; check.check(); await settle() }
       return { check, element, form, type }
@@ -75,6 +82,8 @@ class JavascriptTest < UsernamesTestCase
 
   def test_nothing_blocks_submission
     source = File.read(CONTROLLER)
+
+    assert_includes source, "timeout: { type: Number, default: 8000 }", "an answer has eight seconds"
 
     refute_match(%r{^[^/]*setCustomValidity}, source)
     refute_match(%r{^[^/]*\.pattern\s*=}, source)
@@ -211,6 +220,72 @@ class JavascriptTest < UsernamesTestCase
     result.each do |name, outcome|
       assert_equal({ "state" => "error", "text" => "couldn't be checked just now" }, outcome, name)
     end
+  end
+
+  # The deadline covers the headers and the body: a stalled connection, or a
+  # body that never finishes, ends in "error" rather than "checking".
+  def test_no_answer_in_time_is_an_error
+    result = run_scenario(<<~JS)
+      output("user_handle_status")
+      const outcomes = {}
+      for (const [name, stall] of Object.entries({ headers: stalled, body: stalledBody })) {
+        const realFetch = globalThis.fetch
+        let signal
+        globalThis.fetch = (url, options) => { signal = options.signal; return stall() }
+        const { type, check } = field({ timeout: 30 })
+        await type("ana_" + name)
+        const before = state().state
+        await settle(80)
+        outcomes[name] = { before, after: state(), aborted: signal.aborted }
+        check.disconnect()
+        globalThis.fetch = realFetch
+      }
+      return outcomes
+    JS
+
+    %w[headers body].each do |stall|
+      error = { "state" => "error", "text" => "couldn't be checked just now" }
+
+      assert_equal({ "before" => "checking", "after" => error, "aborted" => true }, result[stall], stall)
+    end
+  end
+
+  # A request that a newer one replaced, or a reset cancelled, never comes
+  # back as an error when its deadline would have passed.
+  def test_a_cancelled_request_has_no_deadline
+    result = run_scenario(<<~JS)
+      output("user_handle_status")
+      const superseded = field({ timeout: 30 })
+      await superseded.type("ana")
+      await superseded.type("bob")
+      reply(requests.at(-1), 200, { state: "free", message: "is available" })
+      await settle(80)
+      const afterSupersede = state()
+      superseded.check.disconnect()
+
+      const reset = field({ timeout: 30 })
+      await reset.type("carla")
+      reset.form.dispatchEvent(new Event("reset"))
+      await settle(80)
+      return { afterSupersede, afterReset: state() }
+    JS
+
+    assert_equal({ "state" => "free", "text" => "is available" }, result["afterSupersede"])
+    assert_equal({ "state" => "", "text" => "" }, result["afterReset"])
+  end
+
+  # An answer in time clears its deadline: nothing turns it into an error later.
+  def test_an_answer_in_time_stays
+    result = run_scenario(<<~JS)
+      output("user_handle_status")
+      const { type } = field({ timeout: 30 })
+      await type("ana")
+      reply(requests[0], 200, { state: "taken", message: "has already been taken" })
+      await settle(80)
+      return state()
+    JS
+
+    assert_equal({ "state" => "taken", "text" => "has already been taken" }, result)
   end
 
   # The record's saved name is unchanged — in any case, with a pasted @ —

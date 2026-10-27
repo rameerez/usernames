@@ -107,8 +107,20 @@ module Usernames
     # exists is never cached, and neither is a 404, a 429 or a 503.
     prepend_before_action :no_store
 
-    rate_limit(**Usernames.configuration.availability.rate_limit, store: RATE_LIMIT,
-                                                                  with: -> { head :too_many_requests })
+    # A counter of its own: an unnamed limiter the parent declares would key
+    # on this controller's path too, and the two would share one count and
+    # one expiry — a parent's shorter window resetting this one, a longer
+    # one spending it twice. Rails 8 takes a name for that; Rails 7.2 keys
+    # only on `by`, so there the name goes into it.
+    OWN_COUNTER =
+      if instance_method(:rate_limiting).parameters.any? { |_kind, name| name == :name }
+        { name: "usernames/availability" }
+      else
+        { by: -> { "usernames/availability:#{request.remote_ip}" } }
+      end
+
+    rate_limit(**Usernames.configuration.availability.rate_limit, **OWN_COUNTER, store: RATE_LIMIT,
+                                                                                 with: -> { head :too_many_requests })
 
     before_action :warn_about_a_memory_store
     # After the limiter, so guessing aliases is rate limited too.

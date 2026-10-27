@@ -128,14 +128,52 @@ class GeneratorInstallTest < Rails::Generators::TestCase
     assert_equal %(import "controllers"\nimport "usernames"\n), application_js
   end
 
-  def test_other_ways_of_exporting_the_application
-    ["export const application = Application.start()\n", "export { application, other }\n"].each do |stimulus|
+  # The four forms that export a binding under the name `application`.
+  def test_every_named_export_of_application
+    ["const application = Application.start()\nexport { application }\n",
+     "export const application = Application.start()\n",
+     "export let application = Application.start()\n",
+     "export var application = Application.start()\n",
+     "const application = Application.start()\nexport { application as application }\n",
+     "const app = Application.start()\nexport { app as application }\n",
+     "const application = Application.start()\nexport { other, application }\n",
+     "const application = Application.start()\nexport {\n  application,\n  other\n}\n",
+     "export { application } from \"./stimulus\"\n"].each do |stimulus|
       prepare_destination
       importmap_app(stimulus: stimulus)
       run_generator %w[--model=Account]
 
       assert_includes application_js, %(import "usernames"), stimulus
     end
+  end
+
+  # Anything else would make the bridge's `import { application }` fail to
+  # link, and take the whole entrypoint with it: no line, and the reason.
+  def test_no_import_without_a_named_export_of_application
+    ["const application = {}\nexport { application as default }\n",
+     "const application = {}\nexport { application as stimulus }\n",
+     "const application = {}\nexport default application\n",
+     "const application = {}\n// export { application }\n",
+     "const application = {}\n/* export { application } */\n",
+     "const application = {}\n/*\nexport const application = 1\n*/\n",
+     "export const applicationName = \"x\"\nexport { applications }\n",
+     "export function application() {}\n",
+     "window.Stimulus = Application.start()\n"].each do |stimulus|
+      prepare_destination
+      importmap_app(stimulus: stimulus)
+      output = run_generator %w[--model=Account]
+
+      refute_includes application_js, "usernames", stimulus
+      assert_match(/Didn't add `import "usernames"`: .* doesn't export the Stimulus application by the name /,
+                   output)
+    end
+  end
+
+  def test_a_commented_out_import_is_not_an_import
+    importmap_app(application_js: %(import "controllers"\n// import "usernames"\n))
+    run_generator %w[--model=Account]
+
+    assert_equal %(import "controllers"\n// import "usernames"\nimport "usernames"\n), application_js
   end
 
   # Where the line could not work, it is not written, and the reason is said.
@@ -146,8 +184,7 @@ class GeneratorInstallTest < Rails::Generators::TestCase
               %(import "controllers"\n)
       } => /No importmap here: run 'rails generate usernames:javascript'/,
       -> { importmap_app(application_js: nil) } => %r{No app/javascript/application\.js},
-      -> { importmap_app(stimulus: nil) } => /No Stimulus application exported/,
-      -> { importmap_app(stimulus: "window.Stimulus = Application.start()\n") } => /No Stimulus application exported/
+      -> { importmap_app(stimulus: nil) } => %r{No app/javascript/controllers/application\.js}
     }.each do |setup, message|
       prepare_destination
       setup.call

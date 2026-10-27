@@ -41,7 +41,6 @@ class AvailabilityControllerTest < UsernamesTestCase
     Rails.logger = Logger.new(IO::NULL)
     User.delete_all
     Player.delete_all
-    skip_unless_json_encodes
   end
 
   def teardown
@@ -66,12 +65,14 @@ class AvailabilityControllerTest < UsernamesTestCase
   end
 
   # `raises: true` lets an exception out instead of the 500 page Rails makes of it.
-  def get(username, target: "user", path: "/usernames/availability", raises: false, **query)
+  # `json: false` for a request whose answer is never rendered as JSON.
+  def get(username, target: "user", path: "/usernames/availability", raises: false, json: true, **query)
+    skip_unless_json_encodes if json
     query = { username: username, target: target, **query }.compact
     env = { "REMOTE_ADDR" => "1.2.3.4", "HTTP_HOST" => "localhost" }
     response = showing_exceptions(!raises) { Rack::MockRequest.new(Rails.application).get("#{path}?#{query.to_query}", env) }
     { status: response.status, cache_control: response.headers["cache-control"],
-      json: (JSON.parse(response.body) if response.status == 200) }
+      json: (JSON.parse(response.body) if json && response.status == 200) }
   end
 
   def json(username, **) = get(username, **)[:json]
@@ -241,6 +242,29 @@ class AvailabilityControllerTest < UsernamesTestCase
 
     assert_equal ([200] * 30) + [429], statuses.map(&:first)
     assert_equal ["no-store"], statuses.map(&:last).uniq, "the 429 is not cached either"
+  end
+
+  # A parent's own unnamed limiter keys on this controller's path too.
+  # Sharing its counter, a shorter window would reset ours (60 requests in
+  # six seconds all served) and a longer one would count every request twice.
+  # Ours is a counter of its own: 30 a minute, exactly.
+  def test_a_parents_unnamed_limiter_does_not_share_our_counter
+    { 1.second => "a shorter window", 1.hour => "a longer window" }.each do |within, what|
+      store = ActiveSupport::Cache::MemoryStore.new
+      parent = Class.new(ActionController::Base) { rate_limit to: 100, within: within, store: store }
+      Object.const_set(:LimitedParent, parent)
+      # Only the statuses matter here, so it runs where Rails can't render JSON too.
+      load_controller(store: store, parent: "LimitedParent").define_method(:show) { head :ok }
+      now = Time.now
+      offsets = [0, 2, 4, 6]
+      statuses = offsets.flat_map do |offset|
+        Time.stub(:now, now + offset) { Array.new(15) { get("ana", json: false)[:status] } }
+      end
+
+      assert_equal({ 200 => 30, 429 => 30 }, statuses.tally, what)
+    ensure
+      Object.send(:remove_const, :LimitedParent) if Object.const_defined?(:LimitedParent, false)
+    end
   end
 
   def test_the_store_is_the_configured_one_captured_at_load
