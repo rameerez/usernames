@@ -63,6 +63,9 @@ class EngineTest < UsernamesTestCase
 
     assert Rake::Task.task_defined?("usernames:audit")
     assert Rake::Task.task_defined?("usernames:reserved")
+    # Once: Rails already loads an engine's lib/tasks, and a second load
+    # would run every task twice.
+    assert_equal([1, 1], %w[usernames:audit usernames:reserved].map { |task| Rake::Task[task].actions.size })
   ensure
     Rake.application = Rake::Application.new
   end

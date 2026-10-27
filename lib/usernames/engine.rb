@@ -28,9 +28,5 @@ module Usernames
     # development the routes reload when config/routes.rb changes, and a
     # page added there is reserved from the next check on.
     config.after_routes_loaded { Usernames::Reserved.reset_routes! }
-
-    rake_tasks do
-      load File.expand_path("../tasks/usernames.rake", __dir__)
-    end
   end
 end

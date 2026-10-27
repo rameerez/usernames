@@ -38,6 +38,9 @@ class TestApp < Rails::Application
   # app's root, that would be the engine's files a second time, and the engine
   # test could not tell "engine first, app last" apart.
   config.paths.add "config/locales", with: "test/fixtures/locales", glob: "**/*.{rb,yml}"
+  # Likewise the app's lib/tasks (it has none): the engine's are loaded by
+  # the engine, as in a real app.
+  config.paths.add "lib/tasks", with: "test/fixtures/tasks", glob: "**/*.rake"
 
   # Disable asset pipeline for this test app (no assets in gem)
   config.assets = nil if config.respond_to?(:assets=)
