@@ -9,7 +9,7 @@ module Usernames
     # Copies a live "is this name free?" check into the app:
     # nothing is mounted behind its back, and every file is the app's to edit.
     #
-    #   app/controllers/usernames/availability_controller.rb   GET /usernames/availability?username=…
+    #   app/controllers/usernames/availability_controller.rb   GET /usernames/availability?<column>=…
     #   app/javascript/controllers/username_check_controller.js
     #   app/views/usernames/_field.html.erb                     <%= render "usernames/field", form: form %>
     class AvailabilityGenerator < Rails::Generators::Base
@@ -30,7 +30,7 @@ module Usernames
       end
 
       def create_stimulus_controller
-        copy_file "username_check_controller.js", "app/javascript/controllers/username_check_controller.js"
+        template "username_check_controller.js.tt", "app/javascript/controllers/username_check_controller.js"
       end
 
       def create_partial

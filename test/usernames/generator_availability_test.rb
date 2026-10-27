@@ -137,6 +137,22 @@ class GeneratorAvailabilityTest < Rails::Generators::TestCase
     assert field.at_css("input[name='player[handle]']")
   end
 
+  # Every comment in the generated files names the real column, never `username`.
+  def test_the_generated_files_speak_of_the_column
+    run_generator %w[--model=Player --column=handle]
+
+    assert_file CONTROLLER, %r{GET /usernames/availability\?handle=javi}
+    assert_file STIMULUS do |content|
+      assert_includes content, "check for Player#handle"
+      assert_includes content, %(data-username-check-param-value="handle")
+      assert_includes content, "Player.handle_rules_for_browser"
+      assert_includes content, %(param: { type: String, default: "handle" })
+    end
+    [CONTROLLER, STIMULUS].each do |file|
+      refute_match(/\?username=|username field/, File.read(File.join(destination_root, file)), file)
+    end
+  end
+
   def test_the_partials_locals_are_strict
     run_generator
 
